@@ -1,0 +1,39 @@
+<div class="auth-page">
+    <div class="container page">
+      <div class="row">
+        <div class="col-md-6 offset-md-3 col-xs-12 mt-5">
+          <h2 class="text-xs-center mb-5">Log in</h2>
+          <form class="mb-3" [formGroup]="form" (ngSubmit)="onSubmit()">
+            <fieldset class="form-group">
+              <input
+                type="email"
+                class="form-control form-control-lg"
+                placeholder="email"
+                formControlName="email"
+                required="required"
+              />
+            </fieldset>
+            <fieldset class="form-group">
+              <input
+                type="password"
+                class="form-control form-control-lg"
+                placeholder="Password"
+                formControlName="password"
+                required="required"
+              />
+            </fieldset>
+            <button type="submit" class="btn btn-lg btn-success pull-xs-right" [disabled]="form.invalid">Submit</button>&nbsp;&nbsp;
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+
+
+
+   
+  
+
+
+

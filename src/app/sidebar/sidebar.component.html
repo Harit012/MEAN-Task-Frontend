@@ -1,0 +1,84 @@
+<div class="sidebar">
+  <h4 class="px-5 text-light">Admin Panel</h4>
+  <ul class="px-2 nav flex-column">
+    <li class="nav-item" (click)="toggleDropdown('rides')">
+      <a class="nav-link dropdown-toggle fs-5"
+        ><i class="fas fa-car"></i> Rides</a>
+      <div class="ps-4" *ngIf="isRidesDropdownOpen">
+        <ul class="nav flex-column pl-4">
+          <li class="nav-item" [routerLink]="'ride/create-ride'">
+            <a class="nav-link">Create Ride</a>
+          </li>
+          <li class="nav-item" [routerLink]="'ride/confirmed-rides'">
+            <a class="nav-link">Confirmed Rides</a>
+          </li>
+          <li class="nav-item" [routerLink]="'ride/ride-history'">
+            <a class="nav-link">Ride History</a>
+          </li>
+        </ul>
+      </div>
+    </li>
+    <li class="nav-item" [routerLink]="'users'">
+      <a class="nav-link fs-5"><i class="fas fa-users"></i>Users</a>
+    </li>
+    <li class="nav-item" (click)="toggleDropdown('driver')">
+      <a class="nav-link dropdown-toggle fs-5"
+        ><i class="fas fa-user-tie"></i> Drivers</a
+      >
+      <div class="ps-4" *ngIf="isDriverDropdownOpen">
+        <ul class="nav flex-column pl-4">
+          <li class="nav-item" [routerLink]="'drivers/list'">
+            <a class="nav-link">List</a>
+          </li>
+          <li class="nav-item" [routerLink]="'drivers/running-request'">
+            <a class="nav-link">Running Requests</a>
+          </li>
+        </ul>
+      </div>
+    </li>
+
+    <li class="nav-item" (click)="toggleDropdown('pricing')">
+      <a class="nav-link dropdown-toggle fs-5"
+        ><i class="fas fa-dollar-sign"></i> Pricing</a
+      >
+      <div class="ps-4" *ngIf="isPricingDropdownOpen">
+        <ul class="nav flex-column pl-4">
+          <li
+            class="nav-item"
+            [routerLink]="'pricing/country'"
+            routerLinkActive="active"
+          >
+            <a class="nav-link">Country</a>
+          </li>
+          <li
+            class="nav-item"
+            [routerLink]="'pricing/city'"
+            routerLinkActive="active"
+          >
+            <a class="nav-link">City</a>
+          </li>
+          <li
+            class="nav-item"
+            [routerLink]="'pricing/vehicle-type'"
+            routerLinkActive="active"
+          >
+            <a class="nav-link">Vehicle Type</a>
+          </li>
+          <li
+            class="nav-item"
+            [routerLink]="'pricing/vehicle-pricing'"
+            routerLinkActive="active"
+          >
+            <a class="nav-link">Vehicle Pricing</a>
+          </li>
+        </ul>
+      </div>
+    </li>
+    <li class="nav-item" [routerLink]="'settings'">
+      <a class="nav-link fs-5"><i class="fas fa-cog"></i> Settings</a>
+    </li>
+    <li class="nav-item" (click)="onClickLogOut()">
+      <a class="nav-link fs-5"><i class="fas fa-sign-out-alt"></i> Logout</a>
+    </li>
+  </ul>
+</div>

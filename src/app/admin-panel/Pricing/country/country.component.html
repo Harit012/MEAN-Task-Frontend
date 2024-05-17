@@ -1,0 +1,177 @@
+<div class="container m-0">
+  <div class="row title-row text-white mb-3">
+    <div class="col-5 align-self-center">
+      <h3>Country</h3>
+    </div>
+    <div class="col-5 align-self-center">
+      <input
+        type="search"
+        name="country"
+        id="country"
+        placeholder="Search"
+        (input)="searchCountry($event)"
+      />
+    </div>
+    <div class="col-2 align-self-center">
+      <button
+        type="button"
+        class="btn btn-large"
+        data-bs-toggle="modal"
+        data-bs-target="#exampleModal"
+        style="background-color: rgb(129, 159, 160);"
+      >
+        Add
+      </button>
+    </div>
+  </div>
+  <div class="row mb-2">
+    <div class="col-2">
+      <b>Index</b>
+    </div>
+    <div class="col-2">
+      <b>Name</b>
+    </div>
+    <div class="col-2">
+      <b>Flag</b>
+    </div>
+    <div class="col-2">
+      <b>Call code</b>
+    </div>
+    <div class="col-2">
+      <b>Currency</b>
+    </div>
+    <div class="col-2">
+      <b>TimeZones</b>
+    </div>
+  </div>
+  <section class="scrollable-section">
+    @if (AddedCountry.length > 0) {
+    <div
+      id="country-row"
+      class="row mb-2"
+      *ngFor="let country of filteredCountry; index as i"
+    >
+      <div class="col-2 align-self-center">&nbsp;&nbsp;&nbsp;{{ i + 1 }}</div>
+      <div class="col-2 align-self-center">{{ country.countryName }}</div>
+      <div class="col-2 align-self-center">
+        <img
+          height="50"
+          width="80"
+          src="{{ country.FlagUrl }}"
+          alt="{{ country.countryName }}"
+        />
+      </div>
+      <div class="col-2 align-self-center">{{ country.countryCallCode }}</div>
+      <div class="col-2 align-self-center">{{ country.currency }}</div>
+      <div class="col-2">
+        <p class="align-self-center" *ngFor="let timeZone of country.timezones">
+          {{ timeZone }}
+        </p>
+        <br />
+      </div>
+    </div>
+    }@else{
+    <div
+      style="height: 500px; align-content: center"
+      class="row text-center align-self-center justify-content-center"
+    >
+      <h2>No Country Added</h2>
+    </div>
+    }
+  </section>
+</div>
+
+<!-- Modal -->
+<div
+  class="modal fade"
+  id="exampleModal"
+  tabindex="-1"
+  aria-labelledby="exampleModalLabel"
+  aria-hidden="true"
+>
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h1 class="modal-title fs-5" id="exampleModalLabel">Search Country</h1>
+        <button
+          type="button"
+          class="btn-close"
+          data-bs-dismiss="modal"
+          aria-label="Close"
+        ></button>
+      </div>
+      <div class="modal-body">
+        <form [formGroup]="countryForm" (ngSubmit)="onAddCountry()">
+          <div class="row">
+            <div class="col-3"></div>
+            <div class="col-6">
+              <div class="form-group">
+                <label for="countryName">Country Name</label>
+                <input
+                  type="text"
+                  name="countryName"
+                  id="countryName"
+                  formControlName="countryName"
+                  class="form-control"
+                  [(ngModel)]="countryname"
+                />
+                <p *ngIf="countryForm.get('countryName')?.invalid && countryForm.get('countryName')?.touched" class="text-danger">This field should not be empty</p>
+              </div>
+            </div>
+          </div>
+          <div class="row" *ngIf="toBeAddedCountry">
+            <div class="col-4">
+              <div class="form-group">
+                <label for="Currency">Currency</label>
+                <input
+                  type="text"
+                  name="currency"
+                  id="currency"
+                  formControlName="currency"
+                  class="form-control"
+                  [disabled]="true"
+                  [(ngModel)]="countrycurrency"
+                />
+              </div>
+            </div>
+            <div class="col-2"></div>
+            <div class="col-4">
+              <div class="form-group">
+                <label for="countryCallCode">Country Code</label>
+                <input
+                  type="text"
+                  name="countryCallCode"
+                  id="countryCallCode"
+                  formControlName="countryCallCode"
+                  class="form-control"
+                  [disabled]="true"
+                  [(ngModel)]="countrycallcode"
+                />
+              </div>
+            </div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer justify-content-between">
+          <button
+            type="button"
+            class="btn btn-primary btn-large"
+            (click)="onSearchCountry()"
+            [disabled]="countryname === ''"
+          >
+            Find Country
+          </button>
+          <button
+          style="color: whitesmoke"
+          type="button"
+          class="btn btn-priary btn-large bg-dark"
+          (click)="onAddCountry()"
+          [disabled]="countryForm.invalid"
+          data-bs-dismiss="modal"
+        >
+          Add Country
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
