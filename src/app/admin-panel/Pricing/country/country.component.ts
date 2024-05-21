@@ -8,6 +8,7 @@ import {
 } from '@angular/forms';
 import { Country } from './country.interface';
 import { HttpClient } from '@angular/common/http';
+import { CountriesService } from './countries.service';
 
 @Component({
   selector: 'app-country',
@@ -21,11 +22,14 @@ export class CountryComponent implements OnInit {
   toBeAddedCountry: Country | null = null;
   AddedCountry: Country[] = [];
   filteredCountry: Country[] = [];
-  countryname: string ="";
-  countrycurrency: string ="";
-  countrycallcode: string ="";
+  countryname: string = '';
+  countrycurrency: string = '';
+  countrycallcode: string = '';
 
-  constructor(private http: HttpClient) {
+  constructor(
+    private http: HttpClient,
+    private countryService: CountriesService
+  ) {
     this.countryForm = new FormGroup({
       countryName: new FormControl(null, [Validators.required]),
       currency: new FormControl(null, [Validators.required]),
@@ -55,7 +59,10 @@ export class CountryComponent implements OnInit {
                 ` (${data[i]['currencies'][countryCurrency]['symbol']})`,
               timezones: data[i]['timezones'],
               FlagUrl: data[i]['flags']['png'],
+              latlng: data[i]['latlng'],
+              countryShortName: data[i]['cca2'],
             };
+            console.log(obj)
             this.countrycallcode = obj.countryCallCode;
             this.countrycurrency = obj.currency;
             this.toBeAddedCountry = obj;
@@ -73,30 +80,24 @@ export class CountryComponent implements OnInit {
   }
   onAddCountry() {
     if (!this.countryForm.invalid) {
-      this.http
-        .post<{ country: Country; error: any }>(
-          'http://localhost:3000/admin/pricing/country',
-          this.toBeAddedCountry,
-          { withCredentials: true }
-        )
-        .subscribe(
-          (res) => {
-            if (res.country) {
-              console.log(res.country);
-              // this.AddedCountry.push(res.country);
-              this.filteredCountry.push(res.country);
-              this.countryForm.reset();
-              this.toBeAddedCountry = null;
-            } else {
-              this.toBeAddedCountry = null;
-              this.countryname='';
-              alert(res.error);
-            }
-          },
-          (err) => {
-            alert('alert from line 93:-' + err.message);
+      this.countryService.postCountry(this.toBeAddedCountry!).subscribe(
+        (res) => {
+          if (res.country) {
+            console.log(res.country);
+            // this.AddedCountry.push(res.country);
+            this.filteredCountry.push(res.country);
+            this.countryForm.reset();
+            this.toBeAddedCountry = null;
+          } else {
+            this.toBeAddedCountry = null;
+            this.countryname = '';
+            alert(res.error);
           }
-        );
+        },
+        (err) => {
+          alert('alert from line 93:-' + err.message);
+        }
+      );
     } else {
       this.countryForm.reset();
     }
@@ -111,21 +112,14 @@ export class CountryComponent implements OnInit {
   }
 
   getCountries() {
-    this.http
-      .get<{ countries: Country[] }>(
-        'http://localhost:3000/admin/pricing/country',
-        {
-          withCredentials: true,
-        }
-      )
-      .subscribe(
-        (res) => {
-          this.AddedCountry = res.countries;
-          this.filteredCountry = res.countries;
-        },
-        (err) => {
-          alert(err);
-        }
-      );
+    this.countryService.getCountries().subscribe(
+      (res) => {
+        this.AddedCountry = res.countries;
+        this.filteredCountry = res.countries;
+      },
+      (err) => {
+        alert(err);
+      }
+    );
   }
 }

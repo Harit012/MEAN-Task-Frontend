@@ -4,5 +4,7 @@ export interface Country {
     countryCallCode: string,
     FlagUrl?: string,
     _id?: string,
-    timezones?: string[]
+    timezones?: string[],
+    latlng?: Number[],
+    countryShortName: string
 }

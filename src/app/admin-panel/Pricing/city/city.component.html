@@ -1,1 +1,72 @@
-<p>city works!</p>
+<div class="container">
+  <div class="row">
+    <div class="col-4">
+      <div class="form-group">
+        <label for="country"><b>Country</b></label>
+        <select
+          name="country"
+          id="country"
+          class="dropdown"
+          (change)="onCountryChanged($event)"
+        >
+          <option [defaultSelected]="true" disabled>Select Country</option>
+          <option
+            *ngFor="let country of countries"
+            value="{{ country.countryShortName }}"
+          >
+            {{ country.countryName }}
+          </option>
+        </select>
+      </div>
+    </div>
+    <div class="col-4"></div>
+  </div>
+  <div class="row">
+    <div class="col-4">
+      <form id="cityForm">
+        <div class="form-group">
+          <label for="searchcity"><b>City :- </b></label>
+          <input class="ms-2" type="text" name="city" id="searchcity" #city />
+        </div>
+      </form>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-7 align-self-center me-2">
+      <div id="map" style="height: 60vh; width: 100%"></div>
+
+      <div class="row mt-3">
+        @if (!editMode) {
+          <div class="col-2"><button style="height: 3rem;width: 5rem;font-size: large;" class="btn btn-large btn-dark" (click)="addNewZone()">Save</button></div>
+          <div class="col-2"><button style="height: 3rem;width: 7rem;font-size: large;" class="btn btn-large btn-danger" (click)="resetMap()">Reset Map</button></div>
+        }@else {
+          <div class="col-2"><button style="height: 3rem;width: 8rem;font-size: large;" class="btn btn-large btn-dark" (click)="editZone()">Save changes</button></div>
+          <div class="col-2"><button style="height: 3rem;width: 7rem;font-size: large;" class="btn btn-large btn-danger" (click)="leaveEditMode()">Leave Edit</button></div>
+        }
+      </div>
+    </div>
+    
+    <div id="registeredzones" class="col-4  ms-4">
+      <h3 class="mb-2" style="font-weight: 700;font-family:'Courier New', Courier, monospace ;">Registered Zones</h3>
+      <div class="scrollable-section">
+      @if (filteredZones.length > 0) {
+        <div *ngFor="let zone of filteredZones;index as i" (click)="onEditZone(i)">
+          <div style="height: 5rem;width: 100%; background-color: rgb(183, 184, 188);" class ="mb-2 align-content-center">
+            <span style="font-size: larger;" class=" ms-3">{{i+1}}</span>
+            <span style="font-size: larger;" class=" ms-3">{{zone.zoneName}}</span>
+          </div>
+        </div>
+      }@else if(selectedCountry == ""){
+        <div style="height: 60vh;align-content: center;justify-content: center;" class="row text-align-center align-self-center ms-5">
+          <h5>Select The Country</h5>
+        </div>
+      }@else {
+        <div style="height: 60vh;align-content: center;justify-content: center;" class="row text-align-center align-self-center ms-5">
+          <h5>No Data Found</h5>
+        </div>
+      }
+      
+    </div>
+    </div>
+  </div>
+</div>
