@@ -1,98 +1,128 @@
 <div class="container">
-    <section class="upper-section mb-1">
-      <div class="row">
-        <div class="col-3"></div>
-        <div class="col-6">
-          <div style="background-color: rgb(172, 170, 167);" id="vehicle-registration-form" class="container-fluid mb-4">
-            <form [formGroup]="vehicleForm" (ngSubmit)="onSubmit()">
-              <div class="d-flex flex-column">
-                <div class="form-group">
-                  <label for="type">Vehicle Type</label>
-                  <select id="type" formControlName="type" >
-                    <option value="" disabled>Select Vehicle Type</option>
-                    <option value="SEDAN">Sedan</option>
-                    <option value="SUV">SUV</option>
-                    <option value="PICK UP">Pick Up</option>
-                    <option value="MINI VAN">Mini Van</option>
-                  </select>
-                  <p class="text-danger" *ngIf="vehicleForm.get('type')?.invalid && vehicleForm.get('type')?.touched">This field is required</p>
-                </div>
-                <div class="form-group">
-                  <label for="vehicleName">Vehicle Image</label><br />
-                  <input
-                    type="file"
-                    id="vehicleImage"
-                    formControlName="vehicleImage"
-                    accept="image/*"
-                    (change)="onFileChange($event)"
-                  />
-                  
-                </div>
-                <p class="text-danger" *ngIf="sizeValidation">The image should be less then 4 MB</p>
-                <div clsss="form-group">
-                  <button
-                    type="button"
-                    class="btn btn-dark"
-                    *ngIf="isEdit"
-                    (click)="onSubmitEdit()"
+  <section class="upper-section mb-1">
+    <div class="row">
+      <div class="col-3"></div>
+      <div class="col-6">
+        <div
+          style="background-color: rgb(172, 170, 167)"
+          id="vehicle-registration-form"
+          class="container-fluid mb-4"
+        >
+          <form [formGroup]="vehicleForm" (ngSubmit)="onSubmit()">
+            <div class="d-flex flex-column">
+              <div class="form-group">
+                <label for="type">Vehicle Type</label>
+                <select id="type" formControlName="type">
+                  <option value="" disabled>Select Vehicle Type</option>
+                  <option
+                    *ngFor="let vehicleType of vehicleTypes"
+                    value="{{ vehicleType }}"
                   >
-                    Submit Edit
-                  </button>&nbsp;&nbsp;&nbsp;&nbsp;
-                  <button *ngIf="isEdit" type="button" class="btn btn-dark" (click)="onCancel()">Cancel</button>
-                  <button
-                    type="button"
-                    class="btn btn-dark"
-                    *ngIf="!isEdit"
-                    (click)="onSubmit()"
-                    [disabled]="vehicleForm.invalid"
-                  >
-                    Submit
-                  </button>
-                </div>
+                    {{ vehicleType }}
+                  </option>
+                </select>
+                <p
+                  class="text-danger"
+                  *ngIf="
+                    vehicleForm.get('type')?.invalid &&
+                    vehicleForm.get('type')?.touched
+                  "
+                >
+                  This field is required
+                </p>
               </div>
-            </form>
-          </div>
+              <div class="form-group">
+                <label for="vehicleName">Vehicle Image</label><br />
+                <input
+                  type="file"
+                  id="vehicleImage"
+                  formControlName="vehicleImage"
+                  accept="image/*"
+                  (change)="onFileChange($event)"
+                />
+              </div>
+              <p class="text-danger" *ngIf="sizeValidation">
+                The image should be less then 4 MB
+              </p>
+              <div clsss="form-group">
+                <button
+                  type="button"
+                  class="btn btn-dark"
+                  *ngIf="isEdit"
+                  (click)="onSubmitEdit()"
+                >
+                  Submit Edit</button
+                >&nbsp;&nbsp;&nbsp;&nbsp;
+                <button
+                  *ngIf="isEdit"
+                  type="button"
+                  class="btn btn-dark"
+                  (click)="onCancel()"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  class="btn btn-dark"
+                  *ngIf="!isEdit"
+                  (click)="onSubmit()"
+                  [disabled]="vehicleForm.invalid"
+                >
+                  Submit
+                </button>
+              </div>
+            </div>
+          </form>
         </div>
-        <div class="col-3"></div>
       </div>
-      <hr>
-      <div class="row ms-1">
-        <div class="col-1"><h5>Index</h5></div>
-        <div class="col-5"><h5>Vehicle Image</h5></div>
-        <div class="col-2"><h5>Vehicle Type</h5></div>
-        <div class="col-4 text-align-center"><h5>Actions</h5></div>
+      <div class="col-3"></div>
+    </div>
+    <hr />
+    <div class="row ms-1">
+      <div class="col-1"><h5>Index</h5></div>
+      <div class="col-5"><h5>Vehicle Image</h5></div>
+      <div class="col-2"><h5>Vehicle Type</h5></div>
+      <div class="col-4 text-align-center"><h5>Actions</h5></div>
+    </div>
+    <hr />
+  </section>
+
+  <section class="lower-section scrollable-section">
+    <div
+      style="height: 300px; align-content: center"
+      class="row text-align-center align-self-center justify-content-center"
+      *ngIf="vehiclesList.length == 0"
+    >
+      <H3>No Data found</H3>
+    </div>
+    <div
+      class="row vehicles-row"
+      *ngFor="let vehicle of vehiclesList; index as i"
+    >
+      <div class="col-1 align-self-center">&nbsp;&nbsp;&nbsp;{{ i + 1 }}</div>
+      <div class="col-5 align-self-center">
+        <img
+          height="120px"
+          width="180px"
+          src="http://localhost:3000/{{ vehicle.vehicleImage }}"
+          alt="img"
+        />
       </div>
-      <hr>
-    </section>
-  
-    <section class="lower-section scrollable-section">
-      <div style="height: 300px;align-content: center;" class="row text-align-center align-self-center justify-content-center" *ngIf="vehiclesList.length == 0">
-        <H3>No Data found</H3>
+      <div class="col-2 align-self-center">{{ vehicle.type }}</div>
+      <div class="col-2 align-self-center">
+        <button id="editbutton" class="btn btn-success" (click)="onEdit(i)">
+          Edit
+        </button>
       </div>
-      <div class="row vehicles-row" *ngFor="let vehicle of vehiclesList; index as i">
-        <div class="col-1 align-self-center">&nbsp;&nbsp;&nbsp;{{ i + 1 }}</div>
-        <div class="col-5 align-self-center">
-          <img height="120px" width="180px"
-            src="http://localhost:3000/{{vehicle.vehicleImage}}"
-            alt="img"
-          />
-        </div>
-        <div class="col-2 align-self-center">{{ vehicle.type }}</div>
-        <div class="col-2 align-self-center">
-          <button id="editbutton" class="btn btn-success " (click)="onEdit(i)">
-            Edit
-          </button>
-        </div>
-        <div class="col-2 align-self-center">
-          <button
-            id="deletebutton"
-            class="btn btn-large btn-danger "
-            (click)="onDelete(i)"
-          >
-            Delete
-          </button>
-        </div>
+      <div class="col-2 align-self-center">
+        <button
+          id="deletebutton"
+          class="btn btn-large btn-danger"
+          (click)="onDelete(i)"
+        >
+          Delete
+        </button>
       </div>
-    </section>
-  </div>
-  
+    </div>
+  </section>
+</div>

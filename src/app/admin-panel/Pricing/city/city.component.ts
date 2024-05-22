@@ -1,4 +1,4 @@
-import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { CountriesService } from '../country/countries.service';
 import { map } from 'rxjs';
 import { CommonModule } from '@angular/common';
@@ -14,7 +14,7 @@ import { CityService } from './city.service';
   templateUrl: './city.component.html',
   styleUrl: './city.component.css',
 })
-export class CityComponent implements OnInit {
+export class CityComponent implements OnInit , AfterViewInit{
   countries: { countryName: string; countryShortName: string }[] = [];
   map!: google.maps.Map;
   @ViewChild('city') city!: ElementRef;
@@ -26,6 +26,8 @@ export class CityComponent implements OnInit {
   editId: string = '';
   editMode: boolean = false;
   updatedInputIndex!: number;
+  polygon!: google.maps.Polygon;
+  editedpolygon!: google.maps.Polygon;
 
   zoneName: string = '';
   countryName: string = '';
@@ -77,9 +79,12 @@ export class CityComponent implements OnInit {
           country = element.long_name;
           this.countryShortName = element.short_name;
           this.countryName = country;
+        } else if (element.types.includes('administrative_area_level_1')) {
+          this.zoneName = element.long_name;
         }
       });
-      this.zoneName = place.name!;
+      console.log(place);
+      this.zoneName = place.name + ' ' + this.zoneName;
       this.map.setCenter(place.geometry?.location?.toJSON()!);
     });
   }
@@ -88,7 +93,7 @@ export class CityComponent implements OnInit {
       document.getElementById('map') as HTMLElement,
       {
         center: { lat: 22.3039, lng: 70.8022 },
-        zoom: 11,
+        zoom: 9,
       }
     );
 
@@ -109,9 +114,12 @@ export class CityComponent implements OnInit {
       drawingManager,
       'overlaycomplete',
       (event: any) => {
+        if (this.polygon) {
+          this.polygon.setMap(null);
+        }
         if (event.type === google.maps.drawing.OverlayType.POLYGON) {
-          const polygon = event.overlay as google.maps.Polygon;
-          this.polyCoordinates = polygon
+          this.polygon = event.overlay as google.maps.Polygon;
+          this.polyCoordinates = this.polygon
             .getPath()
             .getArray()
             .map((coord) => ({
@@ -133,19 +141,16 @@ export class CityComponent implements OnInit {
   }
 
   // for editMode
-  
+
   onEditZone(i: number) {
-    this.updatedInputIndex = i;
-    this.editMode = true;
-    this.initMap();
     const citybox = document.getElementById('searchcity') as HTMLInputElement;
     citybox.value = this.filteredZones[i].zoneName;
     const zone = this.filteredZones[i];
+    this.updatedInputIndex = i;
+    this.editMode = true;
+    this.map.panTo(zone.boundry[0]);
     this.editId = zone._id!;
-    let center = zone.boundry[0];
-    this.map.setCenter(center);
-    this.map.setZoom(10);
-    let polygon = new google.maps.Polygon({
+    this.editedpolygon = new google.maps.Polygon({
       paths: zone.boundry,
       strokeColor: '#FF0000',
       strokeOpacity: 0.8,
@@ -154,10 +159,10 @@ export class CityComponent implements OnInit {
       fillOpacity: 0.35,
       editable: true,
     });
-    polygon.setMap(this.map);
-    const path = polygon.getPath();
-    path.addListener('set_at', () => this.logPolygonCoordinates(polygon));
-    path.addListener('insert_at', () => this.logPolygonCoordinates(polygon));
+    this.editedpolygon.setMap(this.map);
+    const path = this.editedpolygon.getPath();
+    path.addListener('set_at', () => this.logPolygonCoordinates(this.editedpolygon));
+    path.addListener('insert_at', () => this.logPolygonCoordinates(this.editedpolygon));
   }
 
   // to reset the page to normal
@@ -165,7 +170,8 @@ export class CityComponent implements OnInit {
     if (confirm('Are you sure want to reset map?')) {
       let citybox = document.getElementById('searchcity') as HTMLInputElement;
       citybox.value = '';
-      this.initMap();
+      this.polygon.setMap(null);
+      this.map.panTo(this.center);
     } else {
       return;
     }
@@ -175,7 +181,8 @@ export class CityComponent implements OnInit {
       let citybox = document.getElementById('searchcity') as HTMLInputElement;
       citybox.value = '';
       this.editMode = false;
-      this.initMap();
+      this.editedpolygon.setMap(null);
+      this.map.panTo(this.center);
     } else {
       return;
     }
@@ -195,7 +202,8 @@ export class CityComponent implements OnInit {
         });
       this.updatedPolyCoordinates = [];
       this.editMode = false;
-      this.initMap();
+      this.editedpolygon.setMap(null);
+      this.map.panTo(this.center);
     } else {
       alert('Invalid criteria');
     }
@@ -213,6 +221,9 @@ export class CityComponent implements OnInit {
         (data) => {
           if (data.zones) {
             this.filteredZones = data.zones;
+            this.zoneName = '';
+            this.polygon.setMap(null);
+            this.map.panTo({ lat: 22.3039, lng: 70.8022 }); 
           } else {
             alert(data.error);
           }
@@ -233,5 +244,10 @@ export class CityComponent implements OnInit {
         alert(data.error);
       }
     });
+  }
+
+  ngAfterViewInit(): void {
+    // Initialize Bootstrap tooltips
+    (('[data-toggle="tooltip"]') as any).tooltip();
   }
 }

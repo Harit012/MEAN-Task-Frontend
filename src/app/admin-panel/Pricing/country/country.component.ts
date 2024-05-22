@@ -114,11 +114,12 @@ export class CountryComponent implements OnInit {
   getCountries() {
     this.countryService.getCountries().subscribe(
       (res) => {
-        this.AddedCountry = res.countries;
-        this.filteredCountry = res.countries;
-      },
-      (err) => {
-        alert(err);
+        if(res.countries){
+          this.AddedCountry = res.countries;
+          this.filteredCountry = res.countries;
+        }else{
+          alert(res.error);
+        }
       }
     );
   }

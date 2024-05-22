@@ -27,6 +27,7 @@ export class VehicleTypeComponent implements OnInit {
   isEdit: boolean = false;
   selectedImg: string = '';
   sizeValidation : boolean = false;
+  vehicleTypes: string[] = ['SEDAN', 'SUV', 'MINI VAN', 'PICK UP'];
 
   constructor(
     private fb: FormBuilder,

@@ -50,10 +50,10 @@
       <h3 class="mb-2" style="font-weight: 700;font-family:'Courier New', Courier, monospace ;">Registered Zones</h3>
       <div class="scrollable-section">
       @if (filteredZones.length > 0) {
-        <div *ngFor="let zone of filteredZones;index as i" (click)="onEditZone(i)">
-          <div style="height: 5rem;width: 100%; background-color: rgb(183, 184, 188);" class ="mb-2 align-content-center">
-            <span style="font-size: larger;" class=" ms-3">{{i+1}}</span>
-            <span style="font-size: larger;" class=" ms-3">{{zone.zoneName}}</span>
+        <div *ngFor="let zone of filteredZones; index as i" (click)="onEditZone(i)">
+          <div style="height: 5rem; width: 100%; background-color: rgb(183, 184, 188);" class="mb-2 align-content-center" [attr.title]="zone.zoneName" data-toggle="tooltip">
+            <span style="font-size: larger;" class="ms-3">{{i + 1}}</span>
+            <span style="font-size: larger;" class="ms-3">{{zone.zoneName.split(' ')[0]}}</span>
           </div>
         </div>
       }@else if(selectedCountry == ""){

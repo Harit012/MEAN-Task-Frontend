@@ -1,0 +1,60 @@
+*{
+    margin: 0px;
+    padding: 0px;
+}
+
+/* Container styling */
+.container1 {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+  }
+  
+  /* Row styling */
+  .row {
+    margin-bottom: 20px;
+  }
+  
+  /* Column styling */
+  /* .col-4 {
+    flex: 0 0 33.3333%;
+    max-width: 33.3333%;
+    padding: 0 15px;
+  } */
+  
+  /* Select input styling */
+  .form-select {
+    width: 100%;
+    padding: 10px;
+    font-size: 16px;
+    line-height: 1.5;
+    color: #495057;
+    background-color: #fff;
+    background-clip: padding-box;
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+    transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+  }
+  
+  .form-select:focus {
+    border-color: #80bdff;
+    outline: 0;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+  }
+  
+  /* Disabled option styling */
+  option[disabled] {
+    color: #6c757d;
+  }
+  
+  
+  label{
+    font-weight: 400;
+    font-size: medium;
+    font-family: sans-serif;
+    color: #495057;
+  }
+  input{
+    border: 1px solid gray;
+    padding: 10px;
+  }

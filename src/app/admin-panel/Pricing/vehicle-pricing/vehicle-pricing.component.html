@@ -1,1 +1,233 @@
-<p>vehicle-pricing works!</p>
+<div class="container1">
+  <!-- country -->
+  <div class="row mt-1">
+    <div class="col-2 align-self-center">
+      <label for="country">Country </label>
+    </div>
+
+    <div class="col-4">
+      <select
+        name="country"
+        id="country"
+        class="form-select"
+        
+      >
+        <option [defaultSelected]="true" disabled>Select Country</option>
+        <option
+          *ngFor="let country of countryList"
+          value="{{ country.countryShortName }}"
+          (click)="onCountryChange(country)"
+        >
+          {{ country.countryName }}
+        </option>
+      </select>
+    </div>
+  </div>
+  <!-- city -->
+  <div class="row mt-3">
+    <div class="col-2 align-self-center"><label for="city">City </label></div>
+
+    <div class="col-4">
+      <select
+        name="city"
+        id="city"
+        class="form-select"
+      >
+        @if (selectedCountry ) {
+        <option [defaultSelected]="true" disabled>Select city</option>
+        <option *ngFor="let city of cityList" value="{{ city.zoneName }}" (click)="onCityChange(city)">
+          {{ city.zoneName }}
+        </option>
+        }@else if(cityList == []){
+        <option [defaultSelected]="true" disabled>no City Available</option>
+        } @else {
+        <option [defaultSelected]="true" disabled>Select Country first</option>
+        }
+      </select>
+    </div>
+  </div>
+  <!-- vehicle-type -->
+  <div class="row mt-3">
+    <div class="col-2 align-self-center">
+      <label for="vehicleType">Vehicle-Type </label>
+    </div>
+    <div class="col-4">
+      <select id="vehicleType" name="vehicleType" class="form-select" (change)="onVehicleTypeChange($event)">
+        <option [defaultSelected]="true" disabled>Select vehicle-type</option>
+        <option
+          *ngFor="let vehicleType of vehicleTypesList"
+          value="{{ vehicleType }}"
+        >
+          {{ vehicleType }}
+        </option>
+      </select>
+    </div>
+  </div>
+  <form [formGroup]="vehiclePricingForm">  
+    <!-- driver profit -->
+    <div class="row mt-2">
+      <div class="col-2 align-self-center">
+        <label for="DriverProfit">Driver Profit </label>
+      </div>
+      <div class="col-4">
+        <div class="input-group">
+          <input type="number" min="0" class="form-control" id="DriverProfit" placeholder="" formControlName="driverProfit" />
+          <div class="input-group-append">
+            <span
+              class="input-group-text"
+              data-toggle="tooltip"
+              data-placement="top"
+              title="This is a tooltip."
+              >&nbsp;&nbsp;&nbsp;?&nbsp;&nbsp;&nbsp;</span
+            >
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- min-fare -->
+    <div class="row mt-2">
+      <div class="col-2 align-self-center">
+        <label for="MinFare">Min. Fare</label>
+      </div>
+      <div class="col-4">
+        <div class="input-group">
+          <input type="number" min="0" class="form-control" id="MinFare" placeholder="" formControlName="minFare"/>
+          <div class="input-group-append">
+            <span
+              class="input-group-text"
+              data-toggle="tooltip"
+              data-placement="top"
+              title="This is a tooltip."
+              >&nbsp;&nbsp;&nbsp;?&nbsp;&nbsp;&nbsp;</span
+            >
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- Distance for base price -->
+    <div class="row mt-2">
+      <div class="col-2 align-self-center">
+        <label for="DFBP">Distance For base price</label>
+      </div>
+      <div class="col-4">
+        <div class="input-group">
+          <input type="number" min="0" class="form-control" id="DFBP" placeholder="" formControlName="distanceForBasePrice"/>
+          <div class="input-group-append">
+            <span
+              class="input-group-text"
+              data-toggle="tooltip"
+              data-placement="top"
+              title="This is a tooltip."
+              >&nbsp;&nbsp;&nbsp;?&nbsp;&nbsp;&nbsp;</span
+            >
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- Base price -->
+    <div class="row mt-2">
+      <div class="col-2 align-self-center">
+        <label for="BasePrice">Base price</label>
+      </div>
+      <div class="col-4">
+        <div class="input-group">
+          <input type="number" min="0" class="form-control" id="BasePrice" placeholder="" formControlName="basePrice"/>
+          <div class="input-group-append">
+            <span
+              class="input-group-text"
+              data-toggle="tooltip"
+              data-placement="top"
+              title="This is a tooltip."
+              >&nbsp;&nbsp;&nbsp;?&nbsp;&nbsp;&nbsp;</span
+            >
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- Price per Unit Distance -->
+    <div class="row mt-2">
+      <div class="col-2 align-self-center">
+        <label for="PPUD">Price per Unit Distance</label>
+      </div>
+      <div class="col-4">
+        <div class="input-group">
+          <input type="number" min="0" class="form-control" id="PPUD" placeholder="" formControlName="pricePerUnitDistance" />
+          <div class="input-group-append">
+            <span
+              class="input-group-text"
+              data-toggle="tooltip"
+              data-placement="top"
+              title="This is a tooltip."
+              >&nbsp;&nbsp;&nbsp;?&nbsp;&nbsp;&nbsp;</span
+            >
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- Price per Unit Time -->
+    <div class="row mt-2">
+      <div class="col-2 align-self-center">
+        <label for="PPUT">Price per Unit Time(min)</label>
+      </div>
+      <div class="col-4">
+        <div class="input-group">
+          <input type="number" min="0" class="form-control" id="PPUT" placeholder="" formControlName="pricePerUnitTime"/>
+          <div class="input-group-append">
+            <span
+              class="input-group-text"
+              data-toggle="tooltip"
+              data-placement="top"
+              title="This is a tooltip."
+              >&nbsp;&nbsp;&nbsp;?&nbsp;&nbsp;&nbsp;</span
+            >
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- Max Space -->
+    <div class="row mt-2">
+      <div class="col-2 align-self-center">
+        <label for="MaxSpace">Max Space</label>
+      </div>
+      <div class="col-4">
+        <div class="input-group">
+          <input type="number" min="0" class="form-control" id="MaxSpace" placeholder="" formControlName="maxSpace" />
+          <div class="input-group-append">
+            <span
+              class="input-group-text"
+              data-toggle="tooltip"
+              data-placement="top"
+              title="This is a tooltip."
+              >&nbsp;&nbsp;&nbsp;?&nbsp;&nbsp;&nbsp;</span
+            >
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- buttons -->
+    <div class="row mt-2 ">
+      <div class="col-4">
+        <button style="height: 3rem;width: 5rem;;" class="btn btn-dark btn-large" [disabled]="!vehiclePricingForm.valid" (click)="onSubmitVehicleForm()">Add </button>
+      </div>
+      <div class="col-4">
+        <button style="height: 3rem;width: 5rem;;" class="btn btn-dark btn-large" (click)="vehiclePricingForm.reset()">reset</button>
+      </div>
+    </div>
+  </form>
+</div>
+<div class="container mt-5">
+  <div class="row bg-dark text-white p-2">
+    <div class="col-1">Index</div>
+    <div class="col-1">Country</div>
+    <div class="col-1">City</div>
+    <div class="col-1">VehicleType</div>
+    <div class="col-1">DriverProfit</div>
+    <div class="col-1">Min Fare</div>
+    <div class="col-1">Distance For base price</div>
+    <div class="col-1">Base price</div>
+    <div class="col-1">Price per Unit Distance</div>
+    <div class="col-1">Price per Unit Time(min)</div>
+    <div class="col-1">Max Space</div>
+    <div class="col-1">Options</div>
+  </div>
+</div>
