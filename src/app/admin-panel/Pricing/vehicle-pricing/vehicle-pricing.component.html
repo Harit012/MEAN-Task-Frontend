@@ -216,7 +216,7 @@
   </form>
 </div>
 <div class="container mt-5">
-  <div class="row bg-dark text-white p-2">
+  <div class="row bg-dark text-white p-2" style="position:sticky;top:50vh">
     <div class="col-1">Index</div>
     <div class="col-1">Country</div>
     <div class="col-1">City</div>
@@ -229,5 +229,19 @@
     <div class="col-1">Price per Unit Time(min)</div>
     <div class="col-1">Max Space</div>
     <div class="col-1">Options</div>
+  </div>
+  <div class="row" *ngFor="let vehicle of pricingList; index as i">
+    <div class="col-1">{{i}}</div>
+    <div class="col-1">{{vehicle.country}}</div>
+    <div class="col-1">{{vehicle.city}}</div>
+    <div class="col-1">{{vehicle.vehicleType}}</div>
+    <div class="col-1">{{vehicle.driverProfit}}</div>
+    <div class="col-1">{{vehicle.minFare}}</div>
+    <div class="col-1">{{vehicle.distanceForBasePrice}}</div>
+    <div class="col-1">{{vehicle.basePrice}}</div>
+    <div class="col-1">{{vehicle.pricePerUnitDistance}}</div>
+    <div class="col-1">{{vehicle.pricePerUnitTime}}</div>
+    <div class="col-1">{{vehicle.maxSpace}}</div>
+    <div class="col-1"><button class="btn btn-success">Edit</button></div>
   </div>
 </div>

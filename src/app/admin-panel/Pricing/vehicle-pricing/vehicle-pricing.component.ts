@@ -28,6 +28,7 @@ export class VehiclePricingComponent implements OnInit {
   vehicleTypesList: string[] = ['SEDAN', 'SUV', 'MINI VAN', 'PICK UP'];
   selectefVehicleType!: string;
   vehiclePricingForm: FormGroup;
+  pricingList!: VehiclePricing[];
 
   constructor(
     private countryService: CountriesService,
@@ -52,6 +53,14 @@ export class VehiclePricingComponent implements OnInit {
       } else {
         alert(data.error);
       }
+      this.http
+        .get<VehiclePricing[]>(
+          'http://localhost:3000/admin/pricing/vehicle-pricing',
+          { withCredentials: true }
+        )
+        .subscribe((data) => {
+          this.pricingList = data;
+        });
     });
   }
   onCountryChange(country: Country) {
@@ -93,7 +102,7 @@ export class VehiclePricingComponent implements OnInit {
         data
       )
       .subscribe((data) => {
-        console.log(data)
+        console.log(data);
       });
     console.log(data);
   }

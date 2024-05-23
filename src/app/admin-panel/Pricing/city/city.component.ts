@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, ElementRef, OnInit, ViewChild } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CountriesService } from '../country/countries.service';
 import { map } from 'rxjs';
 import { CommonModule } from '@angular/common';
@@ -14,10 +14,9 @@ import { CityService } from './city.service';
   templateUrl: './city.component.html',
   styleUrl: './city.component.css',
 })
-export class CityComponent implements OnInit , AfterViewInit{
+export class CityComponent implements OnInit {
   countries: { countryName: string; countryShortName: string }[] = [];
   map!: google.maps.Map;
-  @ViewChild('city') city!: ElementRef;
   center: google.maps.LatLngLiteral = { lat: 22, lng: 72 };
   polyCoordinates: google.maps.LatLngLiteral[] = [];
   updatedPolyCoordinates: google.maps.LatLngLiteral[] = [];
@@ -26,6 +25,7 @@ export class CityComponent implements OnInit , AfterViewInit{
   editId: string = '';
   editMode: boolean = false;
   updatedInputIndex!: number;
+  drawingManager!: google.maps.drawing.DrawingManager;
   polygon!: google.maps.Polygon;
   editedpolygon!: google.maps.Polygon;
 
@@ -74,6 +74,10 @@ export class CityComponent implements OnInit , AfterViewInit{
     autocomplete.addListener('place_changed', () => {
       const place = autocomplete.getPlace();
       let country: any = place['address_components'];
+      this.drawingManager.setOptions({
+        drawingMode:google.maps.drawing.OverlayType.POLYGON,
+        drawingControl: true
+      })
       country.forEach((element: any) => {
         if (element.types.includes('country')) {
           country = element.long_name;
@@ -83,8 +87,7 @@ export class CityComponent implements OnInit , AfterViewInit{
           this.zoneName = element.long_name;
         }
       });
-      console.log(place);
-      this.zoneName = place.name + ' ' + this.zoneName;
+      this.zoneName = place.name + ',' + this.zoneName;
       this.map.setCenter(place.geometry?.location?.toJSON()!);
     });
   }
@@ -93,11 +96,11 @@ export class CityComponent implements OnInit , AfterViewInit{
       document.getElementById('map') as HTMLElement,
       {
         center: { lat: 22.3039, lng: 70.8022 },
-        zoom: 9,
+        zoom: 10,
       }
     );
 
-    const drawingManager = new google.maps.drawing.DrawingManager({
+    this.drawingManager = new google.maps.drawing.DrawingManager({
       drawingMode: google.maps.drawing.OverlayType.POLYGON,
       drawingControl: true,
       drawingControlOptions: {
@@ -109,9 +112,13 @@ export class CityComponent implements OnInit , AfterViewInit{
         strokeWeight: 2,
       },
     });
-    drawingManager.setMap(this.map);
+    this.drawingManager.setMap(this.map);
+    this.drawingManager.setOptions({
+      drawingMode:null,
+      drawingControl: false,
+    })
     google.maps.event.addListener(
-      drawingManager,
+      this.drawingManager,
       'overlaycomplete',
       (event: any) => {
         if (this.polygon) {
@@ -143,6 +150,11 @@ export class CityComponent implements OnInit , AfterViewInit{
   // for editMode
 
   onEditZone(i: number) {
+    this.drawingManager.setOptions({
+      drawingMode:null,
+      drawingControl: false
+    })
+    // this.polygon.setMap(null);
     const citybox = document.getElementById('searchcity') as HTMLInputElement;
     citybox.value = this.filteredZones[i].zoneName;
     const zone = this.filteredZones[i];
@@ -224,6 +236,10 @@ export class CityComponent implements OnInit , AfterViewInit{
             this.zoneName = '';
             this.polygon.setMap(null);
             this.map.panTo({ lat: 22.3039, lng: 70.8022 }); 
+            this.drawingManager.setOptions({
+              drawingMode:null,
+              drawingControl: false
+            })    
           } else {
             alert(data.error);
           }
@@ -246,8 +262,8 @@ export class CityComponent implements OnInit , AfterViewInit{
     });
   }
 
-  ngAfterViewInit(): void {
-    // Initialize Bootstrap tooltips
-    (('[data-toggle="tooltip"]') as any).tooltip();
-  }
+  // ngAfterViewInit(): void {
+  //   // Initialize Bootstrap tooltips
+  //   // (('[data-toggle="tooltip"]') as any).tooltip();
+  // }
 }
