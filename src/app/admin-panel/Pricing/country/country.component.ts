@@ -59,10 +59,10 @@ export class CountryComponent implements OnInit {
                 ` (${data[i]['currencies'][countryCurrency]['symbol']})`,
               timezones: data[i]['timezones'],
               FlagUrl: data[i]['flags']['png'],
-              latlng: data[i]['latlng'],
+              latlng: { lat: data[i]['latlng'][0], lng: data[i]['latlng'][1] },
               countryShortName: data[i]['cca2'],
             };
-            console.log(obj)
+            console.log(obj);
             this.countrycallcode = obj.countryCallCode;
             this.countrycurrency = obj.currency;
             this.toBeAddedCountry = obj;
@@ -112,15 +112,13 @@ export class CountryComponent implements OnInit {
   }
 
   getCountries() {
-    this.countryService.getCountries().subscribe(
-      (res) => {
-        if(res.countries){
-          this.AddedCountry = res.countries;
-          this.filteredCountry = res.countries;
-        }else{
-          alert(res.error);
-        }
+    this.countryService.getCountries().subscribe((res) => {
+      if (res.countries) {
+        this.AddedCountry = res.countries;
+        this.filteredCountry = res.countries;
+      } else {
+        alert(res.error);
       }
-    );
+    });
   }
 }

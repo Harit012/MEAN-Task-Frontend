@@ -6,6 +6,7 @@ import { ReactiveFormsModule } from '@angular/forms';
 import { Country } from '../country/country.interface';
 import { Zone } from './zone.interface';
 import { CityService } from './city.service';
+import { RecivingZone } from './recivingZone.interface';
 
 @Component({
   selector: 'app-city',
@@ -15,13 +16,23 @@ import { CityService } from './city.service';
   styleUrl: './city.component.css',
 })
 export class CityComponent implements OnInit {
-  countries: { countryName: string; countryShortName: string }[] = [];
+  countries: {
+    countryName: string;
+    countryShortName: string;
+    _id?: string;
+    countryLatLng: google.maps.LatLngLiteral;
+  }[] = [];
   map!: google.maps.Map;
   center: google.maps.LatLngLiteral = { lat: 22, lng: 72 };
   polyCoordinates: google.maps.LatLngLiteral[] = [];
   updatedPolyCoordinates: google.maps.LatLngLiteral[] = [];
-  selectedCountry: string = '';
-  filteredZones: Zone[] = [];
+  selectedCountry!: {
+    countryName: string;
+    countryShortName: string;
+    _id?: string;
+    countryLatLng: google.maps.LatLngLiteral;
+  };
+  filteredZones: RecivingZone[] = [];
   editId: string = '';
   editMode: boolean = false;
   updatedInputIndex!: number;
@@ -44,8 +55,10 @@ export class CityComponent implements OnInit {
       .subscribe((data: Country[]) => {
         data.forEach((element: Country) => {
           this.countries.push({
+            _id: element._id,
             countryName: element.countryName,
             countryShortName: element.countryShortName,
+            countryLatLng: element.latlng!,
           });
         });
       });
@@ -53,7 +66,16 @@ export class CityComponent implements OnInit {
   }
 
   onCountryChanged(event: any) {
-    this.selectedCountry = event.target.value;
+    let tempCountry = event.target.value;
+    for (let i = 0; i < this.countries.length; i++) {
+      if (this.countries[i].countryShortName == tempCountry) {
+        this.selectedCountry = this.countries[i];
+      }
+    }
+    console.log(this.selectedCountry.countryLatLng);
+    this.map.setCenter(this.selectedCountry.countryLatLng);
+    this.map.setZoom(6);
+    this.editMode = false;
     let cityForm = document.getElementById('cityForm') as HTMLFormElement;
     cityForm.reset();
     this.googleAutoComplete(event.target.value);
@@ -75,9 +97,9 @@ export class CityComponent implements OnInit {
       const place = autocomplete.getPlace();
       let country: any = place['address_components'];
       this.drawingManager.setOptions({
-        drawingMode:google.maps.drawing.OverlayType.POLYGON,
-        drawingControl: true
-      })
+        drawingMode: google.maps.drawing.OverlayType.POLYGON,
+        drawingControl: true,
+      });
       country.forEach((element: any) => {
         if (element.types.includes('country')) {
           country = element.long_name;
@@ -89,6 +111,7 @@ export class CityComponent implements OnInit {
       });
       this.zoneName = place.name + ',' + this.zoneName;
       this.map.setCenter(place.geometry?.location?.toJSON()!);
+      this.map.setZoom(10);
     });
   }
   initMap(): void {
@@ -114,9 +137,9 @@ export class CityComponent implements OnInit {
     });
     this.drawingManager.setMap(this.map);
     this.drawingManager.setOptions({
-      drawingMode:null,
+      drawingMode: null,
       drawingControl: false,
-    })
+    });
     google.maps.event.addListener(
       this.drawingManager,
       'overlaycomplete',
@@ -151,9 +174,9 @@ export class CityComponent implements OnInit {
 
   onEditZone(i: number) {
     this.drawingManager.setOptions({
-      drawingMode:null,
-      drawingControl: false
-    })
+      drawingMode: null,
+      drawingControl: false,
+    });
     // this.polygon.setMap(null);
     const citybox = document.getElementById('searchcity') as HTMLInputElement;
     citybox.value = this.filteredZones[i].zoneName;
@@ -173,8 +196,12 @@ export class CityComponent implements OnInit {
     });
     this.editedpolygon.setMap(this.map);
     const path = this.editedpolygon.getPath();
-    path.addListener('set_at', () => this.logPolygonCoordinates(this.editedpolygon));
-    path.addListener('insert_at', () => this.logPolygonCoordinates(this.editedpolygon));
+    path.addListener('set_at', () =>
+      this.logPolygonCoordinates(this.editedpolygon)
+    );
+    path.addListener('insert_at', () =>
+      this.logPolygonCoordinates(this.editedpolygon)
+    );
   }
 
   // to reset the page to normal
@@ -221,13 +248,15 @@ export class CityComponent implements OnInit {
     }
   }
   addNewZone() {
+    let citybox = document.getElementById('searchcity') as HTMLInputElement;
     let border = this.polyCoordinates;
     if (border.length > 2 || this.zoneName == '') {
       const zone: Zone = {
         zoneName: this.zoneName,
         boundry: border,
-        countryName: this.countryName,
-        countryShortName: this.countryShortName,
+        country: this.selectedCountry._id!,
+        // countryName: this.countryName,
+        // countryShortName: this.countryShortName,
       };
       this.cityService.addZone(zone).subscribe(
         (data) => {
@@ -235,11 +264,14 @@ export class CityComponent implements OnInit {
             this.filteredZones = data.zones;
             this.zoneName = '';
             this.polygon.setMap(null);
-            this.map.panTo({ lat: 22.3039, lng: 70.8022 }); 
+            this.map.panTo({ lat: 22.3039, lng: 70.8022 });
             this.drawingManager.setOptions({
-              drawingMode:null,
-              drawingControl: false
-            })    
+              drawingMode: null,
+              drawingControl: false,
+            });
+            this.map.setCenter(this.selectedCountry.countryLatLng);
+            this.map.setZoom(6);
+            citybox.value = '';
           } else {
             alert(data.error);
           }
@@ -253,7 +285,7 @@ export class CityComponent implements OnInit {
     }
   }
   getZone() {
-    this.cityService.getZones(this.selectedCountry).subscribe((data) => {
+    this.cityService.getZones(this.selectedCountry._id!).subscribe((data) => {
       if (data.zones) {
         this.filteredZones = data.zones;
       } else {
@@ -261,9 +293,4 @@ export class CityComponent implements OnInit {
       }
     });
   }
-
-  // ngAfterViewInit(): void {
-  //   // Initialize Bootstrap tooltips
-  //   // (('[data-toggle="tooltip"]') as any).tooltip();
-  // }
 }

@@ -5,6 +5,6 @@ export interface Country {
     FlagUrl?: string,
     _id?: string,
     timezones?: string[],
-    latlng?: Number[],
+    latlng?: google.maps.LatLngLiteral,
     countryShortName: string
 }

@@ -3,7 +3,6 @@ import { CountriesService } from '../country/countries.service';
 import { CommonModule } from '@angular/common';
 import { CityService } from '../city/city.service';
 import { Country } from '../country/country.interface';
-import { Zone } from '../city/zone.interface';
 import {
   FormControl,
   FormGroup,
@@ -12,6 +11,7 @@ import {
 } from '@angular/forms';
 import { VehiclePricing } from './vehicle-pricing.interface';
 import { HttpClient } from '@angular/common/http';
+import { RecivingZone } from '../city/recivingZone.interface';
 
 @Component({
   selector: 'app-vehicle-pricing',
@@ -23,8 +23,8 @@ import { HttpClient } from '@angular/common/http';
 export class VehiclePricingComponent implements OnInit {
   countryList!: Country[];
   selectedCountry!: Country;
-  cityList!: Zone[];
-  selectedCity!: Zone;
+  cityList!: RecivingZone[];
+  selectedCity!: RecivingZone;
   vehicleTypesList: string[] = ['SEDAN', 'SUV', 'MINI VAN', 'PICK UP'];
   selectefVehicleType!: string;
   vehiclePricingForm: FormGroup;
@@ -77,7 +77,7 @@ export class VehiclePricingComponent implements OnInit {
     });
   }
 
-  onCityChange(city: Zone) {
+  onCityChange(city: RecivingZone) {
     this.vehiclePricingForm.reset();
     this.selectedCity = city;
     // console.log(this.selectedCity)
