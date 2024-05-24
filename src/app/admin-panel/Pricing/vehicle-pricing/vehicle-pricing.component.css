@@ -58,3 +58,31 @@
     border: 1px solid gray;
     padding: 10px;
   }
+
+  .scrollable-section{
+    align-self: center;
+    max-height: 500px;
+    max-width: 1267px;
+    /* max-width: 100%; */
+    overflow-y: auto;
+    overflow-x: auto;
+  }
+  .scrollable-section2{
+    align-self: center;
+    max-height: 120px;
+    max-width: 1267px;
+    /* max-width: 100%; */
+    overflow-y: auto;
+    overflow-x: auto;
+  }
+  p{
+    width: 80%; 
+    /* border: 1px solid #000; */
+    word-wrap: break-word; 
+    overflow-wrap: break-word; 
+  }
+  /* .col-1{
+    display: flex;
+    justify-content: center;
+    border: 2px dotted black;
+  } */

@@ -72,7 +72,6 @@ export class CityComponent implements OnInit {
         this.selectedCountry = this.countries[i];
       }
     }
-    console.log(this.selectedCountry.countryLatLng);
     this.map.setCenter(this.selectedCountry.countryLatLng);
     this.map.setZoom(6);
     this.editMode = false;
@@ -184,6 +183,7 @@ export class CityComponent implements OnInit {
     this.updatedInputIndex = i;
     this.editMode = true;
     this.map.panTo(zone.boundry[0]);
+    this.map.setZoom(9)
     this.editId = zone._id!;
     this.editedpolygon = new google.maps.Polygon({
       paths: zone.boundry,

@@ -10,4 +10,5 @@ export interface VehiclePricing {
     pricePerUnitDistance: number;
     pricePerUnitTime: number;
     maxSpace: number;
+    ccv: string
 }

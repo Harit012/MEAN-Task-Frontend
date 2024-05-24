@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { AfterViewChecked, Component, OnInit } from '@angular/core';
 import { CountriesService } from '../country/countries.service';
 import { CommonModule } from '@angular/common';
 import { CityService } from '../city/city.service';
@@ -20,15 +20,19 @@ import { RecivingZone } from '../city/recivingZone.interface';
   templateUrl: './vehicle-pricing.component.html',
   styleUrl: './vehicle-pricing.component.css',
 })
-export class VehiclePricingComponent implements OnInit {
+export class VehiclePricingComponent implements OnInit, AfterViewChecked {
   countryList!: Country[];
   selectedCountry!: Country;
   cityList!: RecivingZone[];
   selectedCity!: RecivingZone;
-  vehicleTypesList: string[] = ['SEDAN', 'SUV', 'MINI VAN', 'PICK UP'];
+  vehicleTypesList: string[] = [];
   selectefVehicleType!: string;
   vehiclePricingForm: FormGroup;
   pricingList!: VehiclePricing[];
+  editMode: boolean = false;
+  editIndex!: number;
+  editabledocument!: VehiclePricing;
+  numbers = [1, 2, 3, 4, 5];
 
   constructor(
     private countryService: CountriesService,
@@ -36,13 +40,34 @@ export class VehiclePricingComponent implements OnInit {
     private http: HttpClient
   ) {
     this.vehiclePricingForm = new FormGroup({
-      driverProfit: new FormControl(null, [Validators.required]),
-      minFare: new FormControl(null, [Validators.required]),
-      distanceForBasePrice: new FormControl(null, [Validators.required]),
-      basePrice: new FormControl(null, [Validators.required]),
-      pricePerUnitDistance: new FormControl(null, [Validators.required]),
-      pricePerUnitTime: new FormControl(null, [Validators.required]),
-      maxSpace: new FormControl(null, [Validators.required]),
+      driverProfit: new FormControl(null, [
+        Validators.required,
+        Validators.pattern('^[0-9]*$'),
+      ]),
+      minFare: new FormControl(null, [
+        Validators.required,
+        Validators.pattern('^[0-9]*$'),
+      ]),
+      distanceForBasePrice: new FormControl(0, [
+        Validators.required,
+        Validators.pattern('^[0-9]*$'),
+      ]),
+      basePrice: new FormControl(null, [
+        Validators.required,
+        Validators.pattern('^[0-9]*$'),
+      ]),
+      pricePerUnitDistance: new FormControl(null, [
+        Validators.required,
+        Validators.pattern('^[0-9]*$'),
+      ]),
+      pricePerUnitTime: new FormControl(null, [
+        Validators.required,
+        Validators.pattern('^[0-9]*$'),
+      ]),
+      maxSpace: new FormControl(null, [
+        Validators.required,
+        Validators.pattern('^[0-9]*$'),
+      ]),
     });
   }
 
@@ -63,12 +88,23 @@ export class VehiclePricingComponent implements OnInit {
         });
     });
   }
+
+  ngAfterViewChecked(): void {
+    if (this.editMode) {
+      let temp_country = document.getElementById('country') as HTMLInputElement;
+      let temp_city = document.getElementById('city') as HTMLInputElement;
+      let temp_vehicleType = document.getElementById(
+        'vehicleType'
+      ) as HTMLInputElement;
+      temp_country.value = this.editabledocument.country;
+      temp_city.value = this.editabledocument.city;
+      temp_vehicleType.value = this.editabledocument.vehicleType;
+    }
+  }
   onCountryChange(country: Country) {
-    // this.selectedCountry = event.target.value;
     this.selectedCountry = country;
     this.vehiclePricingForm.reset();
-    // console.log(country)
-    this.cityService.getZones(country.countryShortName).subscribe((data) => {
+    this.cityService.getZones(country._id!).subscribe((data) => {
       if (data.zones) {
         this.cityList = data.zones;
       } else {
@@ -78,32 +114,117 @@ export class VehiclePricingComponent implements OnInit {
   }
 
   onCityChange(city: RecivingZone) {
+    this.vehicleTypesList = [];
     this.vehiclePricingForm.reset();
     this.selectedCity = city;
-    // console.log(this.selectedCity)
+    this.cityService.getZoneForPricing(city._id!).subscribe(
+      (data) => {
+        let res = data.pricing;
+        res.forEach((ele: any) => {
+          if (!ele['hasvalue']) {
+            this.vehicleTypesList.push(ele['vtype']);
+          }
+        });
+      },
+      (err) => {
+        alert(err.message);
+      }
+    );
   }
 
   onVehicleTypeChange(event: any) {
-    // console.log(this.selectefVehicleType)
     this.selectefVehicleType = event.target.value;
     this.vehiclePricingForm.reset();
   }
 
   onSubmitVehicleForm() {
-    let data: VehiclePricing = {
-      country: this.selectedCountry._id!,
-      city: this.selectedCity._id!,
-      vehicleType: this.selectefVehicleType.toString(),
-      ...this.vehiclePricingForm.value,
-    };
-    this.http
-      .post<VehiclePricing>(
-        'http://localhost:3000/admin/pricing/vehicle-pricing',
-        data
-      )
-      .subscribe((data) => {
-        console.log(data);
-      });
-    console.log(data);
+    if (this.vehiclePricingForm.valid) {
+      let data: VehiclePricing = {
+        country: this.selectedCountry._id!,
+        city: this.selectedCity._id!,
+        vehicleType: this.selectefVehicleType.toString(),
+        ccv:
+          this.selectedCity.zoneName +
+          '_' +
+          this.selectedCity.country.countryName +
+          '_' +
+          this.selectefVehicleType.toString(),
+        ...this.vehiclePricingForm.value,
+      };
+      this.http
+        .post<{ vehiclePricing: VehiclePricing; error: string }>(
+          'http://localhost:3000/admin/pricing/vehicle-pricing',
+          data
+        )
+        .subscribe((data) => {
+          if (data.vehiclePricing) {
+            this.pricingList.push(data.vehiclePricing);
+            this.vehiclePricingForm.reset();
+            this.vehicleTypesList = [];
+            let tempcountry = document.getElementById(
+              'country'
+            ) as HTMLSelectElement;
+            let tempcity = document.getElementById('city') as HTMLSelectElement;
+            tempcountry.selectedIndex = 0;
+            tempcity.selectedIndex = 0;
+            this.cityList = [];
+          } else {
+            alert(data.error);
+          }
+        });
+    } else {
+      alert('Invalid form');
+    }
+  }
+  onEdit(i: number) {
+    this.editMode = true;
+    this.editIndex = i;
+    this.editabledocument = this.pricingList[i];
+    this.vehiclePricingForm.setValue({
+      driverProfit: this.pricingList[i].driverProfit,
+      minFare: this.pricingList[i].minFare,
+      distanceForBasePrice: this.pricingList[i].distanceForBasePrice,
+      basePrice: this.pricingList[i].basePrice,
+      pricePerUnitDistance: this.pricingList[i].pricePerUnitDistance,
+      pricePerUnitTime: this.pricingList[i].pricePerUnitTime,
+      maxSpace: this.pricingList[i].maxSpace,
+    });
+  }
+
+  leaveEditMode() {
+    this.editMode = false;
+    this.vehiclePricingForm.reset();
+  }
+  onUpdate() {
+    if (this.vehiclePricingForm.valid) {
+      let data: VehiclePricing = this.vehiclePricingForm.value;
+      data._id = this.editabledocument._id;
+      this.http
+        .patch<{ vehiclePricing: VehiclePricing; error: string }>(
+          `http://localhost:3000/admin/pricing/vehicle-pricing`,
+          data,
+          { withCredentials: true }
+        )
+        .subscribe((data) => {
+          if (data.vehiclePricing) {
+            this.pricingList[this.editIndex] = data.vehiclePricing;
+            this.leaveEditMode();
+          } else {
+            alert(data.error);
+          }
+        });
+    } else {
+      alert('invalid form');
+    }
+  }
+
+  isFieldValid(field: string): boolean {
+    return this.vehiclePricingForm.get(field)?.valid || false;
+  }
+
+  // Method to check if a field is touched or dirty and invalid
+  isFieldInvalid(field: string): boolean {
+    const control = this.vehiclePricingForm.get(field);
+    return control ? control.invalid && (control.dirty || control.touched) : false;
   }
 }

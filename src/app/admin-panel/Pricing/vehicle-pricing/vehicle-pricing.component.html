@@ -4,64 +4,86 @@
     <div class="col-2 align-self-center">
       <label for="country">Country </label>
     </div>
-
-    <div class="col-4">
-      <select
-        name="country"
-        id="country"
-        class="form-select"
-        
-      >
-        <option [defaultSelected]="true" disabled>Select Country</option>
-        <option
-          *ngFor="let country of countryList"
-          value="{{ country.countryShortName }}"
-          (click)="onCountryChange(country)"
+    @if(!editMode){
+      <div class="col-4">
+        <select
+          name="country"
+          id="country"
+          class="form-select"
+          
         >
-          {{ country.countryName }}
-        </option>
-      </select>
-    </div>
+          <option [defaultSelected]="true" disabled>Select Country</option>
+          <option
+            *ngFor="let country of countryList"
+            value="{{ country.countryShortName }}"
+            (click)="onCountryChange(country)"
+          >
+            {{ country.countryName }}
+          </option>
+        </select>
+      </div>
+    }@else {
+      <div class="col-4">
+        <input type="text" id="country" class="form-control" [disabled]="true">
+      </div>
+    }
+    
   </div>
   <!-- city -->
   <div class="row mt-3">
     <div class="col-2 align-self-center"><label for="city">City </label></div>
-
-    <div class="col-4">
-      <select
-        name="city"
-        id="city"
-        class="form-select"
-      >
-        @if (selectedCountry ) {
-        <option [defaultSelected]="true" disabled>Select city</option>
-        <option *ngFor="let city of cityList" value="{{ city.zoneName }}" (click)="onCityChange(city)">
-          {{ city.zoneName }}
-        </option>
-        }@else if(cityList == []){
-        <option [defaultSelected]="true" disabled>no City Available</option>
-        } @else {
-        <option [defaultSelected]="true" disabled>Select Country first</option>
-        }
-      </select>
-    </div>
+    @if(!editMode){
+      <div class="col-4">
+        <select
+          name="city"
+          id="city"
+          class="form-select"
+        >
+          @if (selectedCountry ) {
+          <option [defaultSelected]="true" disabled>Select city</option>
+          <option *ngFor="let city of cityList" value="{{ city.zoneName }}" (click)="onCityChange(city)">
+            {{ city.zoneName }}
+          </option>
+          }@else if(cityList == []){
+          <option [defaultSelected]="true" disabled>no City Available</option>
+          } @else {
+          <option [defaultSelected]="true" disabled>Select Country first</option>
+          }
+        </select>
+      </div>
+    }@else {
+      <div class="col-4">
+        <input type="text" id="city" class="form-control" [disabled]="true">
+      </div>
+    }
   </div>
   <!-- vehicle-type -->
   <div class="row mt-3">
     <div class="col-2 align-self-center">
       <label for="vehicleType">Vehicle-Type </label>
     </div>
-    <div class="col-4">
-      <select id="vehicleType" name="vehicleType" class="form-select" (change)="onVehicleTypeChange($event)">
-        <option [defaultSelected]="true" disabled>Select vehicle-type</option>
-        <option
-          *ngFor="let vehicleType of vehicleTypesList"
-          value="{{ vehicleType }}"
-        >
-          {{ vehicleType }}
-        </option>
-      </select>
-    </div>
+    @if(!editMode){
+      <div class="col-4">
+        <select id="vehicleType" name="vehicleType" class="form-select" (change)="onVehicleTypeChange($event)">
+          @if(vehicleTypesList.length >0){
+            <option [defaultSelected]="true" disabled>Select vehicle-type</option>
+          <option
+            *ngFor="let vehicleType of vehicleTypesList"
+            value="{{ vehicleType }}"
+          >
+            {{ vehicleType }}
+          </option>
+          }@else{
+            <option [defaultSelected]="true" disabled>no vehicle available</option>
+          }
+          
+        </select>
+      </div>
+    }@else{
+      <div class="col-4">
+        <input type="text" id="vehicleType" class="form-control" [disabled]="true">
+      </div>
+    }
   </div>
   <form [formGroup]="vehiclePricingForm">  
     <!-- driver profit -->
@@ -77,11 +99,12 @@
               class="input-group-text"
               data-toggle="tooltip"
               data-placement="top"
-              title="This is a tooltip."
+              title="Percentage of profit driver gets from fare"
               >&nbsp;&nbsp;&nbsp;?&nbsp;&nbsp;&nbsp;</span
             >
           </div>
         </div>
+        <small *ngIf="isFieldInvalid('driverProfit')" class="text-danger">This value is not correct</small>
       </div>
     </div>
     <!-- min-fare -->
@@ -97,11 +120,13 @@
               class="input-group-text"
               data-toggle="tooltip"
               data-placement="top"
-              title="This is a tooltip."
+              title="Minimum amount which must be paid regardless the distance"
               >&nbsp;&nbsp;&nbsp;?&nbsp;&nbsp;&nbsp;</span
             >
           </div>
         </div>
+        <small *ngIf="isFieldInvalid('minFare')" class="text-danger">This value is not correct</small>
+
       </div>
     </div>
     <!-- Distance for base price -->
@@ -111,17 +136,21 @@
       </div>
       <div class="col-4">
         <div class="input-group">
-          <input type="number" min="0" class="form-control" id="DFBP" placeholder="" formControlName="distanceForBasePrice"/>
+          <select id="DFBP" style="width: 80%;" class="form-select" formControlName="distanceForBasePrice">
+            <option [defaultSelected]="true" value="0">0</option>
+            <option *ngFor="let val of [1,2,3,4,5]" value={{val}}>{{val}}</option>
+          </select>
           <div class="input-group-append">
             <span
               class="input-group-text"
               data-toggle="tooltip"
               data-placement="top"
-              title="This is a tooltip."
+              title="no of kilometes/ miles user can travel on base Price"
               >&nbsp;&nbsp;&nbsp;?&nbsp;&nbsp;&nbsp;</span
             >
           </div>
         </div>
+        <small *ngIf="isFieldInvalid('distanceForBasePrice')" class="text-danger">This value is not correct</small>
       </div>
     </div>
     <!-- Base price -->
@@ -137,11 +166,12 @@
               class="input-group-text"
               data-toggle="tooltip"
               data-placement="top"
-              title="This is a tooltip."
+              title="Base Price"
               >&nbsp;&nbsp;&nbsp;?&nbsp;&nbsp;&nbsp;</span
             >
           </div>
         </div>
+        <small *ngIf="isFieldInvalid('basePrice')" class="text-danger">This value is not correct</small>
       </div>
     </div>
     <!-- Price per Unit Distance -->
@@ -157,11 +187,12 @@
               class="input-group-text"
               data-toggle="tooltip"
               data-placement="top"
-              title="This is a tooltip."
+              title="Price per KiloMeter or Miles"
               >&nbsp;&nbsp;&nbsp;?&nbsp;&nbsp;&nbsp;</span
             >
           </div>
         </div>
+        <small *ngIf="isFieldInvalid('pricePerUnitDistance')" class="text-danger">This value is not correct</small>
       </div>
     </div>
     <!-- Price per Unit Time -->
@@ -177,11 +208,13 @@
               class="input-group-text"
               data-toggle="tooltip"
               data-placement="top"
-              title="This is a tooltip."
+              title="Charge Per Minute "
               >&nbsp;&nbsp;&nbsp;?&nbsp;&nbsp;&nbsp;</span
             >
           </div>
         </div>
+        <small *ngIf="isFieldInvalid('pricePerUnitTime')" class="text-danger">This value is not correct</small>
+
       </div>
     </div>
     <!-- Max Space -->
@@ -197,51 +230,73 @@
               class="input-group-text"
               data-toggle="tooltip"
               data-placement="top"
-              title="This is a tooltip."
+              title="Fill the maximum available seat of vehicle"
               >&nbsp;&nbsp;&nbsp;?&nbsp;&nbsp;&nbsp;</span
             >
           </div>
         </div>
+        <small *ngIf="isFieldInvalid('maxSpace')" class="text-danger">This value is not correct</small>
       </div>
     </div>
     <!-- buttons -->
-    <div class="row mt-2 ">
-      <div class="col-4">
-        <button style="height: 3rem;width: 5rem;;" class="btn btn-dark btn-large" [disabled]="!vehiclePricingForm.valid" (click)="onSubmitVehicleForm()">Add </button>
+
+    @if (!editMode) {
+
+      <div class="row mt-2 ">
+        <div class="col-4">
+          <button style="height: 3rem;width: 5rem;;" class="btn btn-dark btn-large" [disabled]="!vehiclePricingForm.valid" (click)="onSubmitVehicleForm()">Add </button>
+        </div>
+        <div class="col-4">
+          <button style="height: 3rem;width: 5rem;;" class="btn btn-dark btn-large" (click)="vehiclePricingForm.reset()">reset</button>
+        </div>
       </div>
-      <div class="col-4">
-        <button style="height: 3rem;width: 5rem;;" class="btn btn-dark btn-large" (click)="vehiclePricingForm.reset()">reset</button>
+    }@else{
+      <div class="row mt-2 " >
+        <div class="col-3">
+          <button style="height: 3rem;width: 5rem;;" class="btn btn-dark btn-large" [disabled]="!vehiclePricingForm.valid" (click)="onUpdate()">Update</button>
+        </div>
+        <div class="col-3">
+          <button style="height: 3rem;width: 5rem;;" class="btn btn-dark btn-large" (click)="vehiclePricingForm.reset()">reset</button>
+        </div>
+        <div class="col-3">
+          <button style="height: 3rem;width: 5rem;;" class="btn btn-danger btn-large" (click)="leaveEditMode()">cancel</button>
+        </div>
       </div>
-    </div>
+    }
   </form>
 </div>
-<div class="container mt-5">
-  <div class="row bg-dark text-white p-2" style="position:sticky;top:50vh">
-    <div class="col-1">Index</div>
-    <div class="col-1">Country</div>
-    <div class="col-1">City</div>
-    <div class="col-1">VehicleType</div>
-    <div class="col-1">DriverProfit</div>
-    <div class="col-1">Min Fare</div>
-    <div class="col-1">Distance For base price</div>
-    <div class="col-1">Base price</div>
-    <div class="col-1">Price per Unit Distance</div>
-    <div class="col-1">Price per Unit Time(min)</div>
-    <div class="col-1">Max Space</div>
-    <div class="col-1">Options</div>
+<div class="container mt-5 " *ngIf="pricingList.length>0">
+  <div class="scrollable-section2" >
+    <div class="row bg-dark text-white p-2" >
+      <div class="col-1"><p>Index</p></div>
+      <div class="col-1"><p>Country</p></div>
+      <div class="col-1"><p>City</p></div>
+      <div class="col-1"><p>VehicleType</p></div>
+      <div class="col-1"><p>DriverProfit</p></div>
+      <div class="col-1"><p>Min Fare</p></div>
+      <div class="col-1"><p>Distance For base price</p></div>
+      <div class="col-1"><p>Base price</p></div>
+      <div class="col-1"><p>Price per Unit Distance</p></div>
+      <div class="col-1"><p>Price per Unit Time(min)</p></div>
+      <div class="col-1"><p>Max Space</p></div>
+      <div class="col-1"><p>Options</p></div>
+    </div>
   </div>
-  <div class="row" *ngFor="let vehicle of pricingList; index as i">
-    <div class="col-1">{{i}}</div>
-    <div class="col-1">{{vehicle.country}}</div>
-    <div class="col-1">{{vehicle.city}}</div>
-    <div class="col-1">{{vehicle.vehicleType}}</div>
-    <div class="col-1">{{vehicle.driverProfit}}</div>
-    <div class="col-1">{{vehicle.minFare}}</div>
-    <div class="col-1">{{vehicle.distanceForBasePrice}}</div>
-    <div class="col-1">{{vehicle.basePrice}}</div>
-    <div class="col-1">{{vehicle.pricePerUnitDistance}}</div>
-    <div class="col-1">{{vehicle.pricePerUnitTime}}</div>
-    <div class="col-1">{{vehicle.maxSpace}}</div>
-    <div class="col-1"><button class="btn btn-success">Edit</button></div>
+    <div class="scrollable-section">
+    <div class="row" *ngFor="let vehicle of pricingList; index as i">
+      <div class="col-1 p-3"><p>{{i+1}}</p></div>
+      <div class="col-1 "><p>{{vehicle.country}}</p></div>
+      <div class="col-1 "><p>{{vehicle.city}}</p></div>
+      <div class="col-1 "><p>{{vehicle.vehicleType}}</p></div>
+      <div class="col-1 align-self-center"><p>{{vehicle.driverProfit}}</p></div>
+      <div class="col-1 align-self-center"><p>{{vehicle.minFare}}<p></div>
+      <div class="col-1 align-self-center"><p>{{vehicle.distanceForBasePrice}}<p></div>
+      <div class="col-1 align-self-center"><p>{{vehicle.basePrice}}</p></div>
+      <div class="col-1 align-self-center"><p>{{vehicle.pricePerUnitDistance}}</p></div>
+      <div class="col-1 align-self-center"><p>{{vehicle.pricePerUnitTime}}</p></div>
+      <div class="col-1 align-self-center"><p>{{vehicle.maxSpace}}</p></div>
+      <div class="col-1 align-self-center "><button class="btn btn-success" style="height: 40px;width: 50px;" (click)="onEdit(i)">Edit</button></div>
+    </div>
   </div>
-</div>
+  
+</div> 

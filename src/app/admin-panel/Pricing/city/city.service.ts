@@ -3,6 +3,7 @@ import { Injectable } from '@angular/core';
 import { Zone } from './zone.interface';
 import { Params } from '@angular/router';
 import { RecivingZone } from './recivingZone.interface';
+import { RecivedCity } from '../vehicle-pricing/recivedcity.interface';
 
 @Injectable({ providedIn: 'root' })
 export class CityService {
@@ -31,6 +32,19 @@ export class CityService {
     return this.http.get<{ zones: RecivingZone[]; error: string }>(
       'http://localhost:3000/admin/pricing/city',
       { params: params, withCredentials: true }
+    );
+  }
+
+  getZoneForPricing(cityId: string) {
+    const params: Params = {
+      cityId: cityId,
+    };
+    return this.http.get<RecivedCity>(
+      'http://localhost:3000/admin/pricing/cityForPricing',
+      {
+        params: params,
+        withCredentials: true,
+      }
     );
   }
 }
