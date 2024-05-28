@@ -1,19 +1,19 @@
-*{
+/* *{
     margin: 0px;
     padding: 0px;
-}
+} */
 
 /* Container styling */
-.container1 {
+/* .container1 {
     max-width: 800px;
     margin: 0 auto;
     padding: 20px;
-  }
+  } */
   
   /* Row styling */
-  .row {
+  /* .row {
     margin-bottom: 20px;
-  }
+  } */
   
   /* Column styling */
   /* .col-4 {
@@ -23,7 +23,7 @@
   } */
   
   /* Select input styling */
-  .form-select {
+  /* .form-select {
     width: 100%;
     padding: 10px;
     font-size: 16px;
@@ -40,14 +40,14 @@
     border-color: #80bdff;
     outline: 0;
     box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
-  }
+  } */
   
   /* Disabled option styling */
-  option[disabled] {
+  /* option[disabled] {
     color: #6c757d;
-  }
+  } */
   
-  
+/*   
   label{
     font-weight: 400;
     font-size: medium;
@@ -57,30 +57,27 @@
   input{
     border: 1px solid gray;
     padding: 10px;
-  }
+  } */
 
   .scrollable-section{
     align-self: center;
     max-height: 500px;
-    max-width: 1267px;
-    /* max-width: 100%; */
+    /* max-width: 1267px; */
     overflow-y: auto;
     overflow-x: auto;
   }
   .scrollable-section2{
     align-self: center;
     max-height: 120px;
-    max-width: 1267px;
-    /* max-width: 100%; */
+    /* max-width: 1267px; */
     overflow-y: auto;
     overflow-x: auto;
   }
-  p{
+  /* p{
     width: 80%; 
-    /* border: 1px solid #000; */
     word-wrap: break-word; 
     overflow-wrap: break-word; 
-  }
+  } */
   /* .col-1{
     display: flex;
     justify-content: center;

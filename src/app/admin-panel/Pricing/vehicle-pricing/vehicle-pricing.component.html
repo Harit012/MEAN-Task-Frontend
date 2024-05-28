@@ -1,271 +1,276 @@
-<div class="container1">
-  <!-- country -->
-  <div class="row mt-1">
-    <div class="col-2 align-self-center">
-      <label for="country">Country </label>
-    </div>
-    @if(!editMode){
-      <div class="col-4">
-        <select
-          name="country"
-          id="country"
-          class="form-select"
-          
-        >
-          <option [defaultSelected]="true" disabled>Select Country</option>
-          <option
-            *ngFor="let country of countryList"
-            value="{{ country.countryShortName }}"
-            (click)="onCountryChange(country)"
+<div class="">
+  <div class="row">
+    <div class="col-4"></div>
+    <div class="col-7">
+      <!-- country -->
+    <div class="row mt-1 align-content-center">
+      <div class="col-2 align-self-center">
+        <label for="country">Country </label>
+      </div>
+      @if(!editMode){
+        <div class="col-4">
+          <select
+            name="country"
+            id="country"
+            class="form-select"
           >
-            {{ country.countryName }}
-          </option>
-        </select>
-      </div>
-    }@else {
-      <div class="col-4">
-        <input type="text" id="country" class="form-control" [disabled]="true">
-      </div>
-    }
-    
-  </div>
-  <!-- city -->
-  <div class="row mt-3">
-    <div class="col-2 align-self-center"><label for="city">City </label></div>
-    @if(!editMode){
-      <div class="col-4">
-        <select
-          name="city"
-          id="city"
-          class="form-select"
-        >
-          @if (selectedCountry ) {
-          <option [defaultSelected]="true" disabled>Select city</option>
-          <option *ngFor="let city of cityList" value="{{ city.zoneName }}" (click)="onCityChange(city)">
-            {{ city.zoneName }}
-          </option>
-          }@else if(cityList == []){
-          <option [defaultSelected]="true" disabled>no City Available</option>
-          } @else {
-          <option [defaultSelected]="true" disabled>Select Country first</option>
-          }
-        </select>
-      </div>
-    }@else {
-      <div class="col-4">
-        <input type="text" id="city" class="form-control" [disabled]="true">
-      </div>
-    }
-  </div>
-  <!-- vehicle-type -->
-  <div class="row mt-3">
-    <div class="col-2 align-self-center">
-      <label for="vehicleType">Vehicle-Type </label>
-    </div>
-    @if(!editMode){
-      <div class="col-4">
-        <select id="vehicleType" name="vehicleType" class="form-select" (change)="onVehicleTypeChange($event)">
-          @if(vehicleTypesList.length >0){
-            <option [defaultSelected]="true" disabled>Select vehicle-type</option>
-          <option
-            *ngFor="let vehicleType of vehicleTypesList"
-            value="{{ vehicleType }}"
-          >
-            {{ vehicleType }}
-          </option>
-          }@else{
-            <option [defaultSelected]="true" disabled>no vehicle available</option>
-          }
-          
-        </select>
-      </div>
-    }@else{
-      <div class="col-4">
-        <input type="text" id="vehicleType" class="form-control" [disabled]="true">
-      </div>
-    }
-  </div>
-  <form [formGroup]="vehiclePricingForm">  
-    <!-- driver profit -->
-    <div class="row mt-2">
-      <div class="col-2 align-self-center">
-        <label for="DriverProfit">Driver Profit </label>
-      </div>
-      <div class="col-4">
-        <div class="input-group">
-          <input type="number" min="0" class="form-control" id="DriverProfit" placeholder="" formControlName="driverProfit" />
-          <div class="input-group-append">
-            <span
-              class="input-group-text"
-              data-toggle="tooltip"
-              data-placement="top"
-              title="Percentage of profit driver gets from fare"
-              >&nbsp;&nbsp;&nbsp;?&nbsp;&nbsp;&nbsp;</span
+            <option [defaultSelected]="true" disabled>Select Country</option>
+            <option
+              *ngFor="let country of countryList"
+              value="{{ country.countryShortName }}"
+              (click)="onCountryChange(country)"
             >
-          </div>
-        </div>
-        <small *ngIf="isFieldInvalid('driverProfit')" class="text-danger">This value is not correct</small>
-      </div>
-    </div>
-    <!-- min-fare -->
-    <div class="row mt-2">
-      <div class="col-2 align-self-center">
-        <label for="MinFare">Min. Fare</label>
-      </div>
-      <div class="col-4">
-        <div class="input-group">
-          <input type="number" min="0" class="form-control" id="MinFare" placeholder="" formControlName="minFare"/>
-          <div class="input-group-append">
-            <span
-              class="input-group-text"
-              data-toggle="tooltip"
-              data-placement="top"
-              title="Minimum amount which must be paid regardless the distance"
-              >&nbsp;&nbsp;&nbsp;?&nbsp;&nbsp;&nbsp;</span
-            >
-          </div>
-        </div>
-        <small *ngIf="isFieldInvalid('minFare')" class="text-danger">This value is not correct</small>
-
-      </div>
-    </div>
-    <!-- Distance for base price -->
-    <div class="row mt-2">
-      <div class="col-2 align-self-center">
-        <label for="DFBP">Distance For base price</label>
-      </div>
-      <div class="col-4">
-        <div class="input-group">
-          <select id="DFBP" style="width: 80%;" class="form-select" formControlName="distanceForBasePrice">
-            <option [defaultSelected]="true" value="0">0</option>
-            <option *ngFor="let val of [1,2,3,4,5]" value={{val}}>{{val}}</option>
+              {{ country.countryName }}
+            </option>
           </select>
-          <div class="input-group-append">
-            <span
-              class="input-group-text"
-              data-toggle="tooltip"
-              data-placement="top"
-              title="no of kilometes/ miles user can travel on base Price"
-              >&nbsp;&nbsp;&nbsp;?&nbsp;&nbsp;&nbsp;</span
-            >
-          </div>
         </div>
-        <small *ngIf="isFieldInvalid('distanceForBasePrice')" class="text-danger">This value is not correct</small>
-      </div>
-    </div>
-    <!-- Base price -->
-    <div class="row mt-2">
-      <div class="col-2 align-self-center">
-        <label for="BasePrice">Base price</label>
-      </div>
-      <div class="col-4">
-        <div class="input-group">
-          <input type="number" min="0" class="form-control" id="BasePrice" placeholder="" formControlName="basePrice"/>
-          <div class="input-group-append">
-            <span
-              class="input-group-text"
-              data-toggle="tooltip"
-              data-placement="top"
-              title="Base Price"
-              >&nbsp;&nbsp;&nbsp;?&nbsp;&nbsp;&nbsp;</span
-            >
-          </div>
-        </div>
-        <small *ngIf="isFieldInvalid('basePrice')" class="text-danger">This value is not correct</small>
-      </div>
-    </div>
-    <!-- Price per Unit Distance -->
-    <div class="row mt-2">
-      <div class="col-2 align-self-center">
-        <label for="PPUD">Price per Unit Distance</label>
-      </div>
-      <div class="col-4">
-        <div class="input-group">
-          <input type="number" min="0" class="form-control" id="PPUD" placeholder="" formControlName="pricePerUnitDistance" />
-          <div class="input-group-append">
-            <span
-              class="input-group-text"
-              data-toggle="tooltip"
-              data-placement="top"
-              title="Price per KiloMeter or Miles"
-              >&nbsp;&nbsp;&nbsp;?&nbsp;&nbsp;&nbsp;</span
-            >
-          </div>
-        </div>
-        <small *ngIf="isFieldInvalid('pricePerUnitDistance')" class="text-danger">This value is not correct</small>
-      </div>
-    </div>
-    <!-- Price per Unit Time -->
-    <div class="row mt-2">
-      <div class="col-2 align-self-center">
-        <label for="PPUT">Price per Unit Time(min)</label>
-      </div>
-      <div class="col-4">
-        <div class="input-group">
-          <input type="number" min="0" class="form-control" id="PPUT" placeholder="" formControlName="pricePerUnitTime"/>
-          <div class="input-group-append">
-            <span
-              class="input-group-text"
-              data-toggle="tooltip"
-              data-placement="top"
-              title="Charge Per Minute "
-              >&nbsp;&nbsp;&nbsp;?&nbsp;&nbsp;&nbsp;</span
-            >
-          </div>
-        </div>
-        <small *ngIf="isFieldInvalid('pricePerUnitTime')" class="text-danger">This value is not correct</small>
-
-      </div>
-    </div>
-    <!-- Max Space -->
-    <div class="row mt-2">
-      <div class="col-2 align-self-center">
-        <label for="MaxSpace">Max Space</label>
-      </div>
-      <div class="col-4">
-        <div class="input-group">
-          <input type="number" min="0" class="form-control" id="MaxSpace" placeholder="" formControlName="maxSpace" />
-          <div class="input-group-append">
-            <span
-              class="input-group-text"
-              data-toggle="tooltip"
-              data-placement="top"
-              title="Fill the maximum available seat of vehicle"
-              >&nbsp;&nbsp;&nbsp;?&nbsp;&nbsp;&nbsp;</span
-            >
-          </div>
-        </div>
-        <small *ngIf="isFieldInvalid('maxSpace')" class="text-danger">This value is not correct</small>
-      </div>
-    </div>
-    <!-- buttons -->
-
-    @if (!editMode) {
-
-      <div class="row mt-2 ">
+      }@else {
         <div class="col-4">
-          <button style="height: 3rem;width: 5rem;;" class="btn btn-dark btn-large" [disabled]="!vehiclePricingForm.valid" (click)="onSubmitVehicleForm()">Add </button>
+          <input type="text" id="country" class="form-control" [disabled]="true">
+        </div>
+      }
+      
+    </div>
+    <!-- city -->
+    <div class="row mt-3">
+      <div class="col-2 align-self-center"><label for="city">City </label></div>
+      @if(!editMode){
+        <div class="col-4">
+          <select
+            name="city"
+            id="city"
+            class="form-select"
+          >
+            @if (selectedCountry ) {
+            <option [defaultSelected]="true" disabled>Select city</option>
+            <option *ngFor="let city of cityList" value="{{ city.zoneName }}" (click)="onCityChange(city)">
+              {{ city.zoneName }}
+            </option>
+            }@else if(cityList == []){
+            <option [defaultSelected]="true" disabled>no City Available</option>
+            } @else {
+            <option [defaultSelected]="true" disabled>Select Country first</option>
+            }
+          </select>
+        </div>
+      }@else {
+        <div class="col-4">
+          <input type="text" id="city" class="form-control" [disabled]="true">
+        </div>
+      }
+    </div>
+    <!-- vehicle-type -->
+    <div class="row mt-3">
+      <div class="col-2 align-self-center">
+        <label for="vehicleType">Vehicle-Type </label>
+      </div>
+      @if(!editMode){
+        <div class="col-4">
+          <select id="vehicleType" name="vehicleType" class="form-select" (change)="onVehicleTypeChange($event)">
+            @if(vehicleTypesList.length >0){
+              <option [defaultSelected]="true" disabled>Select vehicle-type</option>
+            <option
+              *ngFor="let vehicleType of vehicleTypesList"
+              value="{{ vehicleType }}"
+            >
+              {{ vehicleType }}
+            </option>
+            }@else{
+              <option [defaultSelected]="true" disabled>no vehicle available</option>
+            }
+            
+          </select>
+        </div>
+      }@else{
+        <div class="col-4">
+          <input type="text" id="vehicleType" class="form-control" [disabled]="true">
+        </div>
+      }
+    </div>
+    <form [formGroup]="vehiclePricingForm">  
+      <!-- driver profit -->
+      <div class="row mt-2">
+        <div class="col-2 align-self-center">
+          <label for="DriverProfit">Driver Profit </label>
         </div>
         <div class="col-4">
-          <button style="height: 3rem;width: 5rem;;" class="btn btn-dark btn-large" (click)="vehiclePricingForm.reset()">reset</button>
+          <div class="input-group">
+            <input type="number" min="0" class="form-control" id="DriverProfit" placeholder="" formControlName="driverProfit" />
+            <div class="input-group-append">
+              <span
+                class="input-group-text"
+                data-toggle="tooltip"
+                data-placement="top"
+                title="Percentage of profit driver gets from fare"
+                >&nbsp;&nbsp;&nbsp;?&nbsp;&nbsp;&nbsp;</span
+              >
+            </div>
+          </div>
+          <small *ngIf="isFieldInvalid('driverProfit')" class="text-danger">This value is not correct</small>
         </div>
       </div>
-    }@else{
-      <div class="row mt-2 " >
-        <div class="col-3">
-          <button style="height: 3rem;width: 5rem;;" class="btn btn-dark btn-large" [disabled]="!vehiclePricingForm.valid" (click)="onUpdate()">Update</button>
+      <!-- min-fare -->
+      <div class="row mt-2">
+        <div class="col-2 align-self-center">
+          <label for="MinFare">Min. Fare</label>
         </div>
-        <div class="col-3">
-          <button style="height: 3rem;width: 5rem;;" class="btn btn-dark btn-large" (click)="vehiclePricingForm.reset()">reset</button>
-        </div>
-        <div class="col-3">
-          <button style="height: 3rem;width: 5rem;;" class="btn btn-danger btn-large" (click)="leaveEditMode()">cancel</button>
+        <div class="col-4">
+          <div class="input-group">
+            <input type="number" min="0" class="form-control" id="MinFare" placeholder="" formControlName="minFare"/>
+            <div class="input-group-append">
+              <span
+                class="input-group-text"
+                data-toggle="tooltip"
+                data-placement="top"
+                title="Minimum amount which must be paid regardless the distance"
+                >&nbsp;&nbsp;&nbsp;?&nbsp;&nbsp;&nbsp;</span
+              >
+            </div>
+          </div>
+          <small *ngIf="isFieldInvalid('minFare')" class="text-danger">This value is not correct</small>
+
         </div>
       </div>
-    }
-  </form>
+      <!-- Distance for base price -->
+      <div class="row mt-2">
+        <div class="col-2 align-self-center">
+          <label for="DFBP">Distance For base price</label>
+        </div>
+        <div class="col-4">
+          <div class="input-group">
+            <select id="DFBP" style="width: 60%;" class="form-select" formControlName="distanceForBasePrice">
+              <option [defaultSelected]="true" value="0">0</option>
+              <option *ngFor="let val of [1,2,3,4,5]" value={{val}}>{{val}}</option>
+            </select>
+            <div class="input-group-append">
+              <span
+                class="input-group-text"
+                data-toggle="tooltip"
+                data-placement="top"
+                title="no of kilometes/ miles user can travel on base Price"
+                >&nbsp;&nbsp;&nbsp;?&nbsp;&nbsp;&nbsp;</span
+              >
+            </div>
+          </div>
+          <small *ngIf="isFieldInvalid('distanceForBasePrice')" class="text-danger">This value is not correct</small>
+        </div>
+      </div>
+      <!-- Base price -->
+      <div class="row mt-2">
+        <div class="col-2 align-self-center">
+          <label for="BasePrice">Base price</label>
+        </div>
+        <div class="col-4">
+          <div class="input-group">
+            <input type="number" min="0" class="form-control" id="BasePrice" placeholder="" formControlName="basePrice"/>
+            <div class="input-group-append">
+              <span
+                class="input-group-text"
+                data-toggle="tooltip"
+                data-placement="top"
+                title="Base Price"
+                >&nbsp;&nbsp;&nbsp;?&nbsp;&nbsp;&nbsp;</span
+              >
+            </div>
+          </div>
+          <small *ngIf="isFieldInvalid('basePrice')" class="text-danger">This value is not correct</small>
+        </div>
+      </div>
+      <!-- Price per Unit Distance -->
+      <div class="row mt-2">
+        <div class="col-2 align-self-center">
+          <label for="PPUD">Price per Unit Distance</label>
+        </div>
+        <div class="col-4">
+          <div class="input-group">
+            <input type="number" min="0" class="form-control" id="PPUD" placeholder="" formControlName="pricePerUnitDistance" />
+            <div class="input-group-append">
+              <span
+                class="input-group-text"
+                data-toggle="tooltip"
+                data-placement="top"
+                title="Price per KiloMeter or Miles"
+                >&nbsp;&nbsp;&nbsp;?&nbsp;&nbsp;&nbsp;</span
+              >
+            </div>
+          </div>
+          <small *ngIf="isFieldInvalid('pricePerUnitDistance')" class="text-danger">This value is not correct</small>
+        </div>
+      </div>
+      <!-- Price per Unit Time -->
+      <div class="row mt-2">
+        <div class="col-2 align-self-center">
+          <label for="PPUT">Price per Unit Time(min)</label>
+        </div>
+        <div class="col-4">
+          <div class="input-group">
+            <input type="number" min="0" class="form-control" id="PPUT" placeholder="" formControlName="pricePerUnitTime"/>
+            <div class="input-group-append">
+              <span
+                class="input-group-text"
+                data-toggle="tooltip"
+                data-placement="top"
+                title="Charge Per Minute "
+                >&nbsp;&nbsp;&nbsp;?&nbsp;&nbsp;&nbsp;</span
+              >
+            </div>
+          </div>
+          <small *ngIf="isFieldInvalid('pricePerUnitTime')" class="text-danger">This value is not correct</small>
+
+        </div>
+      </div>
+      <!-- Max Space -->
+      <div class="row mt-2">
+        <div class="col-2 align-self-center">
+          <label for="MaxSpace">Max Space</label>
+        </div>
+        <div class="col-4">
+          <div class="input-group">
+            <input type="number" min="0" class="form-control" id="MaxSpace" placeholder="" formControlName="maxSpace" />
+            <div class="input-group-append">
+              <span
+                class="input-group-text"
+                data-toggle="tooltip"
+                data-placement="top"
+                title="Fill the maximum available seat of vehicle"
+                >&nbsp;&nbsp;&nbsp;?&nbsp;&nbsp;&nbsp;</span
+              >
+            </div>
+          </div>
+          <small *ngIf="isFieldInvalid('maxSpace')" class="text-danger">This value is not correct</small>
+        </div>
+      </div>
+      <!-- buttons -->
+
+      @if (!editMode) {
+
+        <div class="row mt-2 ">
+          <div class="col-4">
+            <button style="height: 3rem;width: 5rem;;" class="btn btn-dark btn-large" [disabled]="!vehiclePricingForm.valid" (click)="onSubmitVehicleForm()">Add </button>
+          </div>
+          <div class="col-4">
+            <button style="height: 3rem;width: 5rem;;" class="btn btn-dark btn-large" (click)="vehiclePricingForm.reset()">reset</button>
+          </div>
+        </div>
+      }@else{
+        <div class="row mt-2 " >
+          <div class="col-3">
+            <button style="height: 3rem;width: 5rem;;" class="btn btn-dark btn-large" [disabled]="!vehiclePricingForm.valid" (click)="onUpdate()">Update</button>
+          </div>
+          <div class="col-3">
+            <button style="height: 3rem;width: 5rem;;" class="btn btn-dark btn-large" (click)="vehiclePricingForm.reset()">reset</button>
+          </div>
+          <div class="col-3">
+            <button style="height: 3rem;width: 5rem;;" class="btn btn-danger btn-large" (click)="leaveEditMode()">cancel</button>
+          </div>
+        </div>
+      }
+    </form>
+    </div>
+  </div>
+ 
 </div>
-<div class="container mt-5 " *ngIf="pricingList.length>0">
+<div class=" mt-5">
   <div class="scrollable-section2" >
     <div class="row bg-dark text-white p-2" >
       <div class="col-1"><p>Index</p></div>

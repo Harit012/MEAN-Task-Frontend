@@ -1,1 +1,311 @@
-<p>users works!</p>
+<div class="" style="width: calc(100dvw - 262px)">
+  <div
+    class="row p-2 d-flex justify-content-between"
+    style="background-color: rgb(62, 71, 80); color: aliceblue"
+  >
+    <div class="col-3">
+      <h3 class="mb-4">Users</h3>
+    </div>
+    <div class="col-6">
+      <input
+        type="search"
+        name="search"
+        id="search"
+        placeholder="Search"
+        class="form-control align-self-center"
+        (input)="onSearchInputChange($event)"
+      />
+    </div>
+    <div class="col-2">
+      <button
+        type="button"
+        class="btn btn-large align-self-center"
+        style="background-color: rgb(51, 183, 24); width: 6rem"
+        (click)="onClickAddUser()"
+      >
+        Add
+      </button>
+    </div>
+  </div>
+  <hr />
+  <div class="row mt-2 p-2">
+    <div class="col-1"><b>Index</b></div>
+    <div class="col-2"><b>User Profile</b></div>
+    <div class="col-1"><b>Username</b></div>
+    <div class="col-3"><b>Email</b></div>
+    <div class="col-1"><b>Country Code</b></div>
+    <div class="col-2"><b>Phone</b></div>
+    <div class="col-2"><b>Action</b></div>
+  </div>
+  <hr />
+  <div class="ms-1 p-2 scrollable-section mt-3">
+    <div
+      class="row mb-2 fs-5"
+      *ngFor="let user of usersList; index as i"
+      style="background-color: rgb(255, 255, 255); color: rgb(0, 0, 0)"
+    >
+      <div class="col-1 align-self-center">
+        <p>{{ currentPage * 10 + (i + 1) }}</p>
+      </div>
+      <div class="col-2">
+        <img
+          src="http://localhost:3000/{{ user.userProfile }}"
+          alt="{{ user.userProfile }}"
+          height="100px"
+          width="100px"
+        />
+      </div>
+      <div class="col-1 align-self-center">
+        <p>{{ user.userName }}</p>
+      </div>
+      <div class="col-3 align-self-center">
+        <p>{{ user.email }}</p>
+      </div>
+      <div class="col-1 align-self-center">
+        <p>{{ user.countryCode }}</p>
+      </div>
+      <div class="col-2 align-self-center">
+        <p>{{ user.phone }}</p>
+      </div>
+      <div class="col-2 align-self-center">
+        <select name="action-selector" id="action-selector" class="form-select" (change)="onActionSelect($event)">
+          <option value="" [defaultSelected]="true" [disabled]="true">
+            Select Action
+          </option>
+          <option
+            value="CardDetails"
+            (click)="cardDetails(user)"
+            style="color: rgb(0, 146, 12)"
+          >
+            Show cards
+          </option>
+          <option value="Edit" (click)="onEdit(user)" style="color: blue">
+            Edit User
+          </option>
+          <option value="Delete" (click)="onDelete(user)" style="color: red">
+            Delete User
+          </option>
+        </select>
+      </div>
+    </div>
+  </div>
+  <div class="row paginaton">
+    <div class="col-12 d-flex justify-content-center">
+      <button
+        class="btn btn-large btn-dark me-3"
+        style="width: 5rem"
+        (click)="onPreviousPage()"
+        [disabled]="currentPage <= 0"
+      >
+        Previous
+      </button>
+      <h4>{{ currentPage + 1 }}</h4>
+      <button
+        class="btn btn-large btn-dark ms-3"
+        style="width: 5rem"
+        (click)="onNextPage()"
+      >
+        Next
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal -->
+
+<div
+  class="modal fade"
+  id="staticBackdrop"
+  data-bs-backdrop="static"
+  data-bs-keyboard="false"
+  tabindex="-1"
+  aria-labelledby="staticBackdropLabel"
+  aria-hidden="true"
+>
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        @if(!editMode){
+        <h1 class="modal-title fs-5" id="staticBackdropLabel">
+          Create New User
+        </h1>
+        <button
+          type="button"
+          class="btn-close"
+          data-bs-dismiss="modal"
+          aria-label="Close"
+        ></button>
+        }@else{
+        <h1 class="modal-title fs-5" id="staticBackdropLabel">Edit User</h1>
+        <button
+          type="button"
+          class="btn-close"
+          data-bs-dismiss="modal"
+          aria-label="Close"
+        ></button>
+        }
+      </div>
+      <div class="modal-body">
+        <form [formGroup]="userForm">
+          <!-- username -->
+          <div class="row mt-3">
+            <label class="col-3" for="userName">UserName :-</label>
+            <div class="col-9">
+              <input
+                type="text"
+                id="userName"
+                class="form-control"
+                [placeholder]="'Enter Username'"
+                formControlName="userName"
+              />
+              <small
+                *ngIf="isFieldInvalid('userName')"
+                class="text-danger justify-content-center"
+                >This value is not correct</small
+              >
+            </div>
+          </div>
+          <!-- email -->
+          <div class="row mt-3">
+            <label class="col-3" for="email">Email :-</label>
+            <div class="col-9">
+              <input
+                type="email"
+                id="email"
+                class="form-control"
+                [placeholder]="'Enter Email'"
+                formControlName="email"
+              />
+              <small
+                *ngIf="isFieldInvalid('email')"
+                class="text-danger justify-content-center"
+                >This value is not correct</small
+              >
+            </div>
+          </div>
+          <!-- country -->
+          <div class="row mt-3">
+            <label class="col-3" for="country">Country :-</label>
+            <div class="col-9">
+              <select
+                name="country"
+                id="country"
+                class="form-select"
+                formControlName="country"
+              >
+              
+                <option [defaultSelected]="true" disabled>
+                  Select Country
+                </option>
+                <!-- <option value="blank" [hidden]="!editMode">blank</option> -->
+                <option
+                  *ngFor="let country of countryList"
+                  value=""
+                  (click)="onCountryChange(country)"
+                >
+                  {{ country.countryName }}
+                </option>
+              </select>
+              <small
+                *ngIf="isFieldInvalid('country')"
+                class="text-danger justify-content-center"
+                >This value is not correct</small
+              >
+            </div>
+            
+          </div>
+          <!-- phone -->
+          <div class="row mt-3 d-flex">
+            <label class="col-3" for="email">Phone :-</label>
+
+            <div class="col-9 d-flex">
+              <input
+                class="col-2 p-1"
+                type="text"
+                id="countrycode"
+                [disabled]="true"
+                value=""
+              />
+              <input
+                class="col-8 ms-1"
+                type="text"
+                maxlength="10"
+                id="phone"
+                class="form-control"
+                [placeholder]="'Enter Phone'"
+                formControlName="phone"
+              />
+            </div>
+            <small
+              *ngIf="isFieldInvalid('phone')"
+              class="text-danger justify-content-center"
+              >This value is not correct</small
+            >
+          </div>
+          <!-- profile -->
+          <div class="row mt-3 d-flex">
+            <label class="col-3" for="userProfile">Profile :-</label>
+            <input
+              class="col-9"
+              type="file"
+              id="userProfile"
+              accept="image/*"
+              formControlName="userProfile"
+              (change)="onFileChange($event)"
+            />
+            <small
+              *ngIf="isFieldInvalid('userProfile')"
+              class="text-danger justify-content-center"
+              >This value is not correct</small
+            >
+            <small id="selectedUserProfile" [hidden]="!editMode"></small>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer d-flex justify-content-between">
+        <div>
+          @if(!editMode){
+          <button
+            type="button"
+            class="btn btn-dark"
+            [disabled]="userForm.invalid"
+            (click)="onAddUser()"
+          >
+            Add User
+          </button>
+          <button
+            type="button"
+            class="btn btn-primary ms-2"
+            (click)="userForm.reset()"
+          >
+            Reset
+          </button>
+          }@else{
+          <button type="button" class="btn btn-dark" (click)="onUpdateUser()">
+            Update User
+          </button>
+          <button
+            type="button"
+            class="btn btn-primary ms-2"
+            (click)="userForm.reset()"
+          >
+            Reset
+          </button>
+          }
+        </div>
+        <div>
+          <button
+            type="button"
+            class="btn btn-secondary"
+            data-bs-dismiss="modal"
+          >
+            Close
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- Card Modal -->

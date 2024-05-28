@@ -1,0 +1,17 @@
+.scrollable-section{
+    align-self: center;
+    max-height: 480px;
+    overflow-y: auto;
+    overflow-x: auto;
+  }
+
+  hr {
+    height: 3px;
+    background-color: rgb(0, 0, 0); 
+  }
+
+  .paginaton{
+    position: fixed;
+    bottom:0px;
+    width: 80%;  
+  }

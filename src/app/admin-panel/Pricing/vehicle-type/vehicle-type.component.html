@@ -1,103 +1,104 @@
-<div class="container">
-  <section class="upper-section mb-1">
-    <div class="row">
-      <div class="col-3"></div>
-      <div class="col-6">
-        <div
-          style="background-color: rgb(172, 170, 167)"
-          id="vehicle-registration-form"
-          class="container-fluid mb-4"
-        >
-          <form [formGroup]="vehicleForm" (ngSubmit)="onSubmit()">
-            <div class="d-flex flex-column">
-              <div class="form-group">
-                <label for="type">Vehicle Type</label>
-                <select id="type" formControlName="type">
-                  <option value="" disabled>Select Vehicle Type</option>
-                  <option
-                    *ngFor="let vehicleType of vehicleTypes"
-                    value="{{ vehicleType }}"
-                  >
-                    {{ vehicleType }}
-                  </option>
-                </select>
-                <p
-                  class="text-danger"
-                  *ngIf="
-                    vehicleForm.get('type')?.invalid &&
-                    vehicleForm.get('type')?.touched
-                  "
+<div style="width: 82dvw;" class="m-2">
+<div class="container m-0 p-0">
+  <div class="row">
+    <div class="col-3"></div>
+    <div class="col-6">
+      <div
+        style="background-color: rgb(172, 170, 167)"
+        id="vehicle-registration-form"
+        class="container-fluid mb-4"
+      >
+        <form [formGroup]="vehicleForm" (ngSubmit)="onSubmit()">
+          <div class="d-flex flex-column">
+            <div class="form-group">
+              <label for="type">Vehicle Type</label>
+              <select id="type" formControlName="type">
+                <option value="" disabled>Select Vehicle Type</option>
+                <option
+                  *ngFor="let vehicleType of vehicleTypes"
+                  value="{{ vehicleType }}"
                 >
-                  This field is required
-                </p>
-              </div>
-              <div class="form-group">
-                <label for="vehicleName">Vehicle Image</label><br />
-                <input
-                  type="file"
-                  id="vehicleImage"
-                  formControlName="vehicleImage"
-                  accept="image/*"
-                  (change)="onFileChange($event)"
-                />
-              </div>
-              <p class="text-danger" *ngIf="sizeValidation">
-                The image should be less then 4 MB
+                  {{ vehicleType }}
+                </option>
+              </select>
+              <p
+                class="text-danger"
+                *ngIf="
+                  vehicleForm.get('type')?.invalid &&
+                  vehicleForm.get('type')?.touched
+                "
+              >
+                This field is required
               </p>
-              <div clsss="form-group">
-                <button
-                  type="button"
-                  class="btn btn-dark"
-                  *ngIf="isEdit"
-                  (click)="onSubmitEdit()"
-                >
-                  Submit Edit</button
-                >&nbsp;&nbsp;&nbsp;&nbsp;
-                <button
-                  *ngIf="isEdit"
-                  type="button"
-                  class="btn btn-dark"
-                  (click)="onCancel()"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="button"
-                  class="btn btn-dark"
-                  *ngIf="!isEdit"
-                  (click)="onSubmit()"
-                  [disabled]="vehicleForm.invalid"
-                >
-                  Submit
-                </button>
-              </div>
             </div>
-          </form>
-        </div>
+            <div class="form-group">
+              <label for="vehicleName">Vehicle Image</label><br />
+              <input
+                type="file"
+                id="vehicleImage"
+                formControlName="vehicleImage"
+                accept="image/*"
+                (change)="onFileChange($event)"
+              />
+            </div>
+            <p class="text-danger" *ngIf="sizeValidation">
+              The image should be less then 4 MB
+            </p>
+            <div clsss="form-group">
+              <button
+                type="button"
+                class="btn btn-dark"
+                *ngIf="isEdit"
+                (click)="onSubmitEdit()"
+              >
+                Submit Edit</button
+              >&nbsp;&nbsp;&nbsp;&nbsp;
+              <button
+                *ngIf="isEdit"
+                type="button"
+                class="btn btn-dark"
+                (click)="onCancel()"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                class="btn btn-dark"
+                *ngIf="!isEdit"
+                (click)="onSubmit()"
+                [disabled]="vehicleForm.invalid"
+              >
+                Submit
+              </button>
+            </div>
+          </div>
+        </form>
       </div>
-      <div class="col-3"></div>
     </div>
-    <hr />
-    <div class="row ms-1">
-      <div class="col-1"><h5>Index</h5></div>
-      <div class="col-5"><h5>Vehicle Image</h5></div>
-      <div class="col-2"><h5>Vehicle Type</h5></div>
-      <div class="col-4 text-align-center"><h5>Actions</h5></div>
-    </div>
-    <hr />
-  </section>
+    <div class="col-3"></div>
+  </div>
+  <hr />
+  <div class="row ms-1">
+    <div class="col-1"><h5>Index</h5></div>
+    <div class="col-5"><h5>Vehicle Image</h5></div>
+    <div class="col-2"><h5>Vehicle Type</h5></div>
+    <div class="col-4 text-align-center"><h5>Actions</h5></div>
+  </div>
+  <hr />
+</div>
 
-  <section class="lower-section scrollable-section">
+<div class="container scrollable-section m-0 p-0">
+  @if(vehiclesList.length < 0){
     <div
-      style="height: 300px; align-content: center"
-      class="row text-align-center align-self-center justify-content-center"
-      *ngIf="vehiclesList.length == 0"
+    style="height: 300px; align-content: center"
+    class="row text-align-center align-self-center justify-content-center"
     >
-      <H3>No Data found</H3>
+      <h3>No Data found</h3>
     </div>
+  }@else{
     <div
-      class="row vehicles-row"
-      *ngFor="let vehicle of vehiclesList; index as i"
+    class="row vehicles-row mb-2"
+    *ngFor="let vehicle of vehiclesList; index as i"
     >
       <div class="col-1 align-self-center">&nbsp;&nbsp;&nbsp;{{ i + 1 }}</div>
       <div class="col-5 align-self-center">
@@ -123,6 +124,7 @@
           Delete
         </button>
       </div>
-    </div>
-  </section>
+  </div>
+  }
+</div>
 </div>

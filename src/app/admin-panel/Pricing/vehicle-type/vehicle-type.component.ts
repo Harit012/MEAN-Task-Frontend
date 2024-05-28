@@ -42,7 +42,6 @@ export class VehicleTypeComponent implements OnInit {
   }
   ngOnInit(): void {
     this.getVehiclesData();
-    console.log(document.cookie)
   }
 
   onSubmit() {
