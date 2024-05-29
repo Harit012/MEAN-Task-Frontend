@@ -4,4 +4,5 @@ export interface Card {
     expiryDate: Date,
     cvv: number,
     cardHolderName: string
+    userId?: string
 }
