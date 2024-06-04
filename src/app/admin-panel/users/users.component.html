@@ -3,10 +3,10 @@
     class="row p-2 d-flex justify-content-between"
     style="background-color: rgb(62, 71, 80); color: aliceblue"
   >
-    <div class="col-3">
+    <div class="col-3 align-self-center">
       <h3 class="mb-4">Users</h3>
     </div>
-    <div class="col-6">
+    <div class="col-4 align-self-center">
       <input
         type="search"
         name="search"
@@ -16,7 +16,15 @@
         (input)="onSearchInputChange($event)"
       />
     </div>
-    <div class="col-2">
+    <div class="col-2 align-self-center" >
+      <select name="sortBy" id="sortBy" class="form-select" (change)="onSortByChange($event)">
+        <option value="none" [defaultSelected]="true" >no sort(default)</option>
+        <option value="name">UserName</option>
+        <option value="email">Email</option>
+        <option value="phone">Phone</option>
+      </select>
+    </div>
+    <div class="col-2 align-self-center">
       <button
         type="button"
         class="btn btn-large align-self-center"
@@ -38,62 +46,68 @@
     <div class="col-2"><b>Action</b></div>
   </div>
   <hr />
-  <div class="ms-1 p-2 scrollable-section mt-3">
-    <div
-      class="row mb-2 fs-5"
-      *ngFor="let user of usersList; index as i"
-      style="background-color: rgb(255, 255, 255); color: rgb(0, 0, 0)"
-    >
-      <div class="col-1 align-self-center">
-        <p>{{ currentPage * 10 + (i + 1) }}</p>
-      </div>
-      <div class="col-2">
-        <img
-          src="http://localhost:3000/{{ user.userProfile }}"
-          alt="{{ user.userProfile }}"
-          height="100px"
-          width="100px"
-        />
-      </div>
-      <div class="col-1 align-self-center">
-        <p>{{ user.userName }}</p>
-      </div>
-      <div class="col-3 align-self-center">
-        <p>{{ user.email }}</p>
-      </div>
-      <div class="col-1 align-self-center">
-        <p>{{ user.countryCode }}</p>
-      </div>
-      <div class="col-2 align-self-center">
-        <p>{{ user.phone }}</p>
-      </div>
-      <div class="col-2 align-self-center">
-        <select
-          name="action-selector"
-          id="action-selector"
-          class="form-select"
-          (change)="onActionSelect($event)"
-        >
-          <option value="" [defaultSelected]="true" [disabled]="true">
-            Select Action
-          </option>
-          <option
-            value="CardDetails"
-            (click)="cardDetails(user)"
-            style="color: rgb(0, 146, 12)"
+  @if(usersList.length >0){
+    <div class="ms-1 p-2 scrollable-section mt-3">
+      <div
+        class="row mb-2 fs-5"
+        *ngFor="let user of usersList; index as i"
+        style="background-color: rgb(255, 255, 255); color: rgb(0, 0, 0)"
+      >
+        <div class="col-1 align-self-center">
+          <p>{{ currentPage * 10 + (i + 1) }}</p>
+        </div>
+        <div class="col-2">
+          <img
+            src="http://localhost:3000/{{ user.userProfile }}"
+            alt="{{ user.userProfile }}"
+            height="100px"
+            width="150px"
+          />
+        </div>
+        <div class="col-1 align-self-center">
+          <p>{{ user.userName }}</p>
+        </div>
+        <div class="col-3 align-self-center">
+          <p>{{ user.email }}</p>
+        </div>
+        <div class="col-1 align-self-center">
+          <p>{{ user.countryCode }}</p>
+        </div>
+        <div class="col-2 align-self-center">
+          <p>{{ user.phone }}</p>
+        </div>
+        <div class="col-2 align-self-center">
+          <select
+            name="action-selector"
+            id="action-selector"
+            class="form-select"
+            (change)="onActionSelect($event)"
           >
-            Show cards
-          </option>
-          <option value="Edit" (click)="onEdit(user)" style="color: blue">
-            Edit User
-          </option>
-          <option value="Delete" (click)="onDelete(user)" style="color: red">
-            Delete User
-          </option>
-        </select>
+            <option value="" [defaultSelected]="true" [disabled]="true">
+              Select Action
+            </option>
+            <option
+              value="CardDetails"
+              (click)="cardDetails(user)"
+              style="color: rgb(0, 146, 12)"
+            >
+              Show cards
+            </option>
+            <option value="Edit" (click)="onEdit(user)" style="color: blue">
+              Edit User
+            </option>
+            <option value="Delete" (click)="onDelete(user)" style="color: red">
+              Delete User
+            </option>
+          </select>
+        </div>
       </div>
     </div>
-  </div>
+  }@else {
+    <div class="d-flex justify-content-center align-self-center">
+      <h3>No users Added</h3>
+    </div>
+  }
   <div class="row paginaton">
     <div class="col-12 d-flex justify-content-center">
       <button
@@ -346,10 +360,25 @@
             <div class="row mb-3" *ngFor="let card of cardList; index as i">
               <div class="col-12">
                 <div class="row" style="background-color: rgb(170, 171, 172)">
-                  <h6 class="m-1 p-2 fs-3">{{ card.cardNumber }}</h6>
-                  <h5 class="m-1 p-2">{{ card.cardHolderName }}</h5>
+                  <h6 class="m-1 p-2 fs-3">XXXX XXXX XXXX {{ card.last4 }}</h6>
+                  <h5 class="m-1 p-2">{{ card.brand }}</h5>
                   <div class="d-flex justify-content-between m-1 p-2">
-                    <p>{{ card.expiryDate }}</p>
+                    <p>{{ card.exp_month }}/{{ card.exp_year }}</p>
+                    @if(i === 0){
+                      <button
+                      class="btn btn-large btn-secondary"
+                    >
+                      Default
+                    </button>
+                    }@else{
+                      <button
+                        class="btn btn-large btn-warning"
+                        (click)="setCardAsDefault(i)"
+  
+                      >
+                        Set as Default
+                      </button>
+                    }
                     <button
                       class="btn btn-large btn-danger"
                       (click)="deleteCard(i)"
@@ -367,94 +396,21 @@
             }
           </div>
           @if(wantToAddCard){
-            <div class="container mt-2">
-          
-            <form [formGroup]="cardForm">
+            <div class="container mt-3">
               <div class="row">
-                <label for="cardNumber" class="col-4 form-label"
-                  ><b>CardNumber :- </b></label
-                >
-                <div class="col-8">
-                  <input
-                    type="text"
-                    id="cardNumber"
-                    maxlength="16"
-                    class="form-control border-dark"
-                    [placeholder]="'Enter 16 digit Card Number'"
-                    formControlName="cardNumber"
-                  />
-                  <small
-                    *ngIf="isCardFieldInvalid('cardNumber')"
-                    class="text-danger justify-content-center"
-                    >This value is not correct</small
-                  >
+                <div class="col-12">
+                  <ngx-stripe-card
+                  [options]="cardOptions"
+                  [elementsOptions]="elementsOptions"
+                  clas="mt-3"
+                ></ngx-stripe-card>
+                <button type="submit" class="btn button1 mt-3" (click)="createToken()">
+                  Add Card
+                </button> 
                 </div>
-              </div>
-              <div class="row mt-2">
-                <label for="cardHolderName" class="col-4 form-label"
-                  ><b>Card Holder's Name :- </b></label
-                >
-                <div class="col-8">
-                  <input
-                    type="text"
-                    id="cardHolderName"
-                    class="form-control border-dark"
-                    [placeholder]="'Enter cardHolderName'"
-                    formControlName="cardHolderName"
-                  />
-                  <small
-                    *ngIf="isCardFieldInvalid('cardHolderName')"
-                    class="text-danger justify-content-center"
-                    >This value is not correct</small
-                  >
-                </div>
-              </div>
-              <div class="row mt-2 d-flex justify-content-between">
-                <div class="col-5">
-                  <label for="cvv"><b>Cvv :-</b></label>
-                  <input
-                    type="text"
-                    id="cvv"
-                    class="form-control border-dark"
-                    maxlength="3"
-                    [placeholder]="'Enter Cvv'"
-                    formControlName="cvv"
-                  />
-                  <small
-                    *ngIf="isCardFieldInvalid('cvv')"
-                    class="text-danger justify-content-center"
-                    >This value is not correct</small
-                  >
-                </div>
-                <div class="col-5">
-                  <label for="expiryDate"><b>valid Till :-</b></label>
-                  <input
-                    type="text"
-                    id="expiryDate"
-                    class="form-control border-dark"
-                    [placeholder]="'mm/yy'"
-                    formControlName="expiryDate"
-                  />
-                  <small
-                    *ngIf="isCardFieldInvalid('expiryDate')"
-                    class="text-danger justify-content-center"
-                    >This value is not correct</small
-                  >
-                </div>
-                <div class="row mt-2 d-flex justify-content-center">
-                  <button
-                    class="col-4 btn-large btn-success"
-                    [disabled]="cardForm.invalid"
-                    (click)="OnAddCard()"
-                  >
-                    Add
-                  </button>
-                </div>
-              </div>
-            </form>
-          </div>
-        }@else {
-          <div class="container"></div>
+              </div>     
+            </div>
+          
         }
         </div>
         <div class="modal-footer">
@@ -465,7 +421,7 @@
           }
           <button
             type="button"
-            class="btn btn-secondary btn-danger"
+            class="btn btn-danger "
             data-bs-dismiss="modal"
           >
             Close

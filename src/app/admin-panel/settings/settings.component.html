@@ -1,1 +1,44 @@
-<p>settings works!</p>
+<div class="container" style="width: calc(100dvw - 262px)">
+  <form>
+    <div class="row mt-2 mb-2">
+      <label for="timeOut" class="col-3 fs-5"><b>TimeOut :-</b></label>
+      <div class="col-7">
+        <select
+          name="timeOut"
+          id="timeOut"
+          class="col-6 form-select"
+          (change)="onTimeOutChange($event)"
+        >
+          <option *ngFor="let timeout of timeOutOptions" value="{{ timeout }}">
+            {{ timeout }}
+          </option>
+        </select>
+      </div>
+    </div>
+    <div class="row mb-2">
+      <label for="stops" class="col-3 fs-5"><b>Stops :-</b></label>
+      <div class="col-7">
+        <select
+          name="stops"
+          id="stops"
+          class="col-6 form-select"
+          (change)="onStopsChange($event)"
+        >
+          <option *ngFor="let stop of stopOptions" value="{{ stop }}">
+            {{ stop }}
+          </option>
+        </select>
+      </div>
+      <div class="row mb-2 mt-3 justify-content-center">
+        <button
+          type="button"
+          class="btn btn-dark"
+          style="width: 5rem"
+          (click)="onSaveChanges()"
+        >
+          Save
+        </button>
+      </div>
+    </div>
+  </form>
+</div>

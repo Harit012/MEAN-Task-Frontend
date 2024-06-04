@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { AfterViewChecked, Component, OnInit } from '@angular/core';
+import { AfterViewChecked, Component, OnInit, ViewChild } from '@angular/core';
 import { CountriesService } from '../Pricing/country/countries.service';
 import { Country } from '../Pricing/country/country.interface';
 import {
@@ -13,17 +13,33 @@ import { UserGet } from './userGet.inerface';
 import * as bootstrap from 'bootstrap';
 import { Card } from './card.interface';
 import { CardService } from './card.service';
+import {
+  NgxStripeModule,
+  StripeCardComponent,
+  StripeElementsDirective,
+  StripeService,
+} from 'ngx-stripe';
+import {
+  StripeCardElementOptions,
+  StripeElementsOptions,
+} from '@stripe/stripe-js';
+import { HttpClient } from '@angular/common/http';
 
 @Component({
   selector: 'app-users',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    StripeElementsDirective,
+    StripeCardComponent,
+    NgxStripeModule,
+  ],
   templateUrl: './users.component.html',
   styleUrl: './users.component.css',
 })
 export class UsersComponent implements OnInit, AfterViewChecked {
   userForm: FormGroup;
-  cardForm: FormGroup ;
   formdata: FormData = new FormData();
   selectedCountry!: Country;
   countryList: Country[] = [];
@@ -32,19 +48,42 @@ export class UsersComponent implements OnInit, AfterViewChecked {
   countryCode!: string;
   searchInput: string = '';
   currentPage: number = 0;
-  userOfCards!: string;
+  customerId!: string;
   editMode: boolean = false;
   wantToAddCard: boolean = false;
+  sortMethod: string = 'none';
+  @ViewChild(StripeCardComponent) card!: StripeCardComponent;
+
+  cardOptions: StripeCardElementOptions = {
+    style: {
+      base: {
+        iconColor: '#000000',
+        color: '#000000',
+        fontWeight: '300',
+        fontFamily: '"Helvetica Neue", Helvetica, sans-serif',
+        fontSize: '28px',
+        '::placeholder': {
+          color: '#CFD7E0',
+        },
+      },
+    },
+  };
+
+  elementsOptions: StripeElementsOptions = {
+    locale: 'en',
+  };
 
   constructor(
     private countryService: CountriesService,
     private userService: UserService,
-    private cardService: CardService
+    private cardService: CardService,
+    private stripeService: StripeService,
+    private http: HttpClient
   ) {
     this.userForm = new FormGroup({
       userName: new FormControl(null, [
         Validators.required,
-        Validators.maxLength(10),
+        Validators.maxLength(20),
       ]),
       email: new FormControl(null, [Validators.required, Validators.email]),
       phone: new FormControl(null, [
@@ -56,19 +95,8 @@ export class UsersComponent implements OnInit, AfterViewChecked {
       userProfile: new FormControl(null, [Validators.required]),
       country: new FormControl(null),
     });
-    this.cardForm = new FormGroup({
-      cardNumber: new FormControl(null, [
-        Validators.required,
-        Validators.pattern('^[0-9]{16}$'),
-        Validators.maxLength(16),
-        Validators.minLength(16),
-      ]),
-      cardHolderName: new FormControl(null, [Validators.required]),
-      expiryDate: new FormControl(null, [Validators.required,Validators.pattern('^[0-1]{1}[1-9]{1}\/[0-9]{2}$')]),
-      cvv: new FormControl(null, [Validators.required,Validators.pattern('^[1-9]{3}$')]),
-    });
   }
-  ngOnInit() {
+  async ngOnInit() {
     this.countryService.getCountries().subscribe((res) => {
       if (res.countries) {
         this.countryList = res.countries;
@@ -77,13 +105,15 @@ export class UsersComponent implements OnInit, AfterViewChecked {
       }
     });
 
-    this.userService.getUsers('', this.currentPage).subscribe((res) => {
-      if (res.users) {
-        this.usersList = res.users;
-      } else {
-        alert(res.error);
-      }
-    });
+    this.userService
+      .getUsers('', this.currentPage, this.sortMethod)
+      .subscribe((res) => {
+        if (res.users) {
+          this.usersList = res.users;
+        } else {
+          alert(res.error);
+        }
+      });
   }
   ngAfterViewChecked() {
     if (this.countryCode) {
@@ -96,6 +126,10 @@ export class UsersComponent implements OnInit, AfterViewChecked {
   onCountryChange(country: Country) {
     this.selectedCountry = country;
     this.countryCode = country.countryCallCode;
+  }
+  onSortByChange(event: any) {
+    this.sortMethod = event.target.value;
+    this.onSearch();
   }
   onFileChange(event: any) {
     if (event.target.files && event.target.files.length) {
@@ -159,7 +193,7 @@ export class UsersComponent implements OnInit, AfterViewChecked {
   }
   onSearch() {
     this.userService
-      .getUsers(this.searchInput, this.currentPage)
+      .getUsers(this.searchInput, this.currentPage, this.sortMethod)
       .subscribe((res) => {
         if (res.users) {
           this.usersList = res.users;
@@ -172,8 +206,10 @@ export class UsersComponent implements OnInit, AfterViewChecked {
     let cardModal = new bootstrap.Modal(
       document.getElementById('cardModal') as HTMLElement
     ).show();
-    this.cardList = user.cards;
-    this.userOfCards = user._id;
+    this.cardService.getCards(user.customerId).subscribe((res) => {
+      this.cardList = res.data;
+    });
+    this.customerId = user.customerId;
   }
   onEdit(user: UserGet) {
     console.log(user);
@@ -213,11 +249,13 @@ export class UsersComponent implements OnInit, AfterViewChecked {
   }
   onDelete(user: UserGet) {
     if (confirm('Are you sure you want to delete this user?')) {
-      this.userService.deleteUser(user._id!).subscribe((res) => {
-        if (res.message) {
-          this.onSearch();
-        }
-      });
+      this.userService
+        .deleteUser(user._id!, user.customerId!)
+        .subscribe((res) => {
+          if (res.message) {
+            this.onSearch();
+          }
+        });
     } else {
     }
   }
@@ -227,12 +265,7 @@ export class UsersComponent implements OnInit, AfterViewChecked {
       ? control.invalid && (control.dirty || control.touched)
       : false;
   }
-  isCardFieldInvalid(field: string): boolean {
-    const control = this.cardForm.get(field);
-    return control
-      ? control.invalid && (control.dirty || control.touched)
-      : false;
-  }
+  
   onNextPage() {
     if (this.usersList.length < 10) {
       alert('No more pages');
@@ -260,31 +293,52 @@ export class UsersComponent implements OnInit, AfterViewChecked {
   onActionSelect(event: any) {
     event.target.selectedIndex = 0;
   }
-  OnAddCard(){
-    const postCard : Card= {...this.cardForm.value,userId:this.userOfCards}
+  OnAddCard(token: any) {
+    const postCard: any = { customerId: this.customerId, token };
+    console.log(postCard);
     this.cardService.postCard(postCard).subscribe((res) => {
-      if(res.card){
+      if (res.card) {
+        console.log(res.card);
         this.cardList.push(res.card);
-        this.cardForm.reset();
-      }else{
-        this.cardForm.reset();
-        alert(res.error);
-      }
-    })
-  }
-  deleteCard(index: number) {
-    let vardId = this.cardList[index]._id;
-    this.cardService.deleteCard(vardId!, this.userOfCards!).subscribe((res) => {
-      if (res.message) {
-        console.log(res.message);
-        this.cardList=this.cardList.slice(0, index).concat(this.cardList.slice(index+1));
-        console.log(this.cardList)
       } else {
         alert(res.error);
       }
     });
   }
-  OnChangeWantToAddCard(){
-    this.wantToAddCard=!this.wantToAddCard;
+  deleteCard(index: number) {
+    let cardId = this.cardList[index].id;
+    this.cardService.deleteCard(cardId!, this.customerId).subscribe((res) => {
+      if (res.message) {
+        console.log(res.message);
+        this.cardList = this.cardList
+          .slice(0, index)
+          .concat(this.cardList.slice(index + 1));
+        console.log(this.cardList);
+      } else {
+        alert(res.error);
+      }
+    });
+  }
+  setCardAsDefault(index: number) {
+    let cardId = this.cardList[index].id;
+    let card = this.cardList[index];
+    this.cardService
+      .setCardAsDefault(cardId!, this.customerId)
+      .subscribe((res) => {
+        this.cardList = this.cardList.slice(0, index).concat(this.cardList.slice(index + 1));
+        this.cardList = [card,...this.cardList]
+      });
+  }
+  OnChangeWantToAddCard() {
+    this.wantToAddCard = !this.wantToAddCard;
+  }
+  createToken(): void {
+    this.stripeService.createToken(this.card.element).subscribe((result) => {
+      if (result.token) {
+        this.OnAddCard(result.token);
+      } else if (result.error) {
+        console.log(result.error.message);
+      }
+    });
   }
 }

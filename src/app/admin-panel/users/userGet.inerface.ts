@@ -1,12 +1,11 @@
-import { Card } from "./card.interface";
 
 export interface UserGet {
     _id: string;
     userName: string;
     email: string;
-    phone: number;
+    phone: string;
     userProfile: string;
     countryCode: string;
     countryName:string;
-    cards:Card[]  
+    customerId: string;  
 }

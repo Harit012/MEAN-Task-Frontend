@@ -1,8 +1,8 @@
 export interface Card {
-    _id?: string,
-    cardNumber: number,
-    expiryDate: Date,
-    cvv: number,
-    cardHolderName: string
-    userId?: string
+    brand: string,
+    exp_month: number,
+    exp_year: number,
+    id: string,
+    last4: string,
+
 }

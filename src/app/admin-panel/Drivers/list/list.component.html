@@ -1,1 +1,403 @@
-<p>list works!</p>
+<div class="" style="width: calc(100dvw - 260px)">
+  <div
+    class="row p-2 d-flex justify-content-between"
+    style="background-color: rgb(62, 71, 80); color: aliceblue"
+  >
+    <div class="col-3 align-self-center">
+      <h3 class="mb-4">Drivers</h3>
+    </div>
+    <div class="col-4 align-self-center">
+      <input
+        type="search"
+        name="search"
+        id="search"
+        placeholder="Search"
+        class="form-control align-self-center"
+        (input)="onSearchInputChange($event)"
+      />
+    </div>
+    <div class="col-2 align-self-center">
+      <select
+        name="sortBy"
+        id="sortBy"
+        class="form-select"
+        (change)="onSortByChange($event)"
+      >
+        <option value="none" [defaultSelected]="true">no sort(default)</option>
+        <option value="name">DriverName</option>
+        <option value="email">Email</option>
+        <option value="phone">Phone</option>
+      </select>
+    </div>
+    <div class="col-2 align-self-center">
+      <button
+        type="button"
+        class="btn btn-large align-self-center"
+        style="background-color: rgb(51, 183, 24); width: 6rem"
+        class="btn btn-primary"
+        data-bs-toggle="modal"
+        data-bs-target="#AddDriverModal"
+        (click)="editMode=false"
+      >
+        Add
+      </button>
+    </div>
+  </div>
+  <hr />
+  <div class="row mt-2 p-2">
+    <div class="col-1"><b>Index</b></div>
+    <div class="col-2"><b>Driver Profile</b></div>
+    <div class="col-1"><b>Drivername</b></div>
+    <div class="col-2"><b>Email</b></div>
+    <div class="col-1"><b>Approved</b></div>
+    <div class="col-1"><b>Country Code</b></div>
+    <div class="col-2"><b>Phone</b></div>
+    <div class="col-2"><b>Action</b></div>
+  </div>
+  <hr />
+  <div>
+  @if(driversList.length > 0){
+  <div class=" mt-3 scrollable-section">
+    <div
+      class="row mb-2 fs-5"
+      *ngFor="let driver of driversList; index as i"
+    >
+      <div class="col-1 align-self-center">
+        <p class="ps-4">{{ currentPage * 10 + (i + 1) }}</p>
+      </div>
+      <div class="col-2 align-self-center">
+        <img
+          src="http://localhost:3000/{{ driver.driverProfile }}"
+          alt="{{ driver.driverProfile }}"
+          height="100px"
+          width="150px"
+        />
+      </div>
+      <div class="col-1 align-self-center">
+        <p>{{ driver.driverName }}</p>
+      </div>
+      <div class="col-2 align-self-center">
+        <p>{{ driver.driverEmail }}</p>
+      </div>
+      <div class="col-1 align-self-center ">
+        <label class="switch">
+          <input
+            type="checkbox"
+            id="driverApprovel"
+            (change)="onApprove(i)"
+            [checked]="driver.approved"
+          />
+          <span class="slider round"></span>
+        </label>
+      </div>
+      <div class="col-1 align-self-center">
+        <p>{{ driver.countryCode }}</p>
+      </div>
+      <div class="col-2 align-self-center">
+        <!-- <span>{{ driver.countryCode }}  </span> -->
+        <span>{{ driver.phone }}</span>
+      </div>
+      <div class="col-2 align-self-center">
+        <select
+          name="action-selector"
+          id="action-selector"
+          class="form-select"
+          (change)="onActionSelect($event)"
+        >
+          <option value="" [defaultSelected]="true" [disabled]="true">
+            Select Action
+          </option>
+          <option
+            value="serviceType"
+            (click)="serviceType(driver)"
+            style="color: rgb(0, 146, 12)"
+          >
+            Service Type
+          </option>
+          <option value="Edit" (click)="onEdit(driver)" style="color: blue">
+            Edit Driver
+          </option>
+          <option value="Delete" (click)="onDelete(driver)" style="color: red">
+            Delete Driver
+          </option>
+        </select>
+      </div>
+    </div>
+    
+  </div>
+  }@else{
+  <div class="d-flex justify-content-center align-self-center">
+    <h3>No users Added</h3>
+  </div>
+  }
+  <div class="row paginaton" *ngIf="driversList.length > 0">
+    <div class="col-12 d-flex justify-content-center">
+      <button
+        class="btn btn-large btn-dark me-3"
+        style="width: 5rem"
+        (click)="onPreviousPage()"
+        [disabled]="currentPage <= 0"
+      >
+        Previous
+      </button>
+      <h4>{{ currentPage + 1 }}</h4>
+      <button
+        class="btn btn-large btn-dark ms-3"
+        style="width: 5rem"
+        (click)="onNextPage()"
+      >
+        Next
+      </button>
+    </div>
+  </div>
+</div>
+
+
+  <!-- Driver Add Modal -->
+
+  <div
+    class="modal fade"
+    id="AddDriverModal"
+    tabindex="-1"
+    aria-labelledby="exampleModalLabel"
+    aria-hidden="true"
+  >
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          @if(!editMode){
+          <h1 class="modal-title fs-5" id="exampleModalLabel">Add Driver</h1>
+          }@else {
+          <h1 class="modal-title fs-5" id="exampleModalLabel">Edit Driver</h1>
+          }
+          <button
+            type="button"
+            class="btn-close"
+            data-bs-dismiss="modal"
+            aria-label="Close"
+          ></button>
+        </div>
+        <div class="modal-body">
+          <form [formGroup]="driverForm">
+            <!-- username -->
+            <div class="row mt-3">
+              <label class="col-3" for="driverName">DriverName:-</label>
+              <div class="col-9">
+                <input
+                  type="text"
+                  id="userName"
+                  class="form-control"
+                  [placeholder]="'Enter Drivername'"
+                  formControlName="driverName"
+                />
+                <small
+                  *ngIf="isFieldInvalid('driverName')"
+                  class="text-danger justify-content-center"
+                  >This value is not correct</small
+                >
+              </div>
+            </div>
+            <!-- email -->
+            <div class="row mt-3">
+              <label class="col-3" for="email">Email :-</label>
+              <div class="col-9">
+                <input
+                  type="email"
+                  id="email"
+                  class="form-control"
+                  [placeholder]="'Enter Email'"
+                  formControlName="driverEmail"
+                />
+                <small
+                  *ngIf="isFieldInvalid('driverEmail')"
+                  class="text-danger justify-content-center"
+                  >This value is not correct</small
+                >
+              </div>
+            </div>
+            <!-- country -->
+            <div class="row mt-3">
+              <label class="col-3" for="country">Country :-</label>
+              <div class="col-9">
+                <select
+                  name="country"
+                  id="country"
+                  class="form-select"
+                  formControlName="country"
+                >
+                  <option [defaultSelected]="true" disabled>
+                    Select Country
+                  </option>
+                  <option
+                    *ngFor="let country of countryList"
+                    value="{{ country.countryName }}"
+                    (click)="onCountryChange(country)"
+                  >
+                    {{ country.countryName }}
+                  </option>
+                </select>
+                <small
+                  *ngIf="isFieldInvalid('country')"
+                  class="text-danger justify-content-center"
+                  >This value is not correct</small
+                >
+              </div>
+            </div>
+            <!-- city -->
+
+            <div class="row mt-3">
+              <label class="col-3" for="City">City :-</label>
+              <div class="col-9">
+                <select
+                  name="city"
+                  id="city"
+                  class="form-select"
+                  formControlName="city"
+                >
+                  <option [defaultSelected]="true" disabled>Select City</option>
+                  <option
+                    *ngFor="let city of cityList"
+                    value="{{ city.zoneName }}"
+                    (click)="onCityChange(city)"
+                  >
+                    {{ city.zoneName }}
+                  </option>
+                </select>
+                <small
+                  *ngIf="isFieldInvalid('city')"
+                  class="text-danger justify-content-center"
+                  >This value is not correct</small
+                >
+              </div>
+            </div>
+
+            <!-- phone -->
+            <div class="row mt-3 d-flex">
+              <label class="col-3" for="email">Phone :-</label>
+
+              <div class="col-9 d-flex">
+                <input
+                  class="col-2 p-1"
+                  type="text"
+                  id="countrycode"
+                  [disabled]="true"
+                  value="{{ countryCallCode }}"
+                />
+                <input
+                  class="col-8 ms-1"
+                  type="text"
+                  maxlength="10"
+                  id="phone"
+                  class="form-control"
+                  [placeholder]="'Enter Phone'"
+                  formControlName="phone"
+                />
+              </div>
+              <small
+                *ngIf="isFieldInvalid('phone')"
+                class="text-danger justify-content-center"
+                >This value is not correct</small
+              >
+            </div>
+            <!-- profile -->
+            <div class="row mt-3 d-flex">
+              <label class="col-3" for="driverProfile">Profile :-</label>
+              <input
+                class="col-9"
+                type="file"
+                id="driverProfile"
+                accept="image/*"
+                formControlName="driverProfile"
+                (change)="onFileChange($event)"
+              />
+              <small
+                *ngIf="isFieldInvalid('driverProfile')"
+                class="text-danger justify-content-center"
+                >This value is not correct</small
+              >
+              <small id="selectedDriverProfile" [hidden]="!editMode"></small>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <div>
+            @if(!editMode){
+            <button
+              type="button"
+              class="btn btn-dark"
+              [disabled]="driverForm.invalid"
+              (click)="onAddDriver()"
+              data-bs-dismiss="modal"
+            >
+              Add User
+            </button>
+            <button
+              type="button"
+              class="btn btn-primary ms-2"
+              (click)="driverForm.reset()"
+            >
+              Reset
+            </button>
+            }@else{
+            <button
+              type="button"
+              class="btn btn-dark"
+              (click)="onUpdateDriver()"
+              data-bs-dismiss="modal"
+            >
+              Update Driver
+            </button>
+            <button
+              type="button"
+              class="btn btn-primary ms-2"
+              (click)="driverForm.reset()"
+            >
+              Reset
+            </button>
+            }
+          </div>
+          <button
+            type="button"
+            class="btn btn-secondary"
+            data-bs-dismiss="modal"
+          >
+            Close
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <div class="modal fade" id="serviceTypeModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h1 class="modal-title fs-5" id="exampleModalLabel">Service Type</h1>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <div class="container">
+            <form >
+            <div class="row">
+              <label for="ServiceType" class="col-5"><b>Service Type :-</b></label>
+              <div class="col-7">
+                <select id="ServiceType" class="form-select" (change)="serviceTypeChange($event)">
+                  <option value="none">none</option>
+                  <option value="SUV">SUV</option>
+                  <option value="SEDAN">SEDAN</option>
+                  <option value="MINI VAN">MINI VAN</option>
+                  <option value="PICK UP">PICK UP</option>
+                </select>
+              </div>
+            </div>
+          </form>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          <button type="button" class="btn btn-dark" (click)="onAddServiceType()">Save changes</button>
+        </div>
+      </div>
+    </div>
+  </div>
