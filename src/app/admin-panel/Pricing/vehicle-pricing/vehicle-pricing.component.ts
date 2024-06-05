@@ -12,6 +12,8 @@ import {
 import { VehiclePricing } from './vehicle-pricing.interface';
 import { HttpClient } from '@angular/common/http';
 import { RecivingZone } from '../city/recivingZone.interface';
+import { AuthService } from '../../../auth/auth.service';
+import { VehiclePricingService } from './vehicle-pricing.service';
 
 @Component({
   selector: 'app-vehicle-pricing',
@@ -37,7 +39,9 @@ export class VehiclePricingComponent implements OnInit, AfterViewChecked {
   constructor(
     private countryService: CountriesService,
     private cityService: CityService,
-    private http: HttpClient
+    private http: HttpClient,
+    private authService: AuthService,
+    private vehiclePricingService: VehiclePricingService
   ) {
     this.vehiclePricingForm = new FormGroup({
       driverProfit: new FormControl(null, [
@@ -75,17 +79,23 @@ export class VehiclePricingComponent implements OnInit, AfterViewChecked {
     this.countryService.getCountries().subscribe((data) => {
       if (data.countries) {
         this.countryList = data.countries;
-      } else {
+      } else if (data.varified == false) {
+        alert('User is not verified');
+        this.authService.userLogOut();
+      } else if (data.error) {
         alert(data.error);
       }
-      this.http
-        .get<VehiclePricing[]>(
-          'http://localhost:3000/admin/pricing/vehicle-pricing',
-          { withCredentials: true }
-        )
-        .subscribe((data) => {
-          this.pricingList = data;
-        });
+    });
+
+    this.vehiclePricingService.getVehiclePricing().subscribe((data) => {
+      if (data.vehiclePricing) {
+        this.pricingList = data.vehiclePricing;
+      } else if (data.varified == false) {
+        alert('User is not verified');
+        this.authService.userLogOut();
+      } else if (data.error) {
+        alert(data.error);
+      }
     });
   }
 
@@ -107,7 +117,10 @@ export class VehiclePricingComponent implements OnInit, AfterViewChecked {
     this.cityService.getZones(country._id!).subscribe((data) => {
       if (data.zones) {
         this.cityList = data.zones;
-      } else {
+      } else if (data.varified == false) {
+        alert('User is not verified');
+        this.authService.userLogOut();
+      } else if (data.error) {
         alert(data.error);
       }
     });
@@ -119,14 +132,20 @@ export class VehiclePricingComponent implements OnInit, AfterViewChecked {
     this.selectedCity = city;
     this.cityService.getZoneForPricing(city._id!).subscribe(
       (data) => {
-        let res = data.pricing;
-        res.forEach((ele: any) => {
-          if (!ele['hasvalue']) {
-            this.vehicleTypesList.push(ele['vtype']);
-          }
-        });
+        if (data.pricing) {
+          let res = data.pricing;
+          res.forEach((ele: any) => {
+            if (!ele['hasvalue']) {
+              this.vehicleTypesList.push(ele['vtype']);
+            }
+          });
+        }
       },
       (err) => {
+        if (err.varified == false) {
+          alert('User is not verified');
+          this.authService.userLogOut();
+        }
         alert(err.message);
       }
     );
@@ -151,27 +170,25 @@ export class VehiclePricingComponent implements OnInit, AfterViewChecked {
           this.selectefVehicleType.toString(),
         ...this.vehiclePricingForm.value,
       };
-      this.http
-        .post<{ vehiclePricing: VehiclePricing; error: string }>(
-          'http://localhost:3000/admin/pricing/vehicle-pricing',
-          data
-        )
-        .subscribe((data) => {
-          if (data.vehiclePricing) {
-            this.pricingList.push(data.vehiclePricing);
-            this.vehiclePricingForm.reset();
-            this.vehicleTypesList = [];
-            let tempcountry = document.getElementById(
-              'country'
-            ) as HTMLSelectElement;
-            let tempcity = document.getElementById('city') as HTMLSelectElement;
-            tempcountry.selectedIndex = 0;
-            tempcity.selectedIndex = 0;
-            this.cityList = [];
-          } else {
-            alert(data.error);
-          }
-        });
+      this.vehiclePricingService.postVehiclePricing(data).subscribe((data) => {
+        if (data.vehiclePricing) {
+          this.pricingList.push(data.vehiclePricing);
+          this.vehiclePricingForm.reset();
+          this.vehicleTypesList = [];
+          let tempcountry = document.getElementById(
+            'country'
+          ) as HTMLSelectElement;
+          let tempcity = document.getElementById('city') as HTMLSelectElement;
+          tempcountry.selectedIndex = 0;
+          tempcity.selectedIndex = 0;
+          this.cityList = [];
+        } else if (data.varified == false) {
+          alert('User is not verified');
+          this.authService.userLogOut();
+        } else if (data.error) {
+          alert(data.error);
+        }
+      });
     } else {
       alert('Invalid form');
     }
@@ -199,20 +216,17 @@ export class VehiclePricingComponent implements OnInit, AfterViewChecked {
     if (this.vehiclePricingForm.valid) {
       let data: VehiclePricing = this.vehiclePricingForm.value;
       data._id = this.editabledocument._id;
-      this.http
-        .patch<{ vehiclePricing: VehiclePricing; error: string }>(
-          `http://localhost:3000/admin/pricing/vehicle-pricing`,
-          data,
-          { withCredentials: true }
-        )
-        .subscribe((data) => {
-          if (data.vehiclePricing) {
-            this.pricingList[this.editIndex] = data.vehiclePricing;
-            this.leaveEditMode();
-          } else {
-            alert(data.error);
-          }
-        });
+      this.vehiclePricingService.patchVehiclePricing(data).subscribe((data) => {
+        if (data.vehiclePricing) {
+          this.pricingList[this.editIndex] = data.vehiclePricing;
+          this.leaveEditMode();
+        } else if (data.varified == false) {
+          alert('User is not verified');
+          this.authService.userLogOut();
+        } else if (data.error) {
+          alert(data.error);
+        }
+      });
     } else {
       alert('invalid form');
     }
@@ -225,6 +239,8 @@ export class VehiclePricingComponent implements OnInit, AfterViewChecked {
   // Method to check if a field is touched or dirty and invalid
   isFieldInvalid(field: string): boolean {
     const control = this.vehiclePricingForm.get(field);
-    return control ? control.invalid && (control.dirty || control.touched) : false;
+    return control
+      ? control.invalid && (control.dirty || control.touched)
+      : false;
   }
 }

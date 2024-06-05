@@ -24,6 +24,7 @@ import {
   StripeElementsOptions,
 } from '@stripe/stripe-js';
 import { HttpClient } from '@angular/common/http';
+import { AuthService } from '../../auth/auth.service';
 
 @Component({
   selector: 'app-users',
@@ -78,7 +79,7 @@ export class UsersComponent implements OnInit, AfterViewChecked {
     private userService: UserService,
     private cardService: CardService,
     private stripeService: StripeService,
-    private http: HttpClient
+    private authService: AuthService
   ) {
     this.userForm = new FormGroup({
       userName: new FormControl(null, [
@@ -100,7 +101,11 @@ export class UsersComponent implements OnInit, AfterViewChecked {
     this.countryService.getCountries().subscribe((res) => {
       if (res.countries) {
         this.countryList = res.countries;
-      } else {
+      } else if (res.varified == false) {
+        alert('User is not verified');
+        this.authService.userLogOut();
+        return;
+      } else if (res.error) {
         alert(res.error);
       }
     });
@@ -110,7 +115,11 @@ export class UsersComponent implements OnInit, AfterViewChecked {
       .subscribe((res) => {
         if (res.users) {
           this.usersList = res.users;
-        } else {
+        } else if (res.varified == false) {
+          alert('User is not verified');
+          this.authService.userLogOut();
+          return;
+        } else if (res.error) {
           alert(res.error);
         }
       });
@@ -152,7 +161,10 @@ export class UsersComponent implements OnInit, AfterViewChecked {
         this.formdata = new FormData();
         this.userForm.reset();
         this.onSearch();
-      } else {
+      } else if (res.varified == false) {
+        alert('User is not verified');
+        this.authService.userLogOut();
+      } else if (res.error) {
         alert(res.error);
       }
     });
@@ -179,11 +191,19 @@ export class UsersComponent implements OnInit, AfterViewChecked {
         this.editMode = false;
         this.userForm.reset();
         this.formdata = new FormData();
-      } else {
+      } else if (res.varified == false) {
         alert(res.error);
         this.editMode = false;
         this.userForm.reset();
         this.formdata = new FormData();
+        alert('User is not verified');
+        this.authService.userLogOut();
+      } else if (res.error) {
+        alert(res.error);
+        this.editMode = false;
+        this.userForm.reset();
+        this.formdata = new FormData();
+        alert(res.error);
       }
     });
   }
@@ -197,7 +217,10 @@ export class UsersComponent implements OnInit, AfterViewChecked {
       .subscribe((res) => {
         if (res.users) {
           this.usersList = res.users;
-        } else {
+        } else if (res.varified == false) {
+          alert('User is not verified');
+          this.authService.userLogOut();
+        } else if (res.error) {
           alert(res.error);
         }
       });
@@ -254,9 +277,15 @@ export class UsersComponent implements OnInit, AfterViewChecked {
         .subscribe((res) => {
           if (res.message) {
             this.onSearch();
+          } else if (res.varified == false) {
+            alert('User is not verified');
+            this.authService.userLogOut();
+          } else if (res.error) {
+            alert(res.error);
           }
         });
     } else {
+      return;
     }
   }
   isFieldInvalid(field: string): boolean {
@@ -265,7 +294,7 @@ export class UsersComponent implements OnInit, AfterViewChecked {
       ? control.invalid && (control.dirty || control.touched)
       : false;
   }
-  
+
   onNextPage() {
     if (this.usersList.length < 10) {
       alert('No more pages');
@@ -300,7 +329,10 @@ export class UsersComponent implements OnInit, AfterViewChecked {
       if (res.card) {
         console.log(res.card);
         this.cardList.push(res.card);
-      } else {
+      } else if (res.varified == false) {
+        alert('User is not verified');
+        this.authService.userLogOut();
+      } else if (res.error) {
         alert(res.error);
       }
     });
@@ -314,7 +346,10 @@ export class UsersComponent implements OnInit, AfterViewChecked {
           .slice(0, index)
           .concat(this.cardList.slice(index + 1));
         console.log(this.cardList);
-      } else {
+      } else if (res.varified == false) {
+        alert('User is not verified');
+        this.authService.userLogOut();
+      } else if (res.error) {
         alert(res.error);
       }
     });
@@ -325,8 +360,10 @@ export class UsersComponent implements OnInit, AfterViewChecked {
     this.cardService
       .setCardAsDefault(cardId!, this.customerId)
       .subscribe((res) => {
-        this.cardList = this.cardList.slice(0, index).concat(this.cardList.slice(index + 1));
-        this.cardList = [card,...this.cardList]
+        this.cardList = this.cardList
+          .slice(0, index)
+          .concat(this.cardList.slice(index + 1));
+        this.cardList = [card, ...this.cardList];
       });
   }
   OnChangeWantToAddCard() {
@@ -339,6 +376,7 @@ export class UsersComponent implements OnInit, AfterViewChecked {
       } else if (result.error) {
         console.log(result.error.message);
       }
+      this.wantToAddCard = false;
     });
   }
 }

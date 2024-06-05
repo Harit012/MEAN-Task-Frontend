@@ -1,3 +1,7 @@
 /* .auth-page{
     background-color: rgb(209, 209, 209);
 } */
+
+input{
+    border:2px solid gray
+}

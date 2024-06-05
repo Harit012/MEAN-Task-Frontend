@@ -20,14 +20,14 @@ export class DriverService {
       sort: sort,
       input: modifiedInput,
     };
-    return this.http.get<{ drivers: Driver[]; error: string }>(
+    return this.http.get<{ drivers: Driver[]; error: string;varified:boolean }>(
       'http://localhost:3000/admin/drivers/list',
       { params: params, withCredentials: true }
     );
   }
 
   postDriver(driver: FormData) {
-    return this.http.post<{ driver: Driver; error: string }>(
+    return this.http.post<{ driver: Driver; error: string;varified:boolean }>(
       'http://localhost:3000/admin/drivers/list',
       driver,
       { withCredentials: true }
@@ -38,14 +38,14 @@ export class DriverService {
     const params: Params = {
       id: id,
     };
-    return this.http.delete<{ message: string; error: string }>(
+    return this.http.delete<{ message: string; error: string;varified:boolean }>(
       'http://localhost:3000/admin/drivers/list',
       { params: params, withCredentials: true }
     );
   }
 
   approvelChange(id: string, approvel: boolean) {
-    return this.http.patch<{ message: string; error: string }>(
+    return this.http.patch<{ message: string; error: string;varified:boolean}>(
       'http://localhost:3000/admin/drivers/list',
       { id: id, approvel: approvel },
       { withCredentials: true }
@@ -53,7 +53,7 @@ export class DriverService {
   }
 
   putEditUser(formData: FormData) {
-    return this.http.put<{ message: string; error: string }>(
+    return this.http.put<{ message: string; error: string;varified:boolean }>(
       'http://localhost:3000/admin/drivers/list',
       formData,
       { withCredentials: true }
@@ -61,7 +61,7 @@ export class DriverService {
   }
 
   patchServiceType(serviceType: string , id:string) {
-    return this.http.patch<{message:string,error:string}>(
+    return this.http.patch<{message:string,error:string;varified:boolean}>(
       'http://localhost:3000/admin/drivers/list/serviceType',
       {  id: id ,serviceType: serviceType  },
       { withCredentials: true }

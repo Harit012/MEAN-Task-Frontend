@@ -9,6 +9,7 @@ import {
 import { Country } from './country.interface';
 import { HttpClient } from '@angular/common/http';
 import { CountriesService } from './countries.service';
+import { AuthService } from '../../../auth/auth.service';
 
 @Component({
   selector: 'app-country',
@@ -28,7 +29,8 @@ export class CountryComponent implements OnInit {
 
   constructor(
     private http: HttpClient,
-    private countryService: CountriesService
+    private countryService: CountriesService,
+    private authService: AuthService
   ) {
     this.countryForm = new FormGroup({
       countryName: new FormControl(null, [Validators.required]),
@@ -62,7 +64,7 @@ export class CountryComponent implements OnInit {
               latlng: { lat: data[i]['latlng'][0], lng: data[i]['latlng'][1] },
               countryShortName: data[i]['cca2'],
             };
-            console.log(obj);
+            // console.log(obj);
             this.countrycallcode = obj.countryCallCode;
             this.countrycurrency = obj.currency;
             this.toBeAddedCountry = obj;
@@ -76,6 +78,8 @@ export class CountryComponent implements OnInit {
           this.countryname = '';
           this.countryForm.reset();
         }
+      },(err)=>{
+        console.log(err);
       });
   }
   onAddCountry() {
@@ -88,14 +92,17 @@ export class CountryComponent implements OnInit {
             this.filteredCountry.push(res.country);
             this.countryForm.reset();
             this.toBeAddedCountry = null;
-          } else {
+          } else if(res.varified == false){
+            this.toBeAddedCountry = null;
+            this.countryname = '';
+            alert('User is not verified');
+            this.authService.userLogOut();
+          }
+          else if(res.error){
             this.toBeAddedCountry = null;
             this.countryname = '';
             alert(res.error);
           }
-        },
-        (err) => {
-          alert('alert from line 93:-' + err.message);
         }
       );
     } else {
@@ -116,7 +123,11 @@ export class CountryComponent implements OnInit {
       if (res.countries) {
         this.AddedCountry = res.countries;
         this.filteredCountry = res.countries;
-      } else {
+      }else if (res.varified == false) {
+        alert('User is not verified');
+        this.authService.userLogOut();
+        return;
+      } else if (res.error) {
         alert(res.error);
       }
     });

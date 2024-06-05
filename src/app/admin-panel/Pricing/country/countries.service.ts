@@ -9,7 +9,7 @@ export class CountriesService {
   constructor(private http: HttpClient) {}
 
   getCountries() {
-    return this.http.get<{ countries: Country[] ,error: string}>(
+    return this.http.get<{ countries: Country[] ,error: string,varified: boolean}>(
       'http://localhost:3000/admin/pricing/country',
       {
         withCredentials: true,
@@ -18,7 +18,7 @@ export class CountriesService {
   }
 
   postCountry(country: Country) {
-    return this.http.post<{ country: Country; error: any }>(
+    return this.http.post<{ country: Country; error: string,varified: boolean }>(
       'http://localhost:3000/admin/pricing/country',
       country,
       { withCredentials: true }

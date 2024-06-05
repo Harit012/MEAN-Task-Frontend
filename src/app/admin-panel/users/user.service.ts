@@ -19,14 +19,14 @@ export class UserService {
       page: page,
       sort : sort
     };
-    return this.http.get<{ users: UserGet[]; error: string }>(
+    return this.http.get<{ users: UserGet[]; error: string,varified:boolean }>(
       'http://localhost:3000/admin/users',
       { params: params, withCredentials: true }
     );
   }
 
   postUser(user: FormData) {
-    return this.http.post<{ user: UserGet; error: string }>(
+    return this.http.post<{ user: UserGet; error: string,varified:boolean }>(
       'http://localhost:3000/admin/users',
       user,
       { withCredentials: true }
@@ -34,7 +34,7 @@ export class UserService {
   }
 
   updateUser(user: FormData) {
-    return this.http.put<{ message: String; error: string }>(
+    return this.http.put<{ message: String; error: string , varified:boolean}>(
       'http://localhost:3000/admin/users',
       user,
       { withCredentials: true }
@@ -46,7 +46,7 @@ export class UserService {
       id: id,
       customerId: customerId
     };
-    return this.http.delete<{ message: string; error: string }>(
+    return this.http.delete<{ message: string; error: string,varified:boolean }>(
       'http://localhost:3000/admin/users',
       { params: params, withCredentials: true }
     );

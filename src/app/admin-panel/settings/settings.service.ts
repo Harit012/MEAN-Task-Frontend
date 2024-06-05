@@ -11,7 +11,7 @@ export class SettingsService {
       timeOut:timeOut,
       stops:stops
     }
-    return this.http.patch<{ message:string; error: string }>(
+    return this.http.patch<{ message:string; error: string ,varified: false}>(
       'http://localhost:3000/admin/settings/patchSettings',
        settings,
       {
@@ -21,7 +21,7 @@ export class SettingsService {
   }
 
   getSettings() {
-    return this.http.get<{ settings: Settings; error: string }>(
+    return this.http.get<{ settings: Settings; error: string ,varified: boolean}>(
       'http://localhost:3000/admin/settings/getSettings',
       { withCredentials: true }
     );

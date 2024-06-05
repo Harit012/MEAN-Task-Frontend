@@ -49,7 +49,7 @@ export class VehicleTypeComponent implements OnInit {
     console.log(this.formdata);
 
     this.http
-      .post<{ vehicles: VehicleType[] }>(
+      .post<{ vehicles: VehicleType[] ,error:string,varified: boolean }>(
         'http://localhost:3000/admin/pricing/vehicle-type',
         this.formdata,
         {
@@ -57,7 +57,14 @@ export class VehicleTypeComponent implements OnInit {
         }
       )
       .subscribe((data) => {
-        this.vehiclesList = data.vehicles;
+        if(data.vehicles){
+          this.vehiclesList = data.vehicles;
+        }else if (data.varified == false) {
+          alert('User is not verified');
+          this.authService.userLogOut();
+        } else if (data.error) {
+          alert(data.error);
+        }
       });
     this.vehicleForm.reset();
     this.formdata = new FormData();
@@ -65,7 +72,7 @@ export class VehicleTypeComponent implements OnInit {
 
   getVehiclesData() {
     this.http
-      .get<{ vehicle: VehicleType[] }>(
+      .get<{ vehicle: VehicleType[],varified: boolean,error:string }>(
         'http://localhost:3000/admin/pricing/vehicle-type',
         {
           withCredentials: true,
@@ -74,9 +81,11 @@ export class VehicleTypeComponent implements OnInit {
       .subscribe((data) => {
         if (data.vehicle) {
           this.vehiclesList = data.vehicle;
-        } else {
+        } else if (data.varified == false) {
+          alert('User is not verified');
           this.authService.userLogOut();
-          this.router.navigate(['/login']);
+        } else if (data.error) {
+          alert(data.error);
         }
       });
   }
@@ -85,7 +94,7 @@ export class VehicleTypeComponent implements OnInit {
     this.formdata.append('type', this.vehicleForm.value.type);
 
     this.http
-      .put<{ vehicles: VehicleType[] }>(
+      .put<{ vehicles: VehicleType[] ,error:string,varified: boolean}>(
         'http://localhost:3000/admin/pricing/vehicle-type',
         this.formdata,
         {
@@ -94,11 +103,17 @@ export class VehicleTypeComponent implements OnInit {
       )
       .subscribe(
         (res) => {
-          this.vehiclesList = res.vehicles;
+          if(res.vehicles){
+            this.vehiclesList = res.vehicles;
+          }else if (res.varified == false) {
+            alert('User is not verified');
+            this.authService.userLogOut();
+            return;
+          } else if (res.error) {
+            alert(res.error);
+          }
         },
         (err) => {
-          console.log(err);
-
           alert(err);
         }
       );
@@ -133,7 +148,7 @@ export class VehicleTypeComponent implements OnInit {
 
       // console.log(params);
       this.http
-        .delete<{ vehicles: VehicleType[] }>(
+        .delete<{ vehicles: VehicleType[] ,error:string,varified: boolean}>(
           'http://localhost:3000/admin/pricing/vehicle-type',
           {
             params: params,
@@ -142,7 +157,15 @@ export class VehicleTypeComponent implements OnInit {
         )
         .subscribe(
           (res) => {
-            this.vehiclesList = res.vehicles;
+            if(res.vehicles){
+              this.vehiclesList = res.vehicles;
+            }else if (res.varified == false) {
+              alert('User is not verified');
+              this.authService.userLogOut();
+              return;
+            } else if (res.error) {
+              alert(res.error);
+            }
           },
           (err) => {
             console.log(err);

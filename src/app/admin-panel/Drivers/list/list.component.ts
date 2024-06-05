@@ -13,6 +13,7 @@ import { RecivingZone } from '../../Pricing/city/recivingZone.interface';
 import { DriverService } from './driver.service';
 import { Driver } from './driver.interface';
 import * as bootstrap from 'bootstrap';
+import { AuthService } from '../../../auth/auth.service';
 @Component({
   selector: 'app-list',
   standalone: true,
@@ -39,7 +40,8 @@ export class ListComponent implements OnInit {
   constructor(
     private countryService: CountriesService,
     private cityService: CityService,
-    private driverService: DriverService
+    private driverService: DriverService,
+    private authService: AuthService
   ) {
     this.driverForm = new FormGroup({
       driverName: new FormControl(null, [Validators.required]),
@@ -64,7 +66,11 @@ export class ListComponent implements OnInit {
     this.countryService.getCountries().subscribe((res) => {
       if (res.countries) {
         this.countryList = res.countries;
-      } else {
+      }else if(res.varified === false){
+        alert('User is not verified');
+        this.authService.userLogOut();
+      }
+      else if(res.error){
         alert(res.error);
       }
     });
@@ -81,7 +87,11 @@ export class ListComponent implements OnInit {
       .subscribe((res) => {
         if (res.drivers) {
           this.driversList = res.drivers;
-        } else {
+        }else if(res.varified === false){
+          alert('User is not verified');
+          this.authService.userLogOut();
+        }
+        else if(res.error){
           alert(res.error);
         }
       });
@@ -93,7 +103,11 @@ export class ListComponent implements OnInit {
     this.cityService.getZones(country._id!).subscribe((data) => {
       if (data.zones) {
         this.cityList = data.zones;
-      } else {
+      }else if(data.varified === false){
+        alert('User is not verified');
+        this.authService.userLogOut();
+      }
+      else if(data.error){
         alert(data.error);
       }
     });
@@ -135,10 +149,16 @@ export class ListComponent implements OnInit {
         this.driversList.push(data.driver);
         this.formdata = new FormData();
         this.driverForm.reset();
-      } else {
-        alert(data.error);
+      }else if(data.varified === false){
         this.formdata = new FormData();
         this.driverForm.reset();
+        alert('User is not verified');
+        this.authService.userLogOut();
+      }
+      else if(data.error){
+        this.formdata = new FormData();
+        this.driverForm.reset();
+        alert(data.error);
       }
     });
   }
@@ -169,11 +189,15 @@ export class ListComponent implements OnInit {
         this.formdata = new FormData();
         this.driverForm.reset();
         this.editMode = false;
-      } else {
-        alert(data.error);
+      }else if(data.varified === false){
+        alert('User is not verified');
+        this.authService.userLogOut();
+      }
+      else if(data.error){
         this.formdata = new FormData();
         this.driverForm.reset();
         this.editMode = false;
+        alert(data.error);
       }
     });
   }
@@ -186,7 +210,11 @@ export class ListComponent implements OnInit {
       .subscribe((data) => {
         if (data.message) {
           this.getDrivers();
-        } else {
+        }else if(data.varified === false){
+          alert('User is not verified');
+          this.authService.userLogOut();
+        }
+        else if(data.error){
           alert(data.error);
         }
       });
@@ -240,6 +268,12 @@ export class ListComponent implements OnInit {
           .subscribe((data) => {
             if (data.zones) {
               this.cityList = data.zones;
+            }else if(data.varified === false){
+              alert('User is not verified');
+              this.authService.userLogOut();
+            }
+            else if(data.error){
+              alert(data.error);
             }
           });
         break;
@@ -258,7 +292,11 @@ export class ListComponent implements OnInit {
         if (data.message) {
           let index = this.driversList.indexOf(driver);
           this.driversList.splice(index, 1);
-        } else {
+        }else if(data.varified === false){
+          alert('User is not verified');
+          this.authService.userLogOut();
+        }
+        else if(data.error){
           alert(data.error);
         }
       });
@@ -304,7 +342,15 @@ export class ListComponent implements OnInit {
     this.driverService
       .patchServiceType(this.selectedServiceType, this.driverForService._id!)
       .subscribe((data) => {
-        this.getDrivers();
+        if(data.message){
+          this.getDrivers();
+        }else if(data.varified === false){
+          alert('User is not verified');
+          this.authService.userLogOut();
+        }
+        else if(data.error){
+          alert(data.error);
+        }
       });
   }
 }

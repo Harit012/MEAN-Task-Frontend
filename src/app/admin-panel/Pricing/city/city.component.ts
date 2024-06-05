@@ -7,6 +7,7 @@ import { Country } from '../country/country.interface';
 import { Zone } from './zone.interface';
 import { CityService } from './city.service';
 import { RecivingZone } from './recivingZone.interface';
+import { AuthService } from '../../../auth/auth.service';
 
 @Component({
   selector: 'app-city',
@@ -46,21 +47,29 @@ export class CityComponent implements OnInit {
 
   constructor(
     private countryService: CountriesService,
-    private cityService: CityService
+    private cityService: CityService,
+    private authService: AuthService
   ) {}
   ngOnInit(): void {
     this.countryService
       .getCountries()
-      .pipe(map((data) => data.countries))
-      .subscribe((data: Country[]) => {
-        data.forEach((element: Country) => {
-          this.countries.push({
-            _id: element._id,
-            countryName: element.countryName,
-            countryShortName: element.countryShortName,
-            countryLatLng: element.latlng!,
+      .subscribe((data) => {
+        if(data.countries){
+          let data1: Country[] = data.countries;
+          data1.forEach((element: Country) => {
+            this.countries.push({
+              _id: element._id,
+              countryName: element.countryName,
+              countryShortName: element.countryShortName,
+              countryLatLng: element.latlng!,
+            });
           });
-        });
+        }else if (data.varified == false) {
+          alert('User is not verified');
+          this.authService.userLogOut();
+        } else if (data.error) {
+          alert(data.error);
+        }
       });
     this.initMap();
   }
@@ -235,7 +244,10 @@ export class CityComponent implements OnInit {
         .subscribe((data) => {
           if (data.zone) {
             this.filteredZones[this.updatedInputIndex] = data.zone;
-          } else {
+          }else if (data.varified == false) {
+            alert('User is not verified');
+            this.authService.userLogOut();
+          } else if (data.error) {
             alert(data.error);
           }
         });
@@ -272,7 +284,10 @@ export class CityComponent implements OnInit {
             this.map.setCenter(this.selectedCountry.countryLatLng);
             this.map.setZoom(6);
             citybox.value = '';
-          } else {
+          } else if (data.varified == false) {
+            alert('User is not verified');
+            this.authService.userLogOut();
+          } else if (data.error) {
             alert(data.error);
           }
         },
@@ -288,7 +303,10 @@ export class CityComponent implements OnInit {
     this.cityService.getZones(this.selectedCountry._id!).subscribe((data) => {
       if (data.zones) {
         this.filteredZones = data.zones;
-      } else {
+      }else if (data.varified == false) {
+        alert('User is not verified');
+        this.authService.userLogOut();
+      } else if (data.error) {
         alert(data.error);
       }
     });
