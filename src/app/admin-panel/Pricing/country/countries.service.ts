@@ -24,4 +24,9 @@ export class CountriesService {
       { withCredentials: true }
     );
   }
+
+  getCountriesFromApi(){
+    
+    return this.http.get<any>('https://restcountries.com/v3.1/all')
+  }
 }

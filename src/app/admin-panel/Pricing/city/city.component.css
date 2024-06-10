@@ -72,3 +72,13 @@
         font-size: 16px;
         transition: border-color 0.3s, box-shadow 0.3s;
   } */
+
+hr{
+    height: 3px;
+    background-color: rgb(0, 0, 0);
+}
+.scrollable-section{
+  max-height: 60vh;
+  overflow-y: auto;
+  overflow-x: auto;
+}

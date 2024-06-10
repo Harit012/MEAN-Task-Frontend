@@ -67,11 +67,21 @@ export class ListComponent implements OnInit {
       if (res.countries) {
         this.countryList = res.countries;
       }else if(res.varified === false){
-        alert('User is not verified');
+        let toast = bootstrap.Toast.getOrCreateInstance(
+          document.getElementById('FailureToast') as HTMLElement
+        )
+        let inToast = document.getElementById('inFailureToast') as HTMLElement
+        inToast.innerText ="User is not Validated";
+        toast.show();
         this.authService.userLogOut();
       }
       else if(res.error){
-        alert(res.error);
+        let toast = bootstrap.Toast.getOrCreateInstance(
+          document.getElementById('FailureToast') as HTMLElement
+        )
+        let inToast = document.getElementById('inFailureToast') as HTMLElement
+        inToast.innerText =res.error;
+        toast.show();
       }
     });
   }
@@ -88,11 +98,21 @@ export class ListComponent implements OnInit {
         if (res.drivers) {
           this.driversList = res.drivers;
         }else if(res.varified === false){
-          alert('User is not verified');
+          let toast = bootstrap.Toast.getOrCreateInstance(
+            document.getElementById('FailureToast') as HTMLElement
+          )
+          let inToast = document.getElementById('inFailureToast') as HTMLElement
+          inToast.innerText ="User is not Validated";
+          toast.show();
           this.authService.userLogOut();
         }
         else if(res.error){
-          alert(res.error);
+          let toast = bootstrap.Toast.getOrCreateInstance(
+            document.getElementById('FailureToast') as HTMLElement
+          )
+          let inToast = document.getElementById('inFailureToast') as HTMLElement
+          inToast.innerText =res.error;
+          toast.show();
         }
       });
   }
@@ -104,11 +124,16 @@ export class ListComponent implements OnInit {
       if (data.zones) {
         this.cityList = data.zones;
       }else if(data.varified === false){
-        alert('User is not verified');
+        // alert('User is not verified');
         this.authService.userLogOut();
       }
       else if(data.error){
-        alert(data.error);
+        let toast = bootstrap.Toast.getOrCreateInstance(
+          document.getElementById('FailureToast') as HTMLElement
+        )
+        let inToast = document.getElementById('inFailureToast') as HTMLElement
+        inToast.innerText =data.error;
+        toast.show();
       }
     });
   }
@@ -150,15 +175,18 @@ export class ListComponent implements OnInit {
         this.formdata = new FormData();
         this.driverForm.reset();
       }else if(data.varified === false){
-        this.formdata = new FormData();
-        this.driverForm.reset();
-        alert('User is not verified');
+        // alert('User is not verified');
         this.authService.userLogOut();
       }
       else if(data.error){
         this.formdata = new FormData();
         this.driverForm.reset();
-        alert(data.error);
+        let toast = bootstrap.Toast.getOrCreateInstance(
+          document.getElementById('FailureToast') as HTMLElement
+        )
+        let inToast = document.getElementById('inFailureToast') as HTMLElement
+        inToast.innerText =data.error;
+        toast.show();
       }
     });
   }
@@ -190,14 +218,19 @@ export class ListComponent implements OnInit {
         this.driverForm.reset();
         this.editMode = false;
       }else if(data.varified === false){
-        alert('User is not verified');
+        // alert('User is not verified');
         this.authService.userLogOut();
       }
       else if(data.error){
         this.formdata = new FormData();
         this.driverForm.reset();
         this.editMode = false;
-        alert(data.error);
+        let toast = bootstrap.Toast.getOrCreateInstance(
+          document.getElementById('FailureToast') as HTMLElement
+        )
+        let inToast = document.getElementById('inFailureToast') as HTMLElement
+        inToast.innerText =data.error;
+        toast.show();
       }
     });
   }
@@ -211,11 +244,16 @@ export class ListComponent implements OnInit {
         if (data.message) {
           this.getDrivers();
         }else if(data.varified === false){
-          alert('User is not verified');
+          // alert('User is not verified');
           this.authService.userLogOut();
         }
         else if(data.error){
-          alert(data.error);
+          let toast = bootstrap.Toast.getOrCreateInstance(
+            document.getElementById('FailureToast') as HTMLElement
+          )
+          let inToast = document.getElementById('inFailureToast') as HTMLElement
+          inToast.innerText =data.error;
+          toast.show();
         }
       });
   }
@@ -269,11 +307,16 @@ export class ListComponent implements OnInit {
             if (data.zones) {
               this.cityList = data.zones;
             }else if(data.varified === false){
-              alert('User is not verified');
+              // alert('User is not verified');
               this.authService.userLogOut();
             }
             else if(data.error){
-              alert(data.error);
+              let toast = bootstrap.Toast.getOrCreateInstance(
+                document.getElementById('FailureToast') as HTMLElement
+              )
+              let inToast = document.getElementById('inFailureToast') as HTMLElement
+              inToast.innerText =data.error;
+              toast.show();
             }
           });
         break;
@@ -293,11 +336,16 @@ export class ListComponent implements OnInit {
           let index = this.driversList.indexOf(driver);
           this.driversList.splice(index, 1);
         }else if(data.varified === false){
-          alert('User is not verified');
+          // alert('User is not verified');
           this.authService.userLogOut();
         }
         else if(data.error){
-          alert(data.error);
+          let toast = bootstrap.Toast.getOrCreateInstance(
+            document.getElementById('FailureToast') as HTMLElement
+          )
+          let inToast = document.getElementById('inFailureToast') as HTMLElement
+          inToast.innerText =data.error;
+          toast.show();
         }
       });
     }
@@ -305,8 +353,12 @@ export class ListComponent implements OnInit {
   // when user wants to go to next page
   onNextPage() {
     if (this.driversList.length < 10) {
-      alert('No more pages');
-    } else {
+      let toast = bootstrap.Toast.getOrCreateInstance(
+        document.getElementById('FailureToast') as HTMLElement
+      )
+      let inToast = document.getElementById('inFailureToast') as HTMLElement
+      inToast.innerText ="No more Pages";
+      toast.show();    } else {
       this.currentPage = this.currentPage + 1;
       this.getDrivers();
     }
@@ -317,7 +369,12 @@ export class ListComponent implements OnInit {
       this.currentPage = this.currentPage - 1;
       this.getDrivers();
     } else {
-      alert('Already on first page');
+      let toast = bootstrap.Toast.getOrCreateInstance(
+        document.getElementById('FailureToast') as HTMLElement
+      )
+      let inToast = document.getElementById('inFailureToast') as HTMLElement
+      inToast.innerText ="Already on First Page";
+      toast.show();
     }
   }
   // when user click service type
@@ -343,13 +400,24 @@ export class ListComponent implements OnInit {
       .patchServiceType(this.selectedServiceType, this.driverForService._id!)
       .subscribe((data) => {
         if(data.message){
+          let toast = bootstrap.Toast.getOrCreateInstance(
+            document.getElementById('SuccessToast') as HTMLElement
+          )
+          let inToast = document.getElementById('inToast') as HTMLElement
+          inToast.innerText = "Updated";
+          toast.show();
           this.getDrivers();
         }else if(data.varified === false){
-          alert('User is not verified');
+          // alert('User is not verified');
           this.authService.userLogOut();
         }
         else if(data.error){
-          alert(data.error);
+          let toast = bootstrap.Toast.getOrCreateInstance(
+            document.getElementById('FailureToast2') as HTMLElement
+          )
+          let inToast = document.getElementById('inFailureToast2') as HTMLElement
+          inToast.innerText =data.error.toString();
+          toast.show();
         }
       });
   }

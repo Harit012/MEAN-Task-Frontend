@@ -14,6 +14,7 @@ import { HttpClient } from '@angular/common/http';
 import { RecivingZone } from '../city/recivingZone.interface';
 import { AuthService } from '../../../auth/auth.service';
 import { VehiclePricingService } from './vehicle-pricing.service';
+import * as bootstrap from 'bootstrap';
 
 @Component({
   selector: 'app-vehicle-pricing',
@@ -80,10 +81,15 @@ export class VehiclePricingComponent implements OnInit, AfterViewChecked {
       if (data.countries) {
         this.countryList = data.countries;
       } else if (data.varified == false) {
-        alert('User is not verified');
+        // alert('User is not verified');
         this.authService.userLogOut();
       } else if (data.error) {
-        alert(data.error);
+        let toast = bootstrap.Toast.getOrCreateInstance(
+          document.getElementById('FailureToast') as HTMLElement
+        );
+        let inToast = document.getElementById('inFailureToast') as HTMLElement;
+        inToast.innerText = data.error;
+        toast.show();
       }
     });
 
@@ -91,10 +97,15 @@ export class VehiclePricingComponent implements OnInit, AfterViewChecked {
       if (data.vehiclePricing) {
         this.pricingList = data.vehiclePricing;
       } else if (data.varified == false) {
-        alert('User is not verified');
+        // alert('User is not verified');
         this.authService.userLogOut();
       } else if (data.error) {
-        alert(data.error);
+        let toast = bootstrap.Toast.getOrCreateInstance(
+          document.getElementById('FailureToast') as HTMLElement
+        );
+        let inToast = document.getElementById('inFailureToast') as HTMLElement;
+        inToast.innerText = data.error;
+        toast.show();
       }
     });
   }
@@ -118,10 +129,15 @@ export class VehiclePricingComponent implements OnInit, AfterViewChecked {
       if (data.zones) {
         this.cityList = data.zones;
       } else if (data.varified == false) {
-        alert('User is not verified');
+        // alert('User is not verified');
         this.authService.userLogOut();
       } else if (data.error) {
-        alert(data.error);
+        let toast = bootstrap.Toast.getOrCreateInstance(
+          document.getElementById('FailureToast') as HTMLElement
+        );
+        let inToast = document.getElementById('inFailureToast') as HTMLElement;
+        inToast.innerText = data.error;
+        toast.show();
       }
     });
   }
@@ -182,16 +198,33 @@ export class VehiclePricingComponent implements OnInit, AfterViewChecked {
           tempcountry.selectedIndex = 0;
           tempcity.selectedIndex = 0;
           this.cityList = [];
+          let toast = bootstrap.Toast.getOrCreateInstance(
+            document.getElementById('SuccessToast') as HTMLElement
+          );
+          let inToast = document.getElementById('inToast') as HTMLElement;
+          inToast.innerText = 'Vehicle pricing Added Successfully';
+          toast.show();
         } else if (data.varified == false) {
-          alert('User is not verified');
+          // alert('User is not verified');
           this.authService.userLogOut();
         } else if (data.error) {
-          alert(data.error);
+          let toast = bootstrap.Toast.getOrCreateInstance(
+            document.getElementById('FailureToast') as HTMLElement
+          );
+          let inToast = document.getElementById(
+            'inFailureToast'
+          ) as HTMLElement;
+          inToast.innerText = data.error;
+          toast.show();
         }
       });
     } else {
-      alert('Invalid form');
-    }
+      let toast = bootstrap.Toast.getOrCreateInstance(
+        document.getElementById('FailureToast') as HTMLElement
+      );
+      let inToast = document.getElementById('inFailureToast') as HTMLElement;
+      inToast.innerText = "Invalid Form";
+      toast.show();    }
   }
   onEdit(i: number) {
     this.editMode = true;
@@ -220,21 +253,35 @@ export class VehiclePricingComponent implements OnInit, AfterViewChecked {
         if (data.vehiclePricing) {
           this.pricingList[this.editIndex] = data.vehiclePricing;
           this.leaveEditMode();
+          let toast = bootstrap.Toast.getOrCreateInstance(
+            document.getElementById('SuccessToast') as HTMLElement
+          );
+          let inToast = document.getElementById('inToast') as HTMLElement;
+          inToast.innerText = 'Vehicle Pricing Updated Successfully';
+          toast.show();
         } else if (data.varified == false) {
-          alert('User is not verified');
+          // alert('User is not verified');
           this.authService.userLogOut();
         } else if (data.error) {
-          alert(data.error);
-        }
+          let toast = bootstrap.Toast.getOrCreateInstance(
+            document.getElementById('FailureToast') as HTMLElement
+          );
+          let inToast = document.getElementById('inFailureToast') as HTMLElement;
+          inToast.innerText = data.error;
+          toast.show();        }
       });
     } else {
-      alert('invalid form');
-    }
+      let toast = bootstrap.Toast.getOrCreateInstance(
+        document.getElementById('FailureToast') as HTMLElement
+      );
+      let inToast = document.getElementById('inFailureToast') as HTMLElement;
+      inToast.innerText = "Invalid Form";
+      toast.show();    }
   }
 
-  isFieldValid(field: string): boolean {
-    return this.vehiclePricingForm.get(field)?.valid || false;
-  }
+  // isFieldValid(field: string): boolean {
+  //   return this.vehiclePricingForm.get(field)?.valid || false;
+  // }
 
   // Method to check if a field is touched or dirty and invalid
   isFieldInvalid(field: string): boolean {

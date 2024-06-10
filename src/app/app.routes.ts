@@ -1,12 +1,16 @@
 import { Routes } from '@angular/router';
 import { UserLoginComponent } from './auth/user-login/user-login.component';
 import { authorizationGuard } from './auth/authorization.guard';
+import { wildcardGuard } from './auth/wildcard.guard';
 
 export const routes: Routes = [
   {
     path: '',
-    redirectTo: '/login',
+    // canMatch: [wildcardGuard],
+    // canActivate:[wildcardGuard],
+    redirectTo: 'admin',
     pathMatch: 'full',
+
   },
   {
     path: 'login',
@@ -102,7 +106,8 @@ export const routes: Routes = [
   },
   {
     path: '**',
+    // canActivate: [wildcardGuard],
     redirectTo: '/admin',
     pathMatch: 'full',
-  }
+  },
 ];

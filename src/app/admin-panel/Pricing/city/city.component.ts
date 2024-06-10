@@ -1,6 +1,5 @@
 import { Component, OnInit } from '@angular/core';
 import { CountriesService } from '../country/countries.service';
-import { map } from 'rxjs';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule } from '@angular/forms';
 import { Country } from '../country/country.interface';
@@ -8,6 +7,9 @@ import { Zone } from './zone.interface';
 import { CityService } from './city.service';
 import { RecivingZone } from './recivingZone.interface';
 import { AuthService } from '../../../auth/auth.service';
+import * as bootstrap from 'bootstrap';
+import { Loader } from 'google-maps';
+import { environment } from '../../../../environments/environment';
 
 @Component({
   selector: 'app-city',
@@ -44,33 +46,356 @@ export class CityComponent implements OnInit {
   zoneName: string = '';
   countryName: string = '';
   countryShortName: string = '';
+  googleMapStyles: google.maps.MapTypeStyle[] = [
+    {
+      elementType: 'geometry',
+      stylers: [
+        {
+          color: '#1d2c4d',
+        },
+      ],
+    },
+    {
+      elementType: 'labels.text.fill',
+      stylers: [
+        {
+          color: '#8ec3b9',
+        },
+      ],
+    },
+    {
+      elementType: 'labels.text.stroke',
+      stylers: [
+        {
+          color: '#1a3646',
+        },
+      ],
+    },
+    {
+      featureType: 'administrative',
+      elementType: 'geometry',
+      stylers: [
+        {
+          visibility: 'off',
+        },
+      ],
+    },
+    {
+      featureType: 'administrative.country',
+      elementType: 'geometry.stroke',
+      stylers: [
+        {
+          color: '#4b6878',
+        },
+      ],
+    },
+    {
+      featureType: 'administrative.land_parcel',
+      stylers: [
+        {
+          visibility: 'off',
+        },
+      ],
+    },
+    {
+      featureType: 'administrative.land_parcel',
+      elementType: 'labels.text.fill',
+      stylers: [
+        {
+          color: '#64779e',
+        },
+      ],
+    },
+    {
+      featureType: 'administrative.neighborhood',
+      stylers: [
+        {
+          visibility: 'off',
+        },
+      ],
+    },
+    {
+      featureType: 'administrative.province',
+      elementType: 'geometry.stroke',
+      stylers: [
+        {
+          color: '#4b6878',
+        },
+      ],
+    },
+    {
+      featureType: 'landscape.man_made',
+      elementType: 'geometry.stroke',
+      stylers: [
+        {
+          color: '#334e87',
+        },
+      ],
+    },
+    {
+      featureType: 'landscape.natural',
+      elementType: 'geometry',
+      stylers: [
+        {
+          color: '#023e58',
+        },
+      ],
+    },
+    {
+      featureType: 'poi',
+      stylers: [
+        {
+          visibility: 'off',
+        },
+      ],
+    },
+    {
+      featureType: 'poi',
+      elementType: 'geometry',
+      stylers: [
+        {
+          color: '#283d6a',
+        },
+      ],
+    },
+    {
+      featureType: 'poi',
+      elementType: 'labels.text',
+      stylers: [
+        {
+          visibility: 'off',
+        },
+      ],
+    },
+    {
+      featureType: 'poi',
+      elementType: 'labels.text.fill',
+      stylers: [
+        {
+          color: '#6f9ba5',
+        },
+      ],
+    },
+    {
+      featureType: 'poi',
+      elementType: 'labels.text.stroke',
+      stylers: [
+        {
+          color: '#1d2c4d',
+        },
+      ],
+    },
+    {
+      featureType: 'poi.park',
+      elementType: 'geometry.fill',
+      stylers: [
+        {
+          color: '#023e58',
+        },
+      ],
+    },
+    {
+      featureType: 'poi.park',
+      elementType: 'labels.text.fill',
+      stylers: [
+        {
+          color: '#3C7680',
+        },
+      ],
+    },
+    {
+      featureType: 'road',
+      elementType: 'geometry',
+      stylers: [
+        {
+          color: '#304a7d',
+        },
+      ],
+    },
+    {
+      featureType: 'road',
+      elementType: 'labels',
+      stylers: [
+        {
+          visibility: 'off',
+        },
+      ],
+    },
+    {
+      featureType: 'road',
+      elementType: 'labels.icon',
+      stylers: [
+        {
+          visibility: 'off',
+        },
+      ],
+    },
+    {
+      featureType: 'road',
+      elementType: 'labels.text.fill',
+      stylers: [
+        {
+          color: '#98a5be',
+        },
+      ],
+    },
+    {
+      featureType: 'road',
+      elementType: 'labels.text.stroke',
+      stylers: [
+        {
+          color: '#1d2c4d',
+        },
+      ],
+    },
+    {
+      featureType: 'road.highway',
+      elementType: 'geometry',
+      stylers: [
+        {
+          color: '#2c6675',
+        },
+      ],
+    },
+    {
+      featureType: 'road.highway',
+      elementType: 'geometry.stroke',
+      stylers: [
+        {
+          color: '#255763',
+        },
+      ],
+    },
+    {
+      featureType: 'road.highway',
+      elementType: 'labels.text.fill',
+      stylers: [
+        {
+          color: '#b0d5ce',
+        },
+      ],
+    },
+    {
+      featureType: 'road.highway',
+      elementType: 'labels.text.stroke',
+      stylers: [
+        {
+          color: '#023e58',
+        },
+      ],
+    },
+    {
+      featureType: 'transit',
+      stylers: [
+        {
+          visibility: 'off',
+        },
+      ],
+    },
+    {
+      featureType: 'transit',
+      elementType: 'labels.text.fill',
+      stylers: [
+        {
+          color: '#98a5be',
+        },
+      ],
+    },
+    {
+      featureType: 'transit',
+      elementType: 'labels.text.stroke',
+      stylers: [
+        {
+          color: '#1d2c4d',
+        },
+      ],
+    },
+    {
+      featureType: 'transit.line',
+      elementType: 'geometry.fill',
+      stylers: [
+        {
+          color: '#283d6a',
+        },
+      ],
+    },
+    {
+      featureType: 'transit.station',
+      elementType: 'geometry',
+      stylers: [
+        {
+          color: '#3a4762',
+        },
+      ],
+    },
+    {
+      featureType: 'water',
+      elementType: 'geometry',
+      stylers: [
+        {
+          color: '#0e1626',
+        },
+      ],
+    },
+    {
+      featureType: 'water',
+      elementType: 'geometry.fill',
+      stylers: [
+        {
+          color: '#ededed',
+        },
+      ],
+    },
+    {
+      featureType: 'water',
+      elementType: 'labels.text',
+      stylers: [
+        {
+          visibility: 'off',
+        },
+      ],
+    },
+    {
+      featureType: 'water',
+      elementType: 'labels.text.fill',
+      stylers: [
+        {
+          color: '#4e6d70',
+        },
+      ],
+    },
+  ];
 
   constructor(
     private countryService: CountriesService,
     private cityService: CityService,
     private authService: AuthService
-  ) {}
+  ) {
+  }
   ngOnInit(): void {
-    this.countryService
-      .getCountries()
-      .subscribe((data) => {
-        if(data.countries){
-          let data1: Country[] = data.countries;
-          data1.forEach((element: Country) => {
-            this.countries.push({
-              _id: element._id,
-              countryName: element.countryName,
-              countryShortName: element.countryShortName,
-              countryLatLng: element.latlng!,
-            });
+    this.countryService.getCountries().subscribe((data) => {
+      if (data.countries) {
+        let data1: Country[] = data.countries;
+        data1.forEach((element: Country) => {
+          this.countries.push({
+            _id: element._id,
+            countryName: element.countryName,
+            countryShortName: element.countryShortName,
+            countryLatLng: element.latlng!,
           });
-        }else if (data.varified == false) {
-          alert('User is not verified');
-          this.authService.userLogOut();
-        } else if (data.error) {
-          alert(data.error);
-        }
-      });
+        });
+      } else if (data.varified == false) {
+        // alert('User is not verified');
+        this.authService.userLogOut();
+      } else if (data.error) {
+        let toast = bootstrap.Toast.getOrCreateInstance(
+          document.getElementById('FailureToast') as HTMLElement
+        );
+        let inToast = document.getElementById('inFailureToast') as HTMLElement;
+        inToast.innerText = data.error;
+        toast.show();
+      }
+    });
     this.initMap();
   }
 
@@ -128,8 +453,22 @@ export class CityComponent implements OnInit {
       {
         center: { lat: 22.3039, lng: 70.8022 },
         zoom: 10,
+        styles:this.googleMapStyles,
       }
     );
+
+    // let loader: Loader = new Loader(environment.GOOGLE_MAPS_API_KEY);
+
+    // loader.load().then(() => {
+    //   this.map = new google.maps.Map(
+    //     document.getElementById('map') as HTMLElement,
+    //     {
+    //       center: { lat: 51.678418, lng: 7.809007 },
+    //       zoom: 10,
+    //       styles: this.googleMapStyles,
+    //     }
+    //   );
+    // });
 
     this.drawingManager = new google.maps.drawing.DrawingManager({
       drawingMode: google.maps.drawing.OverlayType.POLYGON,
@@ -192,7 +531,7 @@ export class CityComponent implements OnInit {
     this.updatedInputIndex = i;
     this.editMode = true;
     this.map.panTo(zone.boundry[0]);
-    this.map.setZoom(9)
+    this.map.setZoom(9);
     this.editId = zone._id!;
     this.editedpolygon = new google.maps.Polygon({
       paths: zone.boundry,
@@ -244,11 +583,24 @@ export class CityComponent implements OnInit {
         .subscribe((data) => {
           if (data.zone) {
             this.filteredZones[this.updatedInputIndex] = data.zone;
-          }else if (data.varified == false) {
-            alert('User is not verified');
+            let toast = bootstrap.Toast.getOrCreateInstance(
+              document.getElementById('SuccessToast') as HTMLElement
+            );
+            let inToast = document.getElementById('inToast') as HTMLElement;
+            inToast.innerText = 'Zone Updated Successfully';
+            toast.show();
+          } else if (data.varified == false) {
+            // alert('User is not verified');
             this.authService.userLogOut();
           } else if (data.error) {
-            alert(data.error);
+            let toast = bootstrap.Toast.getOrCreateInstance(
+              document.getElementById('FailureToast') as HTMLElement
+            );
+            let inToast = document.getElementById(
+              'inFailureToast'
+            ) as HTMLElement;
+            inToast.innerText = data.error;
+            toast.show();
           }
         });
       this.updatedPolyCoordinates = [];
@@ -256,7 +608,12 @@ export class CityComponent implements OnInit {
       this.editedpolygon.setMap(null);
       this.map.panTo(this.center);
     } else {
-      alert('Invalid criteria');
+      let toast = bootstrap.Toast.getOrCreateInstance(
+        document.getElementById('FailureToast') as HTMLElement
+      );
+      let inToast = document.getElementById('inFailureToast') as HTMLElement;
+      inToast.innerText = 'Invalid values, please try again!';
+      toast.show();
     }
   }
   addNewZone() {
@@ -270,44 +627,62 @@ export class CityComponent implements OnInit {
         // countryName: this.countryName,
         // countryShortName: this.countryShortName,
       };
-      this.cityService.addZone(zone).subscribe(
-        (data) => {
-          if (data.zones) {
-            this.filteredZones = data.zones;
-            this.zoneName = '';
-            this.polygon.setMap(null);
-            this.map.panTo({ lat: 22.3039, lng: 70.8022 });
-            this.drawingManager.setOptions({
-              drawingMode: null,
-              drawingControl: false,
-            });
-            this.map.setCenter(this.selectedCountry.countryLatLng);
-            this.map.setZoom(6);
-            citybox.value = '';
-          } else if (data.varified == false) {
-            alert('User is not verified');
-            this.authService.userLogOut();
-          } else if (data.error) {
-            alert(data.error);
-          }
-        },
-        (err) => {
-          alert(err);
+      this.cityService.addZone(zone).subscribe((data) => {
+        if (data.zones) {
+          this.filteredZones = data.zones;
+          let toast = bootstrap.Toast.getOrCreateInstance(
+            document.getElementById('SuccessToast') as HTMLElement
+          );
+          let inToast = document.getElementById('inToast') as HTMLElement;
+          inToast.innerText = 'Zone added Successfully';
+          toast.show();
+          this.zoneName = '';
+          this.polygon.setMap(null);
+          this.map.panTo({ lat: 22.3039, lng: 70.8022 });
+          this.drawingManager.setOptions({
+            drawingMode: null,
+            drawingControl: false,
+          });
+          this.map.setCenter(this.selectedCountry.countryLatLng);
+          this.map.setZoom(6);
+          citybox.value = '';
+        } else if (data.varified == false) {
+          // alert('User is not verified');
+          this.authService.userLogOut();
+        } else if (data.error) {
+          let toast = bootstrap.Toast.getOrCreateInstance(
+            document.getElementById('FailureToast') as HTMLElement
+          );
+          let inToast = document.getElementById(
+            'inFailureToast'
+          ) as HTMLElement;
+          inToast.innerText = data.error;
+          toast.show();
         }
-      );
+      });
     } else {
-      alert('zone has no boundries');
+      let toast = bootstrap.Toast.getOrCreateInstance(
+        document.getElementById('FailureToast') as HTMLElement
+      );
+      let inToast = document.getElementById('inFailureToast') as HTMLElement;
+      inToast.innerText = 'zone has no boundries';
+      toast.show();
     }
   }
   getZone() {
     this.cityService.getZones(this.selectedCountry._id!).subscribe((data) => {
       if (data.zones) {
         this.filteredZones = data.zones;
-      }else if (data.varified == false) {
-        alert('User is not verified');
+      } else if (data.varified == false) {
+        // alert('User is not verified');
         this.authService.userLogOut();
       } else if (data.error) {
-        alert(data.error);
+        let toast = bootstrap.Toast.getOrCreateInstance(
+          document.getElementById('FailureToast') as HTMLElement
+        );
+        let inToast = document.getElementById('inFailureToast') as HTMLElement;
+        inToast.innerText = data.error;
+        toast.show();
       }
     });
   }

@@ -1,4 +1,4 @@
-<div class="auth-page">
+<!-- <div class="auth-page">
     <div class="container page">
       <div class="row">
         <div class="col-md-6 offset-md-3 col-xs-12 mt-5">
@@ -28,12 +28,96 @@
       </div>
     </div>
   </div>
-  
+   -->
 
+<!-- <div class="container d-flex justify-content-center " style="width: 100dvw;height: 100vwh;">
+  <div id="box" class="box align-self-center p-4" style="width:30%">
+    <form class="mb-3" [formGroup]="form" (ngSubmit)="onSubmit()">
+      <fieldset class="form-group">
+        <input
+          type="email"
+          class="form-control form-control-lg"
+          placeholder="email"
+          formControlName="email"
+          required="required"
+        />
+      </fieldset>
+      <fieldset class="form-group">
+        <input
+          type="password"
+          class="form-control form-control-lg"
+          placeholder="Password"
+          formControlName="password"
+          required="required"
+        />
+      </fieldset>
+      <button type="submit" class="btn btn-lg btn-success pull-xs-right" [disabled]="form.invalid">Submit</button>&nbsp;&nbsp;
+    </form>
+  </div>
+</div> -->
+<div
+    id="FailureToast"
+    class="toast align-items-center text-bg-danger fs-5 border-0"
+    role="success"
+    aria-live="assertive"
+    aria-atomic="true"
+    style="z-index: 5;position: fixed;top: 10 ewm;right: 0;"
+  >
+    <div class="toast-body d-flex justify-content-between" >
+      <p id="inFailureToast"></p>
+      <button
+        type="button"
+        class="btn-close align-self-flex-end"
+        data-bs-dismiss="toast"
+        aria-label="Close"
+      ></button>
+    </div>
+  </div>
+<section class="vh-100" id="mainSection">
+  <div class="container py-5 h-100">
+    <div class="row d-flex justify-content-center align-items-center h-100">
+      <div class="col-12 col-md-8 col-lg-6 col-xl-5">
+        <form [formGroup]="form" (ngSubmit)="onSubmit()">
+          <div class="card shadow-2-strong" style="border-radius: 1rem">
+            <div
+              class="card-body p-5 text-center"
+              id="loginCard"
+            >
+              <p class="mb-5 fs-1" id="loginTitle" ><b>Log in</b></p>
 
+              <div data-mdb-input-init class="form-outline mb-4">
+                <input
+                  type="email"
+                  class="form-control form-control-lg"
+                  placeholder="Email"
+                  formControlName="email"
+                  required="required"
+                />
+              </div>
 
-   
-  
+              <div data-mdb-input-init class="form-outline mb-4">
+                <input
+                  type="password"
+                  class="form-control form-control-lg"
+                  placeholder="Password"
+                  formControlName="password"
+                  required="required"
+                />
+              </div>
 
+              <button
+                id="loginButton"
+                class="btn btn-lg btn-block"
+                type="submit"
+              >
+                Login
+              </button>
 
-
+              <hr class="my-4" />
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</section>

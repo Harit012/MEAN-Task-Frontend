@@ -1,7 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { SettingsService } from './settings.service';
 import { CommonModule } from '@angular/common';
-import { Settings } from './settings.interface';
 import { AuthService } from '../../auth/auth.service';
 import * as bootstrap from 'bootstrap';
 
@@ -32,11 +31,15 @@ export class SettingsComponent implements OnInit {
         this.selectedTimeOut = data.settings.timeOut;
         this.selectedStops = data.settings.stops;
       }else if (data.varified == false) {
-        console.log(data)
-        alert('User is not verified');
+        // alert('User is not verified');
         this.authService.userLogOut();
       } else if (data.error) {
-        alert(data.error);
+        let toast = bootstrap.Toast.getOrCreateInstance(
+          document.getElementById('settingsFailureToast') as HTMLElement
+        )
+        let inToast = document.getElementById('inFailureToast') as HTMLElement
+        inToast.innerText = data.error;
+        toast.show();
       }
     });
   }
@@ -65,10 +68,15 @@ export class SettingsComponent implements OnInit {
           inToast.innerText = "Settings has been saved";
           toast.show();
         }else if (data.varified == false) {
-          alert('User is not verified');
+          // alert('User is not verified');
           this.authService.userLogOut();
         } else if (data.error) {
-          alert(data.error);
+          let toast = bootstrap.Toast.getOrCreateInstance(
+            document.getElementById('settingsFailureToast') as HTMLElement
+          )
+          let inToast = document.getElementById('inFailureToast') as HTMLElement
+          inToast.innerText =data.error;
+          toast.show();
         }
       });
   }

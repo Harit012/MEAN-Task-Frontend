@@ -1,4 +1,43 @@
 <div class="" style="width: calc(100dvw - 260px)">
+  <!-- success Toasts -->
+  <div
+    id="SuccessToast"
+    class="toast align-items-center text-bg-success fs-5 border-0"
+    role="success"
+    aria-live="assertive"
+    aria-atomic="true"
+    style="z-index: 5; position: fixed; top: 10 ewm; right: 0"
+  >
+    <div class="toast-body d-flex justify-content-between">
+      <p id="inToast"></p>
+      <button
+        type="button"
+        class="btn-close align-self-flex-end"
+        data-bs-dismiss="toast"
+        aria-label="Close"
+      ></button>
+    </div>
+  </div>
+  <!-- error Toasts -->
+  <div
+    id="FailureToast"
+    class="toast align-items-center text-bg-danger fs-5 border-0"
+    role="success"
+    aria-live="assertive"
+    aria-atomic="true"
+    style="z-index: 5; position: fixed; top: 10 ewm; right: 0"
+  >
+    <div class="toast-body d-flex justify-content-between">
+      <p id="inFailureToast"></p>
+      <button
+        type="button"
+        class="btn-close align-self-flex-end"
+        data-bs-dismiss="toast"
+        aria-label="Close"
+      ></button>
+    </div>
+  </div>
+
   <div
     class="row p-2 d-flex justify-content-between"
     style="background-color: rgb(62, 71, 80); color: aliceblue"
@@ -37,7 +76,7 @@
         class="btn btn-primary"
         data-bs-toggle="modal"
         data-bs-target="#AddDriverModal"
-        (click)="editMode=false"
+        (click)="editMode = false"
       >
         Add
       </button>
@@ -56,101 +95,100 @@
   </div>
   <hr />
   <div>
-  @if(driversList.length > 0){
-  <div class=" mt-3 scrollable-section">
-    <div
-      class="row mb-2 fs-5"
-      *ngFor="let driver of driversList; index as i"
-    >
-      <div class="col-1 align-self-center">
-        <p class="ps-4">{{ currentPage * 10 + (i + 1) }}</p>
-      </div>
-      <div class="col-2 align-self-center">
-        <img
-          src="http://localhost:3000/{{ driver.driverProfile }}"
-          alt="{{ driver.driverProfile }}"
-          height="100px"
-          width="150px"
-        />
-      </div>
-      <div class="col-1 align-self-center">
-        <p>{{ driver.driverName }}</p>
-      </div>
-      <div class="col-2 align-self-center">
-        <p>{{ driver.driverEmail }}</p>
-      </div>
-      <div class="col-1 align-self-center ">
-        <label class="switch">
-          <input
-            type="checkbox"
-            id="driverApprovel"
-            (change)="onApprove(i)"
-            [checked]="driver.approved"
+    @if(driversList.length > 0){
+    <div class="mt-3 scrollable-section">
+      <div class="row mb-2 fs-5" *ngFor="let driver of driversList; index as i">
+        <div class="col-1 align-self-center">
+          <p class="ps-4">{{ currentPage * 10 + (i + 1) }}</p>
+        </div>
+        <div class="col-2 align-self-center">
+          <img
+            src="http://localhost:3000/{{ driver.driverProfile }}"
+            alt="{{ driver.driverProfile }}"
+            height="100px"
+            width="150px"
           />
-          <span class="slider round"></span>
-        </label>
-      </div>
-      <div class="col-1 align-self-center">
-        <p>{{ driver.countryCode }}</p>
-      </div>
-      <div class="col-2 align-self-center">
-        <p>{{ driver.phone }}</p>
-      </div>
-      <div class="col-2 align-self-center">
-        <select
-          name="action-selector"
-          id="action-selector"
-          class="form-select"
-          (change)="onActionSelect($event)"
-        >
-          <option value="" [defaultSelected]="true" [disabled]="true">
-            Select Action
-          </option>
-          <option
-            value="serviceType"
-            (click)="serviceType(driver)"
-            style="color: rgb(0, 146, 12)"
+        </div>
+        <div class="col-1 align-self-center">
+          <p>{{ driver.driverName }}</p>
+        </div>
+        <div class="col-2 align-self-center">
+          <p>{{ driver.driverEmail }}</p>
+        </div>
+        <div class="col-1 align-self-center">
+          <label class="switch">
+            <input
+              type="checkbox"
+              id="driverApprovel"
+              (change)="onApprove(i)"
+              [checked]="driver.approved"
+            />
+            <span class="slider round"></span>
+          </label>
+        </div>
+        <div class="col-1 align-self-center">
+          <p>{{ driver.countryCode }}</p>
+        </div>
+        <div class="col-2 align-self-center">
+          <p>{{ driver.phone }}</p>
+        </div>
+        <div class="col-2 align-self-center">
+          <select
+            name="action-selector"
+            id="action-selector"
+            class="form-select"
+            (change)="onActionSelect($event)"
           >
-            Service Type
-          </option>
-          <option value="Edit" (click)="onEdit(driver)" style="color: blue">
-            Edit Driver
-          </option>
-          <option value="Delete" (click)="onDelete(driver)" style="color: red">
-            Delete Driver
-          </option>
-        </select>
+            <option value="" [defaultSelected]="true" [disabled]="true">
+              Select Action
+            </option>
+            <option
+              value="serviceType"
+              (click)="serviceType(driver)"
+              style="color: rgb(0, 146, 12)"
+            >
+              Service Type
+            </option>
+            <option value="Edit" (click)="onEdit(driver)" style="color: blue">
+              Edit Driver
+            </option>
+            <option
+              value="Delete"
+              (click)="onDelete(driver)"
+              style="color: red"
+            >
+              Delete Driver
+            </option>
+          </select>
+        </div>
       </div>
     </div>
-    
-  </div>
-  }@else{
-  <div class="d-flex justify-content-center align-self-center">
-    <h3>No users Added</h3>
-  </div>
-  }
-  <div class="row paginaton" *ngIf="driversList.length > 0">
-    <div class="col-12 d-flex justify-content-center">
-      <button
-        class="btn btn-large btn-dark me-3"
-        style="width: 5rem"
-        (click)="onPreviousPage()"
-        [disabled]="currentPage <= 0"
-      >
-        Previous
-      </button>
-      <h4>{{ currentPage + 1 }}</h4>
-      <button
-        class="btn btn-large btn-dark ms-3"
-        style="width: 5rem"
-        (click)="onNextPage()"
-      >
-        Next
-      </button>
+    }@else{
+    <div class="d-flex justify-content-center align-self-center">
+      <h3>No users Added</h3>
+    </div>
+    }
+    <div class="row paginaton" *ngIf="driversList.length > 0">
+      <div class="col-12 d-flex justify-content-center">
+        <button
+          class="btn btn-large btn-dark me-3"
+          style="width: 5rem"
+          (click)="onPreviousPage()"
+          [disabled]="currentPage <= 0"
+        >
+          Previous
+        </button>
+        <h4>{{ currentPage + 1 }}</h4>
+        <button
+          class="btn btn-large btn-dark ms-3"
+          style="width: 5rem"
+          (click)="onNextPage()"
+        >
+          Next
+        </button>
+      </div>
     </div>
   </div>
-</div>
-
 
   <!-- Driver Add Modal -->
 
@@ -367,36 +405,65 @@
     </div>
   </div>
 
-
-  <div class="modal fade" id="serviceTypeModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div
+    class="modal fade"
+    id="serviceTypeModal"
+    tabindex="-1"
+    aria-labelledby="exampleModalLabel"
+    aria-hidden="true"
+  >
     <div class="modal-dialog">
       <div class="modal-content">
         <div class="modal-header">
           <h1 class="modal-title fs-5" id="exampleModalLabel">Service Type</h1>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          <button
+            type="button"
+            class="btn-close"
+            data-bs-dismiss="modal"
+            aria-label="Close"
+          ></button>
         </div>
         <div class="modal-body">
           <div class="container">
-            <form >
-            <div class="row">
-              <label for="ServiceType" class="col-5"><b>Service Type :-</b></label>
-              <div class="col-7">
-                <select id="ServiceType" class="form-select" (change)="serviceTypeChange($event)">
-                  <option value="none">none</option>
-                  <option value="SUV">SUV</option>
-                  <option value="SEDAN">SEDAN</option>
-                  <option value="MINI VAN">MINI VAN</option>
-                  <option value="PICK UP">PICK UP</option>
-                </select>
+            <form>
+              <div class="row">
+                <label for="ServiceType" class="col-5"
+                  ><b>Service Type :-</b></label
+                >
+                <div class="col-7">
+                  <select
+                    id="ServiceType"
+                    class="form-select"
+                    (change)="serviceTypeChange($event)"
+                  >
+                    <option value="none">none</option>
+                    <option value="SUV">SUV</option>
+                    <option value="SEDAN">SEDAN</option>
+                    <option value="MINI VAN">MINI VAN</option>
+                    <option value="PICK UP">PICK UP</option>
+                  </select>
+                </div>
               </div>
-            </div>
-          </form>
+            </form>
           </div>
         </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-          <button type="button" class="btn btn-dark" (click)="onAddServiceType()">Save changes</button>
+          <button
+            type="button"
+            class="btn btn-secondary"
+            data-bs-dismiss="modal"
+          >
+            Close
+          </button>
+          <button
+            type="button"
+            class="btn btn-dark"
+            (click)="onAddServiceType()"
+          >
+            Save changes
+          </button>
         </div>
       </div>
     </div>
   </div>
+</div>

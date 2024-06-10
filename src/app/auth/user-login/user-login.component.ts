@@ -9,6 +9,7 @@ import {
 } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AuthService } from '../auth.service';
+import * as bootstrap from 'bootstrap';
 
 @Component({
   selector: 'app-user-login',
@@ -30,7 +31,12 @@ export class UserLoginComponent {
     if (this.form.valid) {
       this.authservice.userLogIn(this.form.value);
     }else{
-      alert("Please Enter Email and Password");
+      let toast = bootstrap.Toast.getOrCreateInstance(
+        document.getElementById('FailureToast') as HTMLElement
+      )
+      let inToast = document.getElementById('inFailureToast') as HTMLElement;
+      inToast.innerText ="Plese Enter Email And Password";
+      toast.show();
       this.form.reset()
     }
   }

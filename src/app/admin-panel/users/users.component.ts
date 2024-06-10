@@ -23,7 +23,6 @@ import {
   StripeCardElementOptions,
   StripeElementsOptions,
 } from '@stripe/stripe-js';
-import { HttpClient } from '@angular/common/http';
 import { AuthService } from '../../auth/auth.service';
 
 @Component({
@@ -102,27 +101,18 @@ export class UsersComponent implements OnInit, AfterViewChecked {
       if (res.countries) {
         this.countryList = res.countries;
       } else if (res.varified == false) {
-        alert('User is not verified');
         this.authService.userLogOut();
         return;
       } else if (res.error) {
-        alert(res.error);
+        let toast = bootstrap.Toast.getOrCreateInstance(
+          document.getElementById('userFailureToast') as HTMLElement
+        );
+        let inToast = document.getElementById('inFailureToast') as HTMLElement;
+        inToast.innerText = res.error;
+        toast.show();
       }
     });
-
-    this.userService
-      .getUsers('', this.currentPage, this.sortMethod)
-      .subscribe((res) => {
-        if (res.users) {
-          this.usersList = res.users;
-        } else if (res.varified == false) {
-          alert('User is not verified');
-          this.authService.userLogOut();
-          return;
-        } else if (res.error) {
-          alert(res.error);
-        }
-      });
+    this.onSearch();
   }
   ngAfterViewChecked() {
     if (this.countryCode) {
@@ -157,15 +147,31 @@ export class UsersComponent implements OnInit, AfterViewChecked {
     this.formdata.append('country', this.selectedCountry._id!);
     this.userService.postUser(this.formdata).subscribe((res) => {
       if (res.user) {
+        let toast = bootstrap.Toast.getOrCreateInstance(
+          document.getElementById('userSuccessToast') as HTMLElement
+        );
+        let inToast = document.getElementById('inToast') as HTMLElement;
+        inToast.innerText = 'User Added Successfully';
+        toast.show();
         this.userForm.reset();
         this.formdata = new FormData();
         this.userForm.reset();
         this.onSearch();
       } else if (res.varified == false) {
-        alert('User is not verified');
+        let toast = bootstrap.Toast.getOrCreateInstance(
+          document.getElementById('userFailureToast') as HTMLElement
+        );
+        let inToast = document.getElementById('inFailureToast') as HTMLElement;
+        inToast.innerText = 'User is not Validated';
+        toast.show();
         this.authService.userLogOut();
       } else if (res.error) {
-        alert(res.error);
+        let toast = bootstrap.Toast.getOrCreateInstance(
+          document.getElementById('userFailureToast') as HTMLElement
+        );
+        let inToast = document.getElementById('inFailureToast') as HTMLElement;
+        inToast.innerText = res.error;
+        toast.show();
       }
     });
   }
@@ -187,23 +193,34 @@ export class UsersComponent implements OnInit, AfterViewChecked {
     });
     this.userService.updateUser(this.formdata).subscribe((res) => {
       if (res.message) {
+        let toast = bootstrap.Toast.getOrCreateInstance(
+          document.getElementById('userSuccessToast') as HTMLElement
+        );
+        let inToast = document.getElementById('inToast') as HTMLElement;
+        inToast.innerText = 'User Updated Successfully';
+        toast.show();
         this.onSearch();
         this.editMode = false;
         this.userForm.reset();
         this.formdata = new FormData();
       } else if (res.varified == false) {
-        alert(res.error);
-        this.editMode = false;
-        this.userForm.reset();
-        this.formdata = new FormData();
-        alert('User is not verified');
+        let toast = bootstrap.Toast.getOrCreateInstance(
+          document.getElementById('userFailureToast') as HTMLElement
+        );
+        let inToast = document.getElementById('inToast') as HTMLElement;
+        inToast.innerText = 'User is not Validated';
+        toast.show();
         this.authService.userLogOut();
       } else if (res.error) {
-        alert(res.error);
         this.editMode = false;
         this.userForm.reset();
         this.formdata = new FormData();
-        alert(res.error);
+        let toast = bootstrap.Toast.getOrCreateInstance(
+          document.getElementById('userFailureToast') as HTMLElement
+        );
+        let inToast = document.getElementById('inFailureToast') as HTMLElement;
+        inToast.innerText = res.error;
+        toast.show();
       }
     });
   }
@@ -218,10 +235,22 @@ export class UsersComponent implements OnInit, AfterViewChecked {
         if (res.users) {
           this.usersList = res.users;
         } else if (res.varified == false) {
-          alert('User is not verified');
+          let toast = bootstrap.Toast.getOrCreateInstance(
+            document.getElementById('userFailureToast') as HTMLElement
+          );
+          let inToast = document.getElementById('inToast') as HTMLElement;
+          inToast.innerText = 'User is not Validated';
+          toast.show();
           this.authService.userLogOut();
         } else if (res.error) {
-          alert(res.error);
+          let toast = bootstrap.Toast.getOrCreateInstance(
+            document.getElementById('userFailureToast') as HTMLElement
+          );
+          let inToast = document.getElementById(
+            'inFailureToast'
+          ) as HTMLElement;
+          inToast.innerText = res.error;
+          toast.show();
         }
       });
   }
@@ -277,11 +306,29 @@ export class UsersComponent implements OnInit, AfterViewChecked {
         .subscribe((res) => {
           if (res.message) {
             this.onSearch();
+            let toast = bootstrap.Toast.getOrCreateInstance(
+              document.getElementById('userSuccessToast') as HTMLElement
+            );
+            let inToast = document.getElementById('inToast') as HTMLElement;
+            inToast.innerText = 'User Deleted Successfully';
+            toast.show();
           } else if (res.varified == false) {
-            alert('User is not verified');
+            let toast = bootstrap.Toast.getOrCreateInstance(
+              document.getElementById('userFailureToast') as HTMLElement
+            )
+            let inToast = document.getElementById('inFailureToast') as HTMLElement
+            inToast.innerText ="User is not Validated";
+            toast.show();
             this.authService.userLogOut();
           } else if (res.error) {
-            alert(res.error);
+            let toast = bootstrap.Toast.getOrCreateInstance(
+              document.getElementById('userFailureToast') as HTMLElement
+            );
+            let inToast = document.getElementById(
+              'inFailureToast'
+            ) as HTMLElement;
+            inToast.innerText = res.error;
+            toast.show();
           }
         });
     } else {
@@ -294,11 +341,14 @@ export class UsersComponent implements OnInit, AfterViewChecked {
       ? control.invalid && (control.dirty || control.touched)
       : false;
   }
-
   onNextPage() {
     if (this.usersList.length < 10) {
-      alert('No more pages');
-    } else {
+      let toast = bootstrap.Toast.getOrCreateInstance(
+        document.getElementById('userFailureToast') as HTMLElement
+      )
+      let inToast = document.getElementById('inFailureToast') as HTMLElement
+      inToast.innerText ="No more Pages";
+      toast.show();    } else {
       this.currentPage = this.currentPage + 1;
       this.onSearch();
     }
@@ -308,8 +358,12 @@ export class UsersComponent implements OnInit, AfterViewChecked {
       this.currentPage = this.currentPage - 1;
       this.onSearch();
     } else {
-      alert('Already on first page');
-    }
+      let toast = bootstrap.Toast.getOrCreateInstance(
+        document.getElementById('userFailureToast') as HTMLElement
+      )
+      let inToast = document.getElementById('inFailureToast') as HTMLElement
+      inToast.innerText ="Aleredy On First Page";
+      toast.show();    }
   }
   onClickAddUser() {
     this.editMode = false;
@@ -330,10 +384,20 @@ export class UsersComponent implements OnInit, AfterViewChecked {
         console.log(res.card);
         this.cardList.push(res.card);
       } else if (res.varified == false) {
-        alert('User is not verified');
+        let toast = bootstrap.Toast.getOrCreateInstance(
+          document.getElementById('userFailureToast') as HTMLElement
+        )
+        let inToast = document.getElementById('inFailureToast') as HTMLElement
+        inToast.innerText ="User is not Validated";
+        toast.show();
         this.authService.userLogOut();
       } else if (res.error) {
-        alert(res.error);
+        let toast = bootstrap.Toast.getOrCreateInstance(
+          document.getElementById('userFailureToast') as HTMLElement
+        );
+        let inToast = document.getElementById('inFailureToast') as HTMLElement;
+        inToast.innerText = res.error;
+        toast.show();
       }
     });
   }
@@ -347,10 +411,20 @@ export class UsersComponent implements OnInit, AfterViewChecked {
           .concat(this.cardList.slice(index + 1));
         console.log(this.cardList);
       } else if (res.varified == false) {
-        alert('User is not verified');
+        let toast = bootstrap.Toast.getOrCreateInstance(
+          document.getElementById('userFailureToast') as HTMLElement
+        )
+        let inToast = document.getElementById('inFailureToast') as HTMLElement
+        inToast.innerText ="User is not Validated";
+        toast.show();
         this.authService.userLogOut();
       } else if (res.error) {
-        alert(res.error);
+        let toast = bootstrap.Toast.getOrCreateInstance(
+          document.getElementById('userFailureToast') as HTMLElement
+        );
+        let inToast = document.getElementById('inFailureToast') as HTMLElement;
+        inToast.innerText = res.error;
+        toast.show();
       }
     });
   }

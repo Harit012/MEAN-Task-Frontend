@@ -5,7 +5,8 @@ hr {
 
   .scrollable-section{
     align-self: center;
-    height: 480px;
+    height: 65dvh;
+    /* height: 75dvh; */
     overflow-y: auto;
     overflow-x: auto;
   }
@@ -51,11 +52,11 @@ hr {
   }
   
   input:checked + .slider {
-    background-color: #2196F3;
+    background-color: #05984a;
   }
   
   input:focus + .slider {
-    box-shadow: 0 0 1px #2196F3;
+    box-shadow: 0 0 1px #c23d18;
   }
   
   input:checked + .slider:before {
@@ -71,4 +72,8 @@ hr {
   
   .slider.round:before {
     border-radius: 50%;
+  }
+
+  #action-selector{
+    background-color: rgb(190, 190, 190);
   }
