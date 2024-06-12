@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import {
   FormControl,
   FormGroup,
@@ -14,6 +14,7 @@ import { DriverService } from './driver.service';
 import { Driver } from './driver.interface';
 import * as bootstrap from 'bootstrap';
 import { AuthService } from '../../../auth/auth.service';
+import { ToastrService } from 'ngx-toastr';
 @Component({
   selector: 'app-list',
   standalone: true,
@@ -36,7 +37,8 @@ export class ListComponent implements OnInit {
   sort: string = 'none';
   serviceTypes: string[] = ['none', 'SUV', 'SEDAN', 'MINI VAN', 'PICK UP'];
   selectedServiceType: string = 'none';
-  driverForService!: Driver;
+  driverForService!: Driver ;
+  toastr = inject(ToastrService)
   constructor(
     private countryService: CountriesService,
     private cityService: CityService,
@@ -63,26 +65,20 @@ export class ListComponent implements OnInit {
   ngOnInit(): void {
     this.getDrivers();
 
-    this.countryService.getCountries().subscribe((res) => {
-      if (res.countries) {
-        this.countryList = res.countries;
-      }else if(res.varified === false){
-        let toast = bootstrap.Toast.getOrCreateInstance(
-          document.getElementById('FailureToast') as HTMLElement
-        )
-        let inToast = document.getElementById('inFailureToast') as HTMLElement
-        inToast.innerText ="User is not Validated";
-        toast.show();
-        this.authService.userLogOut();
-      }
-      else if(res.error){
-        let toast = bootstrap.Toast.getOrCreateInstance(
-          document.getElementById('FailureToast') as HTMLElement
-        )
-        let inToast = document.getElementById('inFailureToast') as HTMLElement
-        inToast.innerText =res.error;
-        toast.show();
-      }
+    this.countryService.getCountries().subscribe({
+      next:(res) => {
+        if (res.countries) {
+          this.countryList = res.countries;
+        }else if(res.varified === false){
+          this.authService.userLogOut();
+        }
+        else if(res.error){
+          this.toastr.error(`Error From Backend:- ${res.error}`, 'Error');
+        }
+      },
+      error: (err) => {
+        this.toastr.error(`unable to fetch data:- ${err.message}`, 'Error');
+      },
     });
   }
   // when sort method changes
@@ -94,25 +90,19 @@ export class ListComponent implements OnInit {
   getDrivers() {
     this.driverService
       .getDrivers(this.currentPage, this.sort, this.currentSearch)
-      .subscribe((res) => {
-        if (res.drivers) {
-          this.driversList = res.drivers;
-        }else if(res.varified === false){
-          let toast = bootstrap.Toast.getOrCreateInstance(
-            document.getElementById('FailureToast') as HTMLElement
-          )
-          let inToast = document.getElementById('inFailureToast') as HTMLElement
-          inToast.innerText ="User is not Validated";
-          toast.show();
-          this.authService.userLogOut();
-        }
-        else if(res.error){
-          let toast = bootstrap.Toast.getOrCreateInstance(
-            document.getElementById('FailureToast') as HTMLElement
-          )
-          let inToast = document.getElementById('inFailureToast') as HTMLElement
-          inToast.innerText =res.error;
-          toast.show();
+      .subscribe({
+        next:(res) => {
+          if (res.drivers) {
+            this.driversList = res.drivers;
+          }else if(res.varified === false){
+            this.authService.userLogOut();
+          }
+          else if(res.error){
+            this.toastr.error(`Error from backend :- ${res.error}`, "Error")
+          }
+        },
+        error:(err)=>{
+          this.toastr.error(`Unable to fetch data :- ${err.message}`, "Error")
         }
       });
   }
@@ -120,20 +110,19 @@ export class ListComponent implements OnInit {
   onCountryChange(country: Country) {
     this.selectedCountry = country;
     this.countryCallCode = country.countryCallCode;
-    this.cityService.getZones(country._id!).subscribe((data) => {
-      if (data.zones) {
-        this.cityList = data.zones;
-      }else if(data.varified === false){
-        // alert('User is not verified');
-        this.authService.userLogOut();
-      }
-      else if(data.error){
-        let toast = bootstrap.Toast.getOrCreateInstance(
-          document.getElementById('FailureToast') as HTMLElement
-        )
-        let inToast = document.getElementById('inFailureToast') as HTMLElement
-        inToast.innerText =data.error;
-        toast.show();
+    this.cityService.getZones(country._id!).subscribe({
+      next:(data) => {
+        if (data.zones) {
+          this.cityList = data.zones;
+        }else if(data.varified === false){
+          this.authService.userLogOut();
+        }
+        else if(data.error){
+          this.toastr.error(`Error while getting Zones:- ${data.error}`, 'Error');
+        }
+      },
+      error:(err)=>{
+        this.toastr.error(`unable to fetch data:- ${err.message}`, 'Error');
       }
     });
   }
@@ -158,6 +147,10 @@ export class ListComponent implements OnInit {
   }
   // to add user
   onAddDriver() {
+
+    // console.log(this.driverForm)
+    // return
+
     this.formdata.append(
       'driverName',
       this.driverForm.get('driverName')?.value
@@ -169,24 +162,23 @@ export class ListComponent implements OnInit {
     this.formdata.append('phone', this.driverForm.get('phone')?.value);
     this.formdata.append('country', this.selectedCountry._id!);
     this.formdata.append('city', this.selectedCity._id!);
-    this.driverService.postDriver(this.formdata).subscribe((data) => {
-      if (data.driver) {
-        this.driversList.push(data.driver);
-        this.formdata = new FormData();
-        this.driverForm.reset();
-      }else if(data.varified === false){
-        // alert('User is not verified');
-        this.authService.userLogOut();
-      }
-      else if(data.error){
-        this.formdata = new FormData();
-        this.driverForm.reset();
-        let toast = bootstrap.Toast.getOrCreateInstance(
-          document.getElementById('FailureToast') as HTMLElement
-        )
-        let inToast = document.getElementById('inFailureToast') as HTMLElement
-        inToast.innerText =data.error;
-        toast.show();
+    this.driverService.postDriver(this.formdata).subscribe({
+      next:(data) => {
+        if (data.driver) {
+          this.driversList.push(data.driver);
+          this.formdata = new FormData();
+          this.driverForm.reset();
+        }else if(data.varified === false){
+          this.authService.userLogOut();
+        }
+        else if(data.error){
+          this.formdata = new FormData();
+          this.driverForm.reset();
+          this.toastr.error(`Error From Backend:- ${data.error}`, 'Error');
+        }
+      },
+      error:(err)=>{
+        this.toastr.error(`unable to add data:- ${err.message}`, 'Error');
       }
     });
   }
@@ -211,26 +203,26 @@ export class ListComponent implements OnInit {
       }
     }
     this.formdata.append('country', this.selectedCountry._id!);
-    this.driverService.putEditUser(this.formdata).subscribe((data) => {
-      if (data.message) {
-        this.getDrivers();
-        this.formdata = new FormData();
-        this.driverForm.reset();
-        this.editMode = false;
-      }else if(data.varified === false){
-        // alert('User is not verified');
-        this.authService.userLogOut();
-      }
-      else if(data.error){
-        this.formdata = new FormData();
-        this.driverForm.reset();
-        this.editMode = false;
-        let toast = bootstrap.Toast.getOrCreateInstance(
-          document.getElementById('FailureToast') as HTMLElement
-        )
-        let inToast = document.getElementById('inFailureToast') as HTMLElement
-        inToast.innerText =data.error;
-        toast.show();
+    this.driverService.putEditUser(this.formdata).subscribe({
+      next :(data) => {
+        if (data.message) {
+          this.getDrivers();
+          this.formdata = new FormData();
+          this.driverForm.reset();
+          this.editMode = false;
+          this.toastr.success('Driver Updated Successfully', 'Success');
+        }else if(data.varified === false){
+          this.authService.userLogOut();
+        }
+        else if(data.error){
+          this.formdata = new FormData();
+          this.driverForm.reset();
+          this.editMode = false;
+          this.toastr.error(`Error From Backend:- ${data.error}`, 'Error');
+        }
+      },
+      error:(err)=>{
+        this.toastr.error(`unable to fetch data:- ${err.message}`,"Error")
       }
     });
   }
@@ -240,20 +232,18 @@ export class ListComponent implements OnInit {
     temp_status = !temp_status;
     this.driverService
       .approvelChange(this.driversList[i]['_id'], temp_status)
-      .subscribe((data) => {
-        if (data.message) {
-          this.getDrivers();
-        }else if(data.varified === false){
-          // alert('User is not verified');
-          this.authService.userLogOut();
-        }
-        else if(data.error){
-          let toast = bootstrap.Toast.getOrCreateInstance(
-            document.getElementById('FailureToast') as HTMLElement
-          )
-          let inToast = document.getElementById('inFailureToast') as HTMLElement
-          inToast.innerText =data.error;
-          toast.show();
+      .subscribe({
+        next:(data) => {
+          if (data.message) {
+            this.getDrivers();
+          }else if(data.varified === false){
+            this.authService.userLogOut();
+          }
+          else if(data.error){
+            this.toastr.error(`Error from Backend:- ${data.error}`, 'Error');
+          }
+        },error:(err)=>{
+          this.toastr.error(`unable to fetch data :- ${err.message}`,"Error")
         }
       });
   }
@@ -303,20 +293,19 @@ export class ListComponent implements OnInit {
         temp_country.selectedIndex = j + 1;
         this.cityService
           .getZones(this.countryList[j]._id!)
-          .subscribe((data) => {
-            if (data.zones) {
-              this.cityList = data.zones;
-            }else if(data.varified === false){
-              // alert('User is not verified');
-              this.authService.userLogOut();
-            }
-            else if(data.error){
-              let toast = bootstrap.Toast.getOrCreateInstance(
-                document.getElementById('FailureToast') as HTMLElement
-              )
-              let inToast = document.getElementById('inFailureToast') as HTMLElement
-              inToast.innerText =data.error;
-              toast.show();
+          .subscribe({
+            next:(data) => {
+              if (data.zones) {
+                this.cityList = data.zones;
+              }else if(data.varified === false){
+                this.authService.userLogOut();
+              }
+              else if(data.error){
+                this.toastr.error(`Error from Backend:- ${data.error}`,'Error')
+              }
+            },
+            error:(err)=>{
+              this.toastr.error(`unable to fetch data :- ${err.message}`,"Error")
             }
           });
         break;
@@ -331,21 +320,21 @@ export class ListComponent implements OnInit {
   // when user clicks on delete
   onDelete(driver: Driver) {
     if (confirm('Are you sure you want to delete this driver?')) {
-      this.driverService.deleteDriver(driver._id!).subscribe((data) => {
-        if (data.message) {
-          let index = this.driversList.indexOf(driver);
-          this.driversList.splice(index, 1);
-        }else if(data.varified === false){
-          // alert('User is not verified');
-          this.authService.userLogOut();
-        }
-        else if(data.error){
-          let toast = bootstrap.Toast.getOrCreateInstance(
-            document.getElementById('FailureToast') as HTMLElement
-          )
-          let inToast = document.getElementById('inFailureToast') as HTMLElement
-          inToast.innerText =data.error;
-          toast.show();
+      this.driverService.deleteDriver(driver._id!).subscribe({
+        next:(data) => {
+          if (data.message) {
+            this.toastr.success('Driver Deleted Successfully', 'Success');
+            let index = this.driversList.indexOf(driver);
+            this.driversList.splice(index, 1);
+          }else if(data.varified === false){
+            this.authService.userLogOut();
+          }
+          else if(data.error){
+            this.toastr.error(`Error from Backend:- ${data.error}`, 'Error');
+          }
+        },
+        error:(err)=>{
+          this.toastr.error(`unable to fetch data :- ${err.message}`,"Error")
         }
       });
     }
@@ -353,12 +342,8 @@ export class ListComponent implements OnInit {
   // when user wants to go to next page
   onNextPage() {
     if (this.driversList.length < 10) {
-      let toast = bootstrap.Toast.getOrCreateInstance(
-        document.getElementById('FailureToast') as HTMLElement
-      )
-      let inToast = document.getElementById('inFailureToast') as HTMLElement
-      inToast.innerText ="No more Pages";
-      toast.show();    } else {
+      this.toastr.warning('Already on Last Page', 'Warning');
+    } else {
       this.currentPage = this.currentPage + 1;
       this.getDrivers();
     }
@@ -369,12 +354,7 @@ export class ListComponent implements OnInit {
       this.currentPage = this.currentPage - 1;
       this.getDrivers();
     } else {
-      let toast = bootstrap.Toast.getOrCreateInstance(
-        document.getElementById('FailureToast') as HTMLElement
-      )
-      let inToast = document.getElementById('inFailureToast') as HTMLElement
-      inToast.innerText ="Already on First Page";
-      toast.show();
+      this.toastr.warning('Already on First Page', 'Warning');
     }
   }
   // when user click service type
@@ -398,26 +378,20 @@ export class ListComponent implements OnInit {
     console.log(this.driverForService._id)
     this.driverService
       .patchServiceType(this.selectedServiceType, this.driverForService._id!)
-      .subscribe((data) => {
-        if(data.message){
-          let toast = bootstrap.Toast.getOrCreateInstance(
-            document.getElementById('SuccessToast') as HTMLElement
-          )
-          let inToast = document.getElementById('inToast') as HTMLElement
-          inToast.innerText = "Updated";
-          toast.show();
-          this.getDrivers();
-        }else if(data.varified === false){
-          // alert('User is not verified');
-          this.authService.userLogOut();
-        }
-        else if(data.error){
-          let toast = bootstrap.Toast.getOrCreateInstance(
-            document.getElementById('FailureToast2') as HTMLElement
-          )
-          let inToast = document.getElementById('inFailureToast2') as HTMLElement
-          inToast.innerText =data.error.toString();
-          toast.show();
+      .subscribe({
+        next:(data) => {
+          if(data.message){
+            this.toastr.success(`${data.message}`,'Success');
+            this.getDrivers();
+          }else if(data.varified === false){
+            this.authService.userLogOut();
+          }
+          else if(data.error){
+            this.toastr.error(`Error from Backend:- ${data.error}`,'Error')
+          }
+        },
+        error:(err)=>{
+          this.toastr.error(`unable to fetch data :- ${err.message}`,"Error")
         }
       });
   }

@@ -1,43 +1,4 @@
 <div class="container m-2" style="width: 82.5dvw;">
-     <!-- success Toasts -->
-     <div
-     id="SuccessToast"
-     class="toast align-items-center text-bg-success fs-5 border-0"
-     role="success"
-     aria-live="assertive"
-     aria-atomic="true"
-     style="z-index: 5;position: fixed;top: 10 ewm;right: 0;"
-   >
-     <div class="toast-body d-flex justify-content-between" >
-       <p id="inToast"></p>
-       <button
-         type="button"
-         class="btn-close align-self-flex-end"
-         data-bs-dismiss="toast"
-         aria-label="Close"
-       ></button>
-     </div>
-   
-   </div>
-   <!-- error Toasts -->
-     <div
-     id="FailureToast"
-     class="toast align-items-center text-bg-danger fs-5 border-0"
-     role="success"
-     aria-live="assertive"
-     aria-atomic="true"
-     style="z-index: 5;position: fixed;top: 10 ewm;right: 0;"
-   >
-     <div class="toast-body d-flex justify-content-between" >
-       <p id="inFailureToast"></p>
-       <button
-         type="button"
-         class="btn-close align-self-flex-end"
-         data-bs-dismiss="toast"
-         aria-label="Close"
-       ></button>
-     </div>
-   </div>
   <div class="row title-row text-white mb-3">
     <div class="col-5 align-self-center">
       <h3>Country</h3>
@@ -140,24 +101,6 @@
         ></button>
       </div>
       <div class="modal-body">
-        <div
-     id="FailureToast2"
-     class="toast align-items-center text-bg-danger fs-5 border-0"
-     role="success"
-     aria-live="assertive"
-     aria-atomic="true"
-     style="z-index: 5;position: fixed;top: 0;right: 0;"
-   >
-     <div class="toast-body d-flex justify-content-between" >
-       <p id="inFailureToast2"></p>
-       <button
-         type="button"
-         class="btn-close align-self-flex-end"
-         data-bs-dismiss="toast"
-         aria-label="Close"
-       ></button>
-     </div>
-   </div>
         <form [formGroup]="countryForm" (ngSubmit)="onAddCountry()">
           <div class="row">
             <div class="col-3"></div>

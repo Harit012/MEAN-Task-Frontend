@@ -26,7 +26,6 @@ export class CountriesService {
   }
 
   getCountriesFromApi(){
-    
     return this.http.get<any>('https://restcountries.com/v3.1/all')
   }
 }

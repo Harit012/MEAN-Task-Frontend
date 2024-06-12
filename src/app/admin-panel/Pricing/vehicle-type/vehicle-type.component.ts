@@ -1,6 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { HttpClient } from '@angular/common/http';
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import {
   FormBuilder,
   FormControl,
@@ -11,7 +10,7 @@ import {
 import { VehicleType } from './vehicle.interface';
 import { AuthService } from '../../../auth/auth.service';
 import { VehicleTypeService } from './vehicle-type.service';
-import * as bootstrap from 'bootstrap';
+import { ToastrService } from 'ngx-toastr';
 
 @Component({
   selector: 'app-vehicle-type',
@@ -29,10 +28,10 @@ export class VehicleTypeComponent implements OnInit {
   selectedImg: string = '';
   sizeValidation: boolean = false;
   vehicleTypes: string[] = ['SEDAN', 'SUV', 'MINI VAN', 'PICK UP'];
+  toastr = inject(ToastrService)
 
   constructor(
     private fb: FormBuilder,
-    private http: HttpClient,
     private authService: AuthService,
     private vehicleTypeService: VehicleTypeService
   ) {
@@ -49,87 +48,61 @@ export class VehicleTypeComponent implements OnInit {
     this.formdata.append('type', this.vehicleForm.value.type);
     console.log(this.formdata);
 
-    this.vehicleTypeService.postVehicleType(this.formdata)
-      .subscribe((data) => {
+    this.vehicleTypeService.postVehicleType(this.formdata).subscribe({
+      next: (data) => {
         if (data.vehicles) {
+          this.toastr.success('Vehicle-type added', 'Success');
           this.vehiclesList = data.vehicles;
-          let toast = bootstrap.Toast.getOrCreateInstance(
-            document.getElementById('SuccessToast') as HTMLElement
-          );
-          let inToast = document.getElementById('inToast') as HTMLElement;
-          inToast.innerText = 'Vehicle Added Successfully';
-          toast.show();
         } else if (data.varified == false) {
-          alert('User is not verified');
           this.authService.userLogOut();
         } else if (data.error) {
-          let toast = bootstrap.Toast.getOrCreateInstance(
-            document.getElementById('FailureToast') as HTMLElement
-          );
-          let inToast = document.getElementById(
-            'inFailureToast'
-          ) as HTMLElement;
-          inToast.innerText = data.error;
-          toast.show();
+          this.toastr.error(`Error From Backend:- ${data.error}`, 'Error');
         }
-      });
+      },
+      error: (err) => {
+        this.toastr.error(`Unable to fetch data:- ${err.message}`, 'Error');
+      },
+    });
     this.vehicleForm.reset();
     this.formdata = new FormData();
   }
 
   getVehiclesData() {
-    this.vehicleTypeService.getVehicleTypes().subscribe((data) => {
-      if (data.vehicle) {
-        this.vehiclesList = data.vehicle;
-      } else if (data.varified == false) {
-        // alert('User is not verified');
-        this.authService.userLogOut();
-      } else if (data.error) {
-        let toast = bootstrap.Toast.getOrCreateInstance(
-          document.getElementById('FailureToast') as HTMLElement
-        );
-        let inToast = document.getElementById(
-          'inFailureToast'
-        ) as HTMLElement;
-        inToast.innerText = data.error;
-        toast.show();
-      }
+    this.vehicleTypeService.getVehicleTypes().subscribe({
+      next: (data) => {
+        if (data.vehicle) {
+          this.vehiclesList = data.vehicle;
+        } else if (data.varified == false) {
+          this.authService.userLogOut();
+        } else if (data.error) {
+          this.toastr.error(`Error From Backend:- ${data.error}`, 'Error');
+        }
+      },
+      error: (err) => {
+        this.toastr.error(`Unable to fetch data:- ${err.message}`, 'Error');
+      },
     });
   }
 
   onSubmitEdit() {
     this.formdata.append('type', this.vehicleForm.value.type);
 
-    this.vehicleTypeService.putVehicleType(this.formdata)
-      .subscribe(
-        (res) => {
-          if (res.vehicles) {
-            let toast = bootstrap.Toast.getOrCreateInstance(
-              document.getElementById('SuccessToast') as HTMLElement
-            );
-            let inToast = document.getElementById('inToast') as HTMLElement;
-            inToast.innerText = 'vehicle Updated Successfully';
-            toast.show();
-            this.vehiclesList = res.vehicles;
-          } else if (res.varified == false) {
-            // alert('User is not verified');
-            this.authService.userLogOut();
-            return;
-          } else if (res.error) {
-            let toast = bootstrap.Toast.getOrCreateInstance(
-              document.getElementById('FailureToast') as HTMLElement
-            );
-            let inToast = document.getElementById(
-              'inFailureToast'
-            ) as HTMLElement;
-            inToast.innerText = res.error;
-            toast.show();
-          }
-        },
-        (err) => {
-          alert(err);
+    this.vehicleTypeService.putVehicleType(this.formdata).subscribe({
+      next: (res) => {
+        if (res.vehicles) {
+          this.toastr.success('Vehicle-type updated', 'Success');
+          this.vehiclesList = res.vehicles;
+        } else if (res.varified == false) {
+          this.authService.userLogOut();
+          return;
+        } else if (res.error) {
+          this.toastr.error(`Error From Backend:- ${res.error}`, 'Error');
         }
-      );
+      },
+      error: (err) => {
+        this.toastr.error(`Unable to fetch data:- ${err.message}`, 'Error');
+      },
+    });
     this.onCancel();
   }
   onFileChange(event: any) {
@@ -139,14 +112,10 @@ export class VehicleTypeComponent implements OnInit {
         // this.formdata= new FormData();
         this.formdata.append('vehicleImage', event.target.files[0]);
       } else {
-        let toast = bootstrap.Toast.getOrCreateInstance(
-          document.getElementById('FailureToast') as HTMLElement
+        this.toastr.warning(
+          'file is too large try to upload smaller file',
+          'Warning'
         );
-        let inToast = document.getElementById(
-          'inFailureToast'
-        ) as HTMLElement;
-        inToast.innerText = "file is too large try to upload smaller file";
-        toast.show();
         this.sizeValidation = true;
         this.vehicleForm.reset();
       }
@@ -165,37 +134,24 @@ export class VehicleTypeComponent implements OnInit {
   }
   onDelete(index: number) {
     if (confirm('Are you sure want to delete?')) {
-      
-      this.vehicleTypeService.deleteVehicleType(this.vehiclesList[index]._id)
-        .subscribe(
-          (res) => {
+      this.vehicleTypeService
+        .deleteVehicleType(this.vehiclesList[index]._id)
+        .subscribe({
+          next: (res) => {
             if (res.vehicles) {
-              let toast = bootstrap.Toast.getOrCreateInstance(
-                document.getElementById('SuccessToast') as HTMLElement
-              );
-              let inToast = document.getElementById('inToast') as HTMLElement;
-              inToast.innerText = 'Vehicle deleted Successfully';
-              toast.show();
+              this.toastr.success('Vehicle-type deleted', 'Success');
               this.vehiclesList = res.vehicles;
             } else if (res.varified == false) {
-              // alert('User is not verified');
               this.authService.userLogOut();
               return;
             } else if (res.error) {
-              let toast = bootstrap.Toast.getOrCreateInstance(
-                document.getElementById('FailureToast') as HTMLElement
-              );
-              let inToast = document.getElementById(
-                'inFailureToast'
-              ) as HTMLElement;
-              inToast.innerText = res.error;
-              toast.show();
+              this.toastr.error(`Error From Backend:- ${res.error}`, 'Error');
             }
           },
-          (err) => {
-            console.log(err);
-          }
-        );
+          error: (err) => {
+            this.toastr.error(`Unable to fetch data:- ${err.message}`, 'Error');
+          },
+        });
     }
   }
 

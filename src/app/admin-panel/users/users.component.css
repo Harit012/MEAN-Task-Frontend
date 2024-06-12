@@ -1,7 +1,7 @@
 .scrollable-section{
     align-self: center;
-    /* height: 480px; */
-    height: 85dvh;
+    height: 520px;
+    /* height: 85dvh; */
     overflow-y: auto;
     overflow-x: auto;
   }
@@ -20,7 +20,7 @@
 
   .paginaton{
     position: fixed;
-    bottom:0px;
+    bottom:10px;
     width: 80%;  
   }
 

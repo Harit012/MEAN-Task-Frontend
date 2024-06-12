@@ -77,3 +77,9 @@ hr {
   #action-selector{
     background-color: rgb(190, 190, 190);
   }
+
+  .paginaton{
+    position: fixed;
+    bottom:10px;
+    width: 80%;  
+  }

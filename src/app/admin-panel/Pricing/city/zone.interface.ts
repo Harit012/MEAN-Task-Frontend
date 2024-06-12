@@ -4,3 +4,10 @@ export interface Zone {
     zoneName: string,
     country:string
 }
+
+export interface ZoneCountries{
+    countryName: string;
+    countryShortName: string;
+    _id?: string;
+    countryLatLng: google.maps.LatLngLiteral;
+}

@@ -1,126 +1,134 @@
 <script
-    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDOgtoT8p1B4OkbPdlIly-LWJBtLNN4lZI&libraries=places,drawing&v=weekly&loading=async"
-    defer
-  ></script>
-<div class="container" style="width: 100dvw;">
-
-     <!-- success Toasts -->
-     <div
-     id="SuccessToast"
-     class="toast align-items-center text-bg-success fs-5 border-0"
-     role="success"
-     aria-live="assertive"
-     aria-atomic="true"
-     style="z-index: 5;position: fixed;top: 10 ewm;right: 0;"
-   >
-     <div class="toast-body d-flex justify-content-between" >
-       <p id="inToast"></p>
-       <button
-         type="button"
-         class="btn-close align-self-flex-end"
-         data-bs-dismiss="toast"
-         aria-label="Close"
-       ></button>
-     </div>
-   
-   </div>
-   <!-- error Toasts -->
-     <div
-     id="FailureToast"
-     class="toast align-items-center text-bg-danger fs-5 border-0"
-     role="success"
-     aria-live="assertive"
-     aria-atomic="true"
-     style="z-index: 5;position: fixed;top: 10 ewm;right: 0;"
-   >
-     <div class="toast-body d-flex justify-content-between" >
-       <p id="inFailureToast"></p>
-       <button
-         type="button"
-         class="btn-close align-self-flex-end"
-         data-bs-dismiss="toast"
-         aria-label="Close"
-       ></button>
-     </div>
-   </div>
-
+  src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDOgtoT8p1B4OkbPdlIly-LWJBtLNN4lZI&libraries=places,drawing&v=weekly&loading=async"
+  defer
+></script>
+<div class="container" style="width: 100dvw">
   <div class="row mb-3 mt-3">
-        <label class="offset-3 col-3" for="country"><b class="fs-5">Country :- </b></label>
-        <select
-          name="country"
-          id="country"
-          class="col-3"
-          (change)="onCountryChanged($event)"
-        >
-          <option [defaultSelected]="true" disabled>Select Country</option>
-          <option
+    <label class="offset-3 col-3" for="country"
+      ><b class="fs-5">Country :- </b></label
+    >
+    <div class="col-3">
+      <select
+        name="country"
+        id="country"
+        class="form-select"
+        (change)="onCountryChanged($event)"
+      >
+        <option [defaultSelected]="true" disabled>Select Country</option>
+        <option
           *ngFor="let country of countries"
           value="{{ country.countryShortName }}"
-          >
+        >
           {{ country.countryName }}
         </option>
       </select>
+    </div>
   </div>
-  <div class="row ">
-      <form id="cityForm">
-          <label for="searchcity" class="offset-3 col-3"><b class="fs-5">City :- </b></label>
-          <input class="col-3" type="text" name="city" id="searchcity" style="height: 2rem;" #city />
-      </form>
+  <div class="row d-flex">
+    <form id="cityForm">
+      <label for="searchcity" class="offset-3 col-3"
+        ><b class="fs-5">City :- </b></label
+      >
+      <input
+        class="ms-3 col-3"
+        type="text"
+        name="city"
+        id="searchcity"
+        style="height: 2.5rem; width: 19rem"
+        #city
+      />
+    </form>
   </div>
-  <hr>
+  <hr />
   <div class="row mt-3">
     <div class="col-8 align-self-center me-2">
-      <div id="map" style="height: 60vh; width: 100%"></div> 
+      <div id="map" style="height: 60vh; width: 100%"></div>
     </div>
-    
+
     <div class="col-3">
-      <div id="registeredzones" style="width: 100%;">
-        <h3 class="mb-2" style="font-weight: 700;">Registered Zones</h3>
+      <div id="registeredzones" style="width: 100%">
+        <h3 class="mb-2" style="font-weight: 700">Registered Zones</h3>
         <div class="scrollable-section" style="width: 23dvw">
-        @if (filteredZones.length > 0) {
-          <div *ngFor="let zone of filteredZones; index as i" (click)="onEditZone(i)">
-            <div style="height: 5rem; width: 100%; background-color: rgb(183, 184, 188);" class="mb-2 align-content-center" [attr.title]="zone.zoneName" data-toggle="tooltip">
-              <span style="font-size: larger;" class="ms-3">{{i + 1}}</span>
-              <span style="font-size: larger;" class="ms-3">{{zone.zoneName.split(',')[0]}}</span>
+          @if (filteredZones.length > 0) {
+          <div
+            *ngFor="let zone of filteredZones; index as i"
+            (click)="onEditZone(i)"
+          >
+            <div
+              style="
+                height: 5rem;
+                width: 100%;
+                background-color: rgb(183, 184, 188);
+              "
+              class="mb-2 align-content-center"
+              [attr.title]="zone.zoneName"
+              data-toggle="tooltip"
+            >
+              <span style="font-size: larger" class="ms-3">{{ i + 1 }}</span>
+              <span style="font-size: larger" class="ms-3">{{
+                zone.zoneName.split(",")[0]
+              }}</span>
             </div>
           </div>
-        }@else if(selectedCountry == null){
-          <div style="height: 60vh;align-content: center;justify-content: center;" class="row text-align-center align-self-center ms-5">
+          }@else if(selectedCountry == null){
+          <div
+            style="height: 60vh; align-content: center; justify-content: center"
+            class="row text-align-center align-self-center ms-5"
+          >
             <h5>Select The Country</h5>
           </div>
-        }@else {
-          <div style="height: 60vh;align-content: center;justify-content: center;" class="row text-align-center align-self-center ms-5">
+          }@else {
+          <div
+            style="height: 60vh; align-content: center; justify-content: center"
+            class="row text-align-center align-self-center ms-5"
+          >
             <h5>No Data Found</h5>
           </div>
-        }
-        
-      </div>
+          }
+        </div>
       </div>
     </div>
   </div>
-  <hr>
+  <hr />
   <div class="row mt-3 d-flex justify-content-center">
-        @if (!editMode) {
-          <div class="col-2"><button style="height: 3rem;width: 5rem;font-size: large;" class="btn btn-large btn-dark" (click)="addNewZone()">Save</button></div>
-          <div class="col-2"><button style="height: 3rem;width: 7rem;font-size: large;" class="btn btn-large btn-danger" (click)="resetMap()">Reset Map</button></div>
-        }@else {
-          <div class="col-2"><button style="height: 3rem;width: 8rem;font-size: large;" class="btn btn-large btn-dark" (click)="editZone()">Update</button></div>
-          <div class="col-2"><button style="height: 3rem;width: 7rem;font-size: large;" class="btn btn-large btn-danger" (click)="leaveEditMode()">Leave Edit</button></div>
-        }
+    @if (!editMode) {
+    <div class="col-2">
+      <button
+        style="height: 3rem; width: 5rem; font-size: large"
+        class="btn btn-large btn-dark"
+        (click)="addNewZone()"
+      >
+        Save
+      </button>
+    </div>
+    <div class="col-2">
+      <button
+        style="height: 3rem; width: 7rem; font-size: large"
+        class="btn btn-large btn-danger"
+        (click)="resetMap()"
+      >
+        Reset Map
+      </button>
+    </div>
+    }@else {
+    <div class="col-2">
+      <button
+        style="height: 3rem; width: 8rem; font-size: large"
+        class="btn btn-large btn-dark"
+        (click)="editZone()"
+      >
+        Update
+      </button>
+    </div>
+    <div class="col-2">
+      <button
+        style="height: 3rem; width: 7rem; font-size: large"
+        class="btn btn-large btn-danger"
+        (click)="leaveEditMode()"
+      >
+        Leave Edit
+      </button>
+    </div>
+    }
   </div>
 </div>
-
-<!-- <div >
-  <div class="row"><div class="col-4">othowieshrg</div>
-  <div class="col-4">dfkbjidbj</div>
-  <div class="col-4">dfmb</div></div>
-  <div class="row"><div class="col-4">othowieshrg</div>
-  <div class="col-4">dfkbjidbj</div>
-  <div class="col-4">dfmb</div></div>
-  <div class="row"><div class="col-4">othowieshrg</div>
-  <div class="col-4">dfkbjidbj</div>
-  <div class="col-4">dfmb</div></div>
-  <div class="row"><div class="col-4">othowieshrg</div>
-  <div class="col-4">dfkbjidbj</div>
-  <div class="col-4">dfmb</div></div>
-</div> -->

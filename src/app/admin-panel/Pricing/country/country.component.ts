@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import {
   FormControl,
   FormGroup,
@@ -7,10 +7,9 @@ import {
   Validators,
 } from '@angular/forms';
 import { Country } from './country.interface';
-import { HttpClient } from '@angular/common/http';
 import { CountriesService } from './countries.service';
 import { AuthService } from '../../../auth/auth.service';
-import * as bootstrap from 'bootstrap';
+import { ToastrService } from 'ngx-toastr';
 
 @Component({
   selector: 'app-country',
@@ -27,9 +26,9 @@ export class CountryComponent implements OnInit {
   countryname: string = '';
   countrycurrency: string = '';
   countrycallcode: string = '';
+  toastr = inject(ToastrService);
 
   constructor(
-    private http: HttpClient,
     private countryService: CountriesService,
     private authService: AuthService
   ) {
@@ -46,7 +45,8 @@ export class CountryComponent implements OnInit {
   onSearchCountry() {
     let input = this.countryname;
     let searchRegEx = new RegExp(`^${input}$`, 'gi');
-      this.countryService.getCountriesFromApi().subscribe((data) => {
+    this.countryService.getCountriesFromApi().subscribe({
+      next: (data) => {
         for (let i = 0; i < data.length; i++) {
           if (data[i]['name']['common'].match(searchRegEx)) {
             let currencyRequirment = data[i]['currencies'];
@@ -73,58 +73,42 @@ export class CountryComponent implements OnInit {
           }
         }
         if (this.toBeAddedCountry == null) {
-          let toast = bootstrap.Toast.getOrCreateInstance(
-            document.getElementById('FailureToast2') as HTMLElement
-          );
-          let inToast = document.getElementById(
-            'inFailureToast2'
-          ) as HTMLElement;
-          inToast.innerText = "No country found with this name!";
-          toast.show();
+          this.toastr.error(`no country found with name ${input}`, 'Error');
           this.countryname = '';
           this.countryForm.reset();
         }
-      },(err)=>{
-        console.log(err);
-      });
+      },
+      error: (err) => {
+        this.toastr.error('Unable to connect with Countries API', 'Error');
+      },
+    });
   }
   onAddCountry() {
     if (!this.countryForm.invalid) {
-      this.countryService.postCountry(this.toBeAddedCountry!).subscribe(
-        (res) => {
-          if (res.country) {
-            let toast = bootstrap.Toast.getOrCreateInstance(
-              document.getElementById('SuccessToast') as HTMLElement
-            );
-            let inToast = document.getElementById('inToast') as HTMLElement;
-            inToast.innerText = 'country Added Successfully';
-            toast.show();
-            // console.log(res.country);
-            // this.AddedCountry.push(res.country);
-            this.filteredCountry.push(res.country);
-            this.countryForm.reset();
-            this.toBeAddedCountry = null;
-          } else if(res.varified == false){
-            // alert('User is not verified');
-            this.authService.userLogOut();
-          }
-          else if(res.error){
-            this.toBeAddedCountry = null;
-            this.countryname = '';
-            let toast = bootstrap.Toast.getOrCreateInstance(
-              document.getElementById('FailureToast') as HTMLElement
-            );
-            let inToast = document.getElementById(
-              'inFailureToast'
-            ) as HTMLElement;
-            inToast.innerText = res.error;
-            toast.show();
-          }
-        }
-      );
-    } else {
-      this.countryForm.reset();
-    }
+      this.countryService
+        .postCountry(this.toBeAddedCountry!)
+        .subscribe({
+          next:(res) => {
+            if (res.country) {
+              this.toastr.success(`Country ${res.country.countryName} added`, 'Success');
+              this.filteredCountry.push(res.country);
+              this.countryForm.reset();
+              this.toBeAddedCountry = null;
+            } 
+            else if (res.varified == false) {
+              this.authService.userLogOut();
+            } 
+            else if (res.error) {
+              this.toBeAddedCountry = null;
+              this.countryname = '';
+              this.toastr.error(`Error From Backend:- ${res.error}`, 'Error');
+            }
+          },
+          error: (err) => {
+            this.toastr.error(`Unable to fetch data:- ${err.message}`, 'Error');
+          },
+        });
+    } 
   }
 
   searchCountry(event: any) {
@@ -136,24 +120,21 @@ export class CountryComponent implements OnInit {
   }
 
   getCountries() {
-    this.countryService.getCountries().subscribe((res) => {
-      if (res.countries) {
-        this.AddedCountry = res.countries;
-        this.filteredCountry = res.countries;
-      }else if (res.varified == false) {
-        // alert('User is not verified');
-        this.authService.userLogOut();
-        return;
-      } else if (res.error) {
-        let toast = bootstrap.Toast.getOrCreateInstance(
-          document.getElementById('FailureToast') as HTMLElement
-        );
-        let inToast = document.getElementById(
-          'inFailureToast'
-        ) as HTMLElement;
-        inToast.innerText = res.error;
-        toast.show();
-      }
+    this.countryService.getCountries().subscribe({
+      next:(res) => {
+        if (res.countries) {
+          this.AddedCountry = res.countries;
+          this.filteredCountry = res.countries;
+        } else if (res.varified == false) {
+          this.authService.userLogOut();
+          return;
+        } else if (res.error) {
+          this.toastr.error(`Error From Backend:- ${res.error}`, 'Error');
+        }
+      },
+      error: (err) => {
+        this.toastr.error(`Unable to fetch data:- ${err.message}`, 'Error');
+      },
     });
   }
 }

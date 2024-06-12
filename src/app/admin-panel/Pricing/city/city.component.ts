@@ -1,15 +1,13 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { CountriesService } from '../country/countries.service';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule } from '@angular/forms';
 import { Country } from '../country/country.interface';
-import { Zone } from './zone.interface';
+import { Zone, ZoneCountries } from './zone.interface';
 import { CityService } from './city.service';
 import { RecivingZone } from './recivingZone.interface';
 import { AuthService } from '../../../auth/auth.service';
-import * as bootstrap from 'bootstrap';
-import { Loader } from 'google-maps';
-import { environment } from '../../../../environments/environment';
+import { ToastrService } from 'ngx-toastr';
 
 @Component({
   selector: 'app-city',
@@ -19,22 +17,12 @@ import { environment } from '../../../../environments/environment';
   styleUrl: './city.component.css',
 })
 export class CityComponent implements OnInit {
-  countries: {
-    countryName: string;
-    countryShortName: string;
-    _id?: string;
-    countryLatLng: google.maps.LatLngLiteral;
-  }[] = [];
+  countries: ZoneCountries[] = [];
   map!: google.maps.Map;
   center: google.maps.LatLngLiteral = { lat: 22, lng: 72 };
   polyCoordinates: google.maps.LatLngLiteral[] = [];
   updatedPolyCoordinates: google.maps.LatLngLiteral[] = [];
-  selectedCountry!: {
-    countryName: string;
-    countryShortName: string;
-    _id?: string;
-    countryLatLng: google.maps.LatLngLiteral;
-  };
+  selectedCountry!: ZoneCountries;
   filteredZones: RecivingZone[] = [];
   editId: string = '';
   editMode: boolean = false;
@@ -366,12 +354,12 @@ export class CityComponent implements OnInit {
     },
   ];
 
+  toastr = inject(ToastrService);
   constructor(
     private countryService: CountriesService,
     private cityService: CityService,
     private authService: AuthService
-  ) {
-  }
+  ) {}
   ngOnInit(): void {
     this.countryService.getCountries().subscribe((data) => {
       if (data.countries) {
@@ -385,15 +373,12 @@ export class CityComponent implements OnInit {
           });
         });
       } else if (data.varified == false) {
-        // alert('User is not verified');
         this.authService.userLogOut();
       } else if (data.error) {
-        let toast = bootstrap.Toast.getOrCreateInstance(
-          document.getElementById('FailureToast') as HTMLElement
+        this.toastr.error(
+          `Error in Fatching Countrys:- ${data.error}`,
+          'Error'
         );
-        let inToast = document.getElementById('inFailureToast') as HTMLElement;
-        inToast.innerText = data.error;
-        toast.show();
       }
     });
     this.initMap();
@@ -453,23 +438,9 @@ export class CityComponent implements OnInit {
       {
         center: { lat: 22.3039, lng: 70.8022 },
         zoom: 10,
-        styles:this.googleMapStyles,
+        styles: this.googleMapStyles,
       }
     );
-
-    // let loader: Loader = new Loader(environment.GOOGLE_MAPS_API_KEY);
-
-    // loader.load().then(() => {
-    //   this.map = new google.maps.Map(
-    //     document.getElementById('map') as HTMLElement,
-    //     {
-    //       center: { lat: 51.678418, lng: 7.809007 },
-    //       zoom: 10,
-    //       styles: this.googleMapStyles,
-    //     }
-    //   );
-    // });
-
     this.drawingManager = new google.maps.drawing.DrawingManager({
       drawingMode: google.maps.drawing.OverlayType.POLYGON,
       drawingControl: true,
@@ -580,40 +551,30 @@ export class CityComponent implements OnInit {
     if (this.updatedPolyCoordinates.length > 2 && this.editId != '') {
       this.cityService
         .updateZone({ boundry: this.updatedPolyCoordinates, id: this.editId })
-        .subscribe((data) => {
-          if (data.zone) {
-            this.filteredZones[this.updatedInputIndex] = data.zone;
-            let toast = bootstrap.Toast.getOrCreateInstance(
-              document.getElementById('SuccessToast') as HTMLElement
-            );
-            let inToast = document.getElementById('inToast') as HTMLElement;
-            inToast.innerText = 'Zone Updated Successfully';
-            toast.show();
-          } else if (data.varified == false) {
-            // alert('User is not verified');
-            this.authService.userLogOut();
-          } else if (data.error) {
-            let toast = bootstrap.Toast.getOrCreateInstance(
-              document.getElementById('FailureToast') as HTMLElement
-            );
-            let inToast = document.getElementById(
-              'inFailureToast'
-            ) as HTMLElement;
-            inToast.innerText = data.error;
-            toast.show();
-          }
+        .subscribe({
+          next: (data) => {
+            if (data.zone) {
+              this.filteredZones[this.updatedInputIndex] = data.zone;
+              this.toastr.success(
+                `Zone ${data.zone.zoneName} updated`,
+                'Success'
+              );
+            } else if (data.varified == false) {
+              this.authService.userLogOut();
+            } else if (data.error) {
+              this.toastr.error(`Error From Backend:- ${data.error}`, 'Error');
+            }
+          },
+          error: (err) => {
+            this.toastr.error(`Unable to fetch data:- ${err.message}`, 'Error');
+          },
         });
       this.updatedPolyCoordinates = [];
       this.editMode = false;
       this.editedpolygon.setMap(null);
       this.map.panTo(this.center);
     } else {
-      let toast = bootstrap.Toast.getOrCreateInstance(
-        document.getElementById('FailureToast') as HTMLElement
-      );
-      let inToast = document.getElementById('inFailureToast') as HTMLElement;
-      inToast.innerText = 'Invalid values, please try again!';
-      toast.show();
+      this.toastr.warning(`Values are Not Valid`, 'Warning');
     }
   }
   addNewZone() {
@@ -627,63 +588,49 @@ export class CityComponent implements OnInit {
         // countryName: this.countryName,
         // countryShortName: this.countryShortName,
       };
-      this.cityService.addZone(zone).subscribe((data) => {
-        if (data.zones) {
-          this.filteredZones = data.zones;
-          let toast = bootstrap.Toast.getOrCreateInstance(
-            document.getElementById('SuccessToast') as HTMLElement
-          );
-          let inToast = document.getElementById('inToast') as HTMLElement;
-          inToast.innerText = 'Zone added Successfully';
-          toast.show();
-          this.zoneName = '';
-          this.polygon.setMap(null);
-          this.map.panTo({ lat: 22.3039, lng: 70.8022 });
-          this.drawingManager.setOptions({
-            drawingMode: null,
-            drawingControl: false,
-          });
-          this.map.setCenter(this.selectedCountry.countryLatLng);
-          this.map.setZoom(6);
-          citybox.value = '';
-        } else if (data.varified == false) {
-          // alert('User is not verified');
-          this.authService.userLogOut();
-        } else if (data.error) {
-          let toast = bootstrap.Toast.getOrCreateInstance(
-            document.getElementById('FailureToast') as HTMLElement
-          );
-          let inToast = document.getElementById(
-            'inFailureToast'
-          ) as HTMLElement;
-          inToast.innerText = data.error;
-          toast.show();
-        }
+      this.cityService.addZone(zone).subscribe({
+        next :(data) => {
+          if (data.zones) {
+            this.filteredZones = data.zones;
+            this.toastr.success(`Zone ${zone.zoneName} added`, 'Success');
+            this.zoneName = '';
+            this.polygon.setMap(null);
+            this.map.panTo({ lat: 22.3039, lng: 70.8022 });
+            this.drawingManager.setOptions({
+              drawingMode: null,
+              drawingControl: false,
+            });
+            this.map.setCenter(this.selectedCountry.countryLatLng);
+            this.map.setZoom(6);
+            citybox.value = '';
+          } else if (data.varified == false) {
+            this.authService.userLogOut();
+          } else if (data.error) {
+            this.toastr.error(`Error From Backend:- ${data.error}`, 'Error');
+          }
+        },
+        error: (err) => {
+          this.toastr.error(`Unable to fetch data:- ${err.message}`, 'Error');
+        },
       });
     } else {
-      let toast = bootstrap.Toast.getOrCreateInstance(
-        document.getElementById('FailureToast') as HTMLElement
-      );
-      let inToast = document.getElementById('inFailureToast') as HTMLElement;
-      inToast.innerText = 'zone has no boundries';
-      toast.show();
+      this.toastr.warning(`Zone has no boundries`, 'Warning');
     }
   }
   getZone() {
-    this.cityService.getZones(this.selectedCountry._id!).subscribe((data) => {
-      if (data.zones) {
-        this.filteredZones = data.zones;
-      } else if (data.varified == false) {
-        // alert('User is not verified');
-        this.authService.userLogOut();
-      } else if (data.error) {
-        let toast = bootstrap.Toast.getOrCreateInstance(
-          document.getElementById('FailureToast') as HTMLElement
-        );
-        let inToast = document.getElementById('inFailureToast') as HTMLElement;
-        inToast.innerText = data.error;
-        toast.show();
-      }
+    this.cityService.getZones(this.selectedCountry._id!).subscribe({
+      next:(data) => {
+        if (data.zones) {
+          this.filteredZones = data.zones;
+        } else if (data.varified == false) {
+          this.authService.userLogOut();
+        } else if (data.error) {
+          this.toastr.error(`Error From Backend:- ${data.error}`, 'Error');
+        }
+      },
+      error: (err) => {
+        this.toastr.error(`Unable to fetch data:- ${err.message}`, 'Error');
+      },
     });
   }
 }

@@ -1,5 +1,11 @@
 import { CommonModule } from '@angular/common';
-import { AfterViewChecked, Component, OnInit, ViewChild } from '@angular/core';
+import {
+  AfterViewChecked,
+  Component,
+  OnInit,
+  ViewChild,
+  inject,
+} from '@angular/core';
 import { CountriesService } from '../Pricing/country/countries.service';
 import { Country } from '../Pricing/country/country.interface';
 import {
@@ -24,6 +30,7 @@ import {
   StripeElementsOptions,
 } from '@stripe/stripe-js';
 import { AuthService } from '../../auth/auth.service';
+import { ToastrService } from 'ngx-toastr';
 
 @Component({
   selector: 'app-users',
@@ -73,6 +80,7 @@ export class UsersComponent implements OnInit, AfterViewChecked {
     locale: 'en',
   };
 
+  toastr = inject(ToastrService);
   constructor(
     private countryService: CountriesService,
     private userService: UserService,
@@ -96,21 +104,20 @@ export class UsersComponent implements OnInit, AfterViewChecked {
       country: new FormControl(null),
     });
   }
-  async ngOnInit() {
-    this.countryService.getCountries().subscribe((res) => {
-      if (res.countries) {
-        this.countryList = res.countries;
-      } else if (res.varified == false) {
-        this.authService.userLogOut();
-        return;
-      } else if (res.error) {
-        let toast = bootstrap.Toast.getOrCreateInstance(
-          document.getElementById('userFailureToast') as HTMLElement
-        );
-        let inToast = document.getElementById('inFailureToast') as HTMLElement;
-        inToast.innerText = res.error;
-        toast.show();
-      }
+  ngOnInit() {
+    this.countryService.getCountries().subscribe({
+      next: (res) => {
+        if (res.countries) {
+          this.countryList = res.countries;
+        } else if (res.varified == false) {
+          this.authService.userLogOut();
+        } else if (res.error) {
+          this.toastr.error(`Error From Backend:- ${res.error}`, 'Error');
+        }
+      },
+      error: (err) => {
+        this.toastr.error(`Unable to Fetch data:- ${err.message}`, 'Error');
+      },
     });
     this.onSearch();
   }
@@ -135,7 +142,7 @@ export class UsersComponent implements OnInit, AfterViewChecked {
       if (event.target.files[0].size < 4000000) {
         this.formdata.append('userProfile', event.target.files[0]);
       } else {
-        return;
+        this.toastr.warning('Upload file size is too large', 'Warning');
       }
     }
   }
@@ -145,34 +152,23 @@ export class UsersComponent implements OnInit, AfterViewChecked {
     this.formdata.append('email', this.userForm.get('email')?.value);
     this.formdata.append('phone', this.userForm.get('phone')?.value);
     this.formdata.append('country', this.selectedCountry._id!);
-    this.userService.postUser(this.formdata).subscribe((res) => {
-      if (res.user) {
-        let toast = bootstrap.Toast.getOrCreateInstance(
-          document.getElementById('userSuccessToast') as HTMLElement
-        );
-        let inToast = document.getElementById('inToast') as HTMLElement;
-        inToast.innerText = 'User Added Successfully';
-        toast.show();
-        this.userForm.reset();
-        this.formdata = new FormData();
-        this.userForm.reset();
-        this.onSearch();
-      } else if (res.varified == false) {
-        let toast = bootstrap.Toast.getOrCreateInstance(
-          document.getElementById('userFailureToast') as HTMLElement
-        );
-        let inToast = document.getElementById('inFailureToast') as HTMLElement;
-        inToast.innerText = 'User is not Validated';
-        toast.show();
-        this.authService.userLogOut();
-      } else if (res.error) {
-        let toast = bootstrap.Toast.getOrCreateInstance(
-          document.getElementById('userFailureToast') as HTMLElement
-        );
-        let inToast = document.getElementById('inFailureToast') as HTMLElement;
-        inToast.innerText = res.error;
-        toast.show();
-      }
+    this.userService.postUser(this.formdata).subscribe({
+      next: (res) => {
+        if (res.user) {
+          this.toastr.success(`User Added Successfully`, 'Success');
+          this.userForm.reset();
+          this.formdata = new FormData();
+          this.userForm.reset();
+          this.onSearch();
+        } else if (res.varified == false) {
+          this.authService.userLogOut();
+        } else if (res.error) {
+          this.toastr.error(`Error From Backend:- ${res.error}`, 'Error');
+        }
+      },
+      error: (err) => {
+        this.toastr.error(`unable to Fetch data :- ${err.message}`);
+      },
     });
   }
   onUpdateUser() {
@@ -191,37 +187,26 @@ export class UsersComponent implements OnInit, AfterViewChecked {
         this.formdata.append('country', element._id!);
       }
     });
-    this.userService.updateUser(this.formdata).subscribe((res) => {
-      if (res.message) {
-        let toast = bootstrap.Toast.getOrCreateInstance(
-          document.getElementById('userSuccessToast') as HTMLElement
-        );
-        let inToast = document.getElementById('inToast') as HTMLElement;
-        inToast.innerText = 'User Updated Successfully';
-        toast.show();
-        this.onSearch();
-        this.editMode = false;
-        this.userForm.reset();
-        this.formdata = new FormData();
-      } else if (res.varified == false) {
-        let toast = bootstrap.Toast.getOrCreateInstance(
-          document.getElementById('userFailureToast') as HTMLElement
-        );
-        let inToast = document.getElementById('inToast') as HTMLElement;
-        inToast.innerText = 'User is not Validated';
-        toast.show();
-        this.authService.userLogOut();
-      } else if (res.error) {
-        this.editMode = false;
-        this.userForm.reset();
-        this.formdata = new FormData();
-        let toast = bootstrap.Toast.getOrCreateInstance(
-          document.getElementById('userFailureToast') as HTMLElement
-        );
-        let inToast = document.getElementById('inFailureToast') as HTMLElement;
-        inToast.innerText = res.error;
-        toast.show();
-      }
+    this.userService.updateUser(this.formdata).subscribe({
+      next: (res) => {
+        if (res.message) {
+          this.toastr.success(`User Updated`, 'Success');
+          this.onSearch();
+          this.editMode = false;
+          this.userForm.reset();
+          this.formdata = new FormData();
+        } else if (res.varified == false) {
+          this.authService.userLogOut();
+        } else if (res.error) {
+          this.editMode = false;
+          this.userForm.reset();
+          this.formdata = new FormData();
+          this.toastr.error(`Error From Backend:- ${res.error}`, 'Error');
+        }
+      },
+      error: (err) => {
+        this.toastr.error(`unable to Fetch data :- ${err.message}`);
+      },
     });
   }
   onSearchInputChange(event: any) {
@@ -231,35 +216,33 @@ export class UsersComponent implements OnInit, AfterViewChecked {
   onSearch() {
     this.userService
       .getUsers(this.searchInput, this.currentPage, this.sortMethod)
-      .subscribe((res) => {
-        if (res.users) {
-          this.usersList = res.users;
-        } else if (res.varified == false) {
-          let toast = bootstrap.Toast.getOrCreateInstance(
-            document.getElementById('userFailureToast') as HTMLElement
-          );
-          let inToast = document.getElementById('inToast') as HTMLElement;
-          inToast.innerText = 'User is not Validated';
-          toast.show();
-          this.authService.userLogOut();
-        } else if (res.error) {
-          let toast = bootstrap.Toast.getOrCreateInstance(
-            document.getElementById('userFailureToast') as HTMLElement
-          );
-          let inToast = document.getElementById(
-            'inFailureToast'
-          ) as HTMLElement;
-          inToast.innerText = res.error;
-          toast.show();
-        }
+      .subscribe({
+        next: (res) => {
+          if (res.users) {
+            this.usersList = res.users;
+          } else if (res.varified == false) {
+            this.authService.userLogOut();
+          } else if (res.error) {
+            this.toastr.error(`Error From Backend:- ${res.error}`, 'Error');
+          }
+        },
+        error: (err) => {
+          this.toastr.error(`Unable to Fetch data:- ${err.message}`, 'Error');
+        },
       });
   }
   cardDetails(user: UserGet) {
     let cardModal = new bootstrap.Modal(
       document.getElementById('cardModal') as HTMLElement
     ).show();
-    this.cardService.getCards(user.customerId).subscribe((res) => {
-      this.cardList = res.data;
+    // console.log(user.customerId)
+    this.cardService.getCards(user.customerId).subscribe({
+      next: (res) => {
+        this.cardList = res.data;
+      },
+      error: (err) => {
+        this.toastr.error(`Unable to Fetch data:- ${err.message}`, 'Error');
+      },
     });
     this.customerId = user.customerId;
   }
@@ -301,36 +284,21 @@ export class UsersComponent implements OnInit, AfterViewChecked {
   }
   onDelete(user: UserGet) {
     if (confirm('Are you sure you want to delete this user?')) {
-      this.userService
-        .deleteUser(user._id!, user.customerId!)
-        .subscribe((res) => {
+      this.userService.deleteUser(user._id!, user.customerId!).subscribe({
+        next: (res) => {
           if (res.message) {
             this.onSearch();
-            let toast = bootstrap.Toast.getOrCreateInstance(
-              document.getElementById('userSuccessToast') as HTMLElement
-            );
-            let inToast = document.getElementById('inToast') as HTMLElement;
-            inToast.innerText = 'User Deleted Successfully';
-            toast.show();
+            this.toastr.success('User Deleted Successfully', 'Success');
           } else if (res.varified == false) {
-            let toast = bootstrap.Toast.getOrCreateInstance(
-              document.getElementById('userFailureToast') as HTMLElement
-            )
-            let inToast = document.getElementById('inFailureToast') as HTMLElement
-            inToast.innerText ="User is not Validated";
-            toast.show();
             this.authService.userLogOut();
           } else if (res.error) {
-            let toast = bootstrap.Toast.getOrCreateInstance(
-              document.getElementById('userFailureToast') as HTMLElement
-            );
-            let inToast = document.getElementById(
-              'inFailureToast'
-            ) as HTMLElement;
-            inToast.innerText = res.error;
-            toast.show();
+            this.toastr.error(`Error From Backend:- ${res.error}`, 'Error');
           }
-        });
+        },
+        error: (err) => {
+          this.toastr.error(`Unable to Fetch data:- ${err.message}`, 'Error');
+        },
+      });
     } else {
       return;
     }
@@ -343,12 +311,8 @@ export class UsersComponent implements OnInit, AfterViewChecked {
   }
   onNextPage() {
     if (this.usersList.length < 10) {
-      let toast = bootstrap.Toast.getOrCreateInstance(
-        document.getElementById('userFailureToast') as HTMLElement
-      )
-      let inToast = document.getElementById('inFailureToast') as HTMLElement
-      inToast.innerText ="No more Pages";
-      toast.show();    } else {
+      this.toastr.warning(`Already on last page`, 'Warning');
+    } else {
       this.currentPage = this.currentPage + 1;
       this.onSearch();
     }
@@ -358,12 +322,8 @@ export class UsersComponent implements OnInit, AfterViewChecked {
       this.currentPage = this.currentPage - 1;
       this.onSearch();
     } else {
-      let toast = bootstrap.Toast.getOrCreateInstance(
-        document.getElementById('userFailureToast') as HTMLElement
-      )
-      let inToast = document.getElementById('inFailureToast') as HTMLElement
-      inToast.innerText ="Aleredy On First Page";
-      toast.show();    }
+      this.toastr.warning(`Already on first page`, 'Warning');
+    }
   }
   onClickAddUser() {
     this.editMode = false;
@@ -379,52 +339,43 @@ export class UsersComponent implements OnInit, AfterViewChecked {
   OnAddCard(token: any) {
     const postCard: any = { customerId: this.customerId, token };
     console.log(postCard);
-    this.cardService.postCard(postCard).subscribe((res) => {
-      if (res.card) {
-        console.log(res.card);
-        this.cardList.push(res.card);
-      } else if (res.varified == false) {
-        let toast = bootstrap.Toast.getOrCreateInstance(
-          document.getElementById('userFailureToast') as HTMLElement
-        )
-        let inToast = document.getElementById('inFailureToast') as HTMLElement
-        inToast.innerText ="User is not Validated";
-        toast.show();
-        this.authService.userLogOut();
-      } else if (res.error) {
-        let toast = bootstrap.Toast.getOrCreateInstance(
-          document.getElementById('userFailureToast') as HTMLElement
-        );
-        let inToast = document.getElementById('inFailureToast') as HTMLElement;
-        inToast.innerText = res.error;
-        toast.show();
+    this.cardService.postCard(postCard).subscribe({
+      next:(res) => {
+        if (res.card) {
+          this.toastr.success('Card Added Successfully', 'Success');
+          this.cardList.push(res.card);
+        } 
+        else if (res.varified == false) {
+          this.authService.userLogOut();
+        } 
+        else if (res.error) {
+          this.toastr.error(`Error From Backend:- ${res.error}`, 'Error');
+        }
+      },
+      error:(err)=>{
+        this.toastr.error(`Unable to Fetch data:- ${err.message}`, 'Error');
       }
     });
   }
   deleteCard(index: number) {
     let cardId = this.cardList[index].id;
-    this.cardService.deleteCard(cardId!, this.customerId).subscribe((res) => {
-      if (res.message) {
-        console.log(res.message);
-        this.cardList = this.cardList
-          .slice(0, index)
-          .concat(this.cardList.slice(index + 1));
-        console.log(this.cardList);
-      } else if (res.varified == false) {
-        let toast = bootstrap.Toast.getOrCreateInstance(
-          document.getElementById('userFailureToast') as HTMLElement
-        )
-        let inToast = document.getElementById('inFailureToast') as HTMLElement
-        inToast.innerText ="User is not Validated";
-        toast.show();
-        this.authService.userLogOut();
-      } else if (res.error) {
-        let toast = bootstrap.Toast.getOrCreateInstance(
-          document.getElementById('userFailureToast') as HTMLElement
-        );
-        let inToast = document.getElementById('inFailureToast') as HTMLElement;
-        inToast.innerText = res.error;
-        toast.show();
+    this.cardService.deleteCard(cardId!, this.customerId).subscribe({
+      next:(res) => {
+        if (res.message) {
+          this.toastr.success('Card Deleted Successfully', 'Success');
+          this.cardList = this.cardList
+            .slice(0, index)
+            .concat(this.cardList.slice(index + 1));
+        } 
+        else if (res.varified == false) {
+          this.authService.userLogOut();
+        } 
+        else if (res.error) {
+          this.toastr.error(`Error From Backend:- ${res.error}`, 'Error');
+        }
+      },
+      error:(err)=>{
+        this.toastr.error(`Unable to Fetch data:- ${err.message}`, 'Error');
       }
     });
   }
@@ -433,24 +384,35 @@ export class UsersComponent implements OnInit, AfterViewChecked {
     let card = this.cardList[index];
     this.cardService
       .setCardAsDefault(cardId!, this.customerId)
-      .subscribe((res) => {
-        this.cardList = this.cardList
-          .slice(0, index)
-          .concat(this.cardList.slice(index + 1));
-        this.cardList = [card, ...this.cardList];
+      .subscribe({
+        next:(res) => {
+          this.toastr.info(`new Default card is:- XXXX XXXX XXXX ${card.last4}`, 'Info');
+            this.cardList = this.cardList
+              .slice(0, index)
+              .concat(this.cardList.slice(index + 1));
+            this.cardList = [card, ...this.cardList];
+          },
+          error:(err)=>{
+            this.toastr.error(`Unable to Fetch data:- ${err.message}`, 'Error');
+          }
       });
   }
   OnChangeWantToAddCard() {
     this.wantToAddCard = !this.wantToAddCard;
   }
   createToken(): void {
-    this.stripeService.createToken(this.card.element).subscribe((result) => {
-      if (result.token) {
-        this.OnAddCard(result.token);
-      } else if (result.error) {
-        console.log(result.error.message);
+    this.stripeService.createToken(this.card.element).subscribe({
+      next:(result) => {
+        if (result.token) {
+          this.OnAddCard(result.token);
+        } else if (result.error) {
+          this.toastr.error(result.error.message, 'Error');
+        }
+        this.wantToAddCard = false;
+      },
+      error:(err)=>{
+        this.toastr.error(`Unable to Fetch data:- ${err.message}`, 'Error');
       }
-      this.wantToAddCard = false;
     });
   }
 }
