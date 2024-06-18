@@ -10,6 +10,7 @@ import { Country } from './country.interface';
 import { CountriesService } from './countries.service';
 import { AuthService } from '../../../auth/auth.service';
 import { ToastrService } from 'ngx-toastr';
+import { environment } from '../../../../environments/environment';
 
 @Component({
   selector: 'app-country',
@@ -73,13 +74,13 @@ export class CountryComponent implements OnInit {
           }
         }
         if (this.toBeAddedCountry == null) {
-          this.toastr.error(`no country found with name ${input}`, 'Error');
+          this.toastr.error(`no country found with name ${input}`, 'Error',environment.TROASTR_STYLE);
           this.countryname = '';
           this.countryForm.reset();
         }
       },
       error: (err) => {
-        this.toastr.error('Unable to connect with Countries API', 'Error');
+        this.toastr.error('Unable to connect with Countries API', 'Error',environment.TROASTR_STYLE);
       },
     });
   }
@@ -90,7 +91,7 @@ export class CountryComponent implements OnInit {
         .subscribe({
           next:(res) => {
             if (res.country) {
-              this.toastr.success(`Country ${res.country.countryName} added`, 'Success');
+              this.toastr.success(`Country ${res.country.countryName} added`, 'Success',environment.TROASTR_STYLE);
               this.filteredCountry.push(res.country);
               this.countryForm.reset();
               this.toBeAddedCountry = null;
@@ -101,11 +102,11 @@ export class CountryComponent implements OnInit {
             else if (res.error) {
               this.toBeAddedCountry = null;
               this.countryname = '';
-              this.toastr.error(`Error From Backend:- ${res.error}`, 'Error');
+              this.toastr.error(`Error From Backend:- ${res.error}`, 'Error',environment.TROASTR_STYLE);
             }
           },
           error: (err) => {
-            this.toastr.error(`Unable to fetch data:- ${err.message}`, 'Error');
+            this.toastr.error(`Unable to fetch data:- ${err.message}`, 'Error',environment.TROASTR_STYLE);
           },
         });
     } 
@@ -129,11 +130,11 @@ export class CountryComponent implements OnInit {
           this.authService.userLogOut();
           return;
         } else if (res.error) {
-          this.toastr.error(`Error From Backend:- ${res.error}`, 'Error');
+          this.toastr.error(`Error From Backend:- ${res.error}`, 'Error',environment.TROASTR_STYLE);
         }
       },
       error: (err) => {
-        this.toastr.error(`Unable to fetch data:- ${err.message}`, 'Error');
+        this.toastr.error(`Unable to fetch data:- ${err.message}`, 'Error',environment.TROASTR_STYLE);
       },
     });
   }

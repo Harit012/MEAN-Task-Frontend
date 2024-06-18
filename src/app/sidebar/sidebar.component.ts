@@ -27,6 +27,6 @@ export class SidebarComponent {
   }
 
   onClickLogOut(){
-    this.authservice.userLogOut();
+    this.authservice.logOutManually();
   }
 }

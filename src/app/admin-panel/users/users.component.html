@@ -1,5 +1,5 @@
 <div class="" style="width: calc(100dvw - 262px)">
-  
+  <app-loader *ngIf="isLoader"></app-loader>
   <div
     class="row p-2 d-flex justify-content-between"
     style="background-color: rgb(62, 71, 80); color: aliceblue"
@@ -88,16 +88,17 @@
               Select Action
             </option>
             <option
+              name="showCards"
               value="CardDetails"
               (click)="cardDetails(user)"
               style="color: rgb(0, 146, 12)"
             >
               Show cards
             </option>
-            <option value="Edit" (click)="onEdit(user)" style="color: blue">
+            <option value="Edit" name="editUser" (click)="onEdit(user)" style="color: blue">
               Edit User
             </option>
-            <option value="Delete" (click)="onDelete(user)" style="color: red">
+            <option value="Delete" name="deleteUser" (click)="onDelete(user)" style="color: red">
               Delete User
             </option>
           </select>

@@ -8,6 +8,7 @@ import { CityService } from './city.service';
 import { RecivingZone } from './recivingZone.interface';
 import { AuthService } from '../../../auth/auth.service';
 import { ToastrService } from 'ngx-toastr';
+import { environment } from '../../../../environments/environment';
 
 @Component({
   selector: 'app-city',
@@ -377,7 +378,7 @@ export class CityComponent implements OnInit {
       } else if (data.error) {
         this.toastr.error(
           `Error in Fatching Countrys:- ${data.error}`,
-          'Error'
+          'Error',environment.TROASTR_STYLE
         );
       }
     });
@@ -557,16 +558,16 @@ export class CityComponent implements OnInit {
               this.filteredZones[this.updatedInputIndex] = data.zone;
               this.toastr.success(
                 `Zone ${data.zone.zoneName} updated`,
-                'Success'
+                'Success',environment.TROASTR_STYLE
               );
             } else if (data.varified == false) {
               this.authService.userLogOut();
             } else if (data.error) {
-              this.toastr.error(`Error From Backend:- ${data.error}`, 'Error');
+              this.toastr.error(`Error From Backend:- ${data.error}`, 'Error',environment.TROASTR_STYLE);
             }
           },
           error: (err) => {
-            this.toastr.error(`Unable to fetch data:- ${err.message}`, 'Error');
+            this.toastr.error(`Unable to fetch data:- ${err.message}`, 'Error',environment.TROASTR_STYLE);
           },
         });
       this.updatedPolyCoordinates = [];
@@ -574,7 +575,7 @@ export class CityComponent implements OnInit {
       this.editedpolygon.setMap(null);
       this.map.panTo(this.center);
     } else {
-      this.toastr.warning(`Values are Not Valid`, 'Warning');
+      this.toastr.warning(`Values are Not Valid`, 'Warning',environment.TROASTR_STYLE);
     }
   }
   addNewZone() {
@@ -592,7 +593,7 @@ export class CityComponent implements OnInit {
         next :(data) => {
           if (data.zones) {
             this.filteredZones = data.zones;
-            this.toastr.success(`Zone ${zone.zoneName} added`, 'Success');
+            this.toastr.success(`Zone ${zone.zoneName} added`, 'Success',environment.TROASTR_STYLE);
             this.zoneName = '';
             this.polygon.setMap(null);
             this.map.panTo({ lat: 22.3039, lng: 70.8022 });
@@ -606,15 +607,15 @@ export class CityComponent implements OnInit {
           } else if (data.varified == false) {
             this.authService.userLogOut();
           } else if (data.error) {
-            this.toastr.error(`Error From Backend:- ${data.error}`, 'Error');
+            this.toastr.error(`Error From Backend:- ${data.error}`, 'Error',environment.TROASTR_STYLE);
           }
         },
         error: (err) => {
-          this.toastr.error(`Unable to fetch data:- ${err.message}`, 'Error');
+          this.toastr.error(`Unable to fetch data:- ${err.message}`, 'Error',environment.TROASTR_STYLE);
         },
       });
     } else {
-      this.toastr.warning(`Zone has no boundries`, 'Warning');
+      this.toastr.warning(`Zone has no boundries`, 'Warning',environment.TROASTR_STYLE);
     }
   }
   getZone() {
@@ -625,11 +626,11 @@ export class CityComponent implements OnInit {
         } else if (data.varified == false) {
           this.authService.userLogOut();
         } else if (data.error) {
-          this.toastr.error(`Error From Backend:- ${data.error}`, 'Error');
+          this.toastr.error(`Error From Backend:- ${data.error}`, 'Error',environment.TROASTR_STYLE);
         }
       },
       error: (err) => {
-        this.toastr.error(`Unable to fetch data:- ${err.message}`, 'Error');
+        this.toastr.error(`Unable to fetch data:- ${err.message}`, 'Error',environment.TROASTR_STYLE);
       },
     });
   }

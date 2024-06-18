@@ -31,6 +31,8 @@ import {
 } from '@stripe/stripe-js';
 import { AuthService } from '../../auth/auth.service';
 import { ToastrService } from 'ngx-toastr';
+import { environment } from '../../../environments/environment';
+import { LoaderComponent } from '../../loader/loader.component';
 
 @Component({
   selector: 'app-users',
@@ -41,6 +43,7 @@ import { ToastrService } from 'ngx-toastr';
     StripeElementsDirective,
     StripeCardComponent,
     NgxStripeModule,
+    LoaderComponent
   ],
   templateUrl: './users.component.html',
   styleUrl: './users.component.css',
@@ -81,6 +84,7 @@ export class UsersComponent implements OnInit, AfterViewChecked {
   };
 
   toastr = inject(ToastrService);
+  isLoader: boolean = false;
   constructor(
     private countryService: CountriesService,
     private userService: UserService,
@@ -105,21 +109,23 @@ export class UsersComponent implements OnInit, AfterViewChecked {
     });
   }
   ngOnInit() {
+    this.isLoader = true;
     this.countryService.getCountries().subscribe({
       next: (res) => {
         if (res.countries) {
           this.countryList = res.countries;
         } else if (res.varified == false) {
-          this.authService.userLogOut();
+          // this.authService.userLogOut();
         } else if (res.error) {
-          this.toastr.error(`Error From Backend:- ${res.error}`, 'Error');
+          this.toastr.error(`Error From Backend:- ${res.error}`, 'Error',environment.TROASTR_STYLE);
         }
       },
       error: (err) => {
-        this.toastr.error(`Unable to Fetch data:- ${err.message}`, 'Error');
+        this.toastr.error(`Unable to Fetch data:- ${err.message}`, 'Error',environment.TROASTR_STYLE);
       },
     });
     this.onSearch();
+    this.isLoader = false;
   }
   ngAfterViewChecked() {
     if (this.countryCode) {
@@ -142,11 +148,12 @@ export class UsersComponent implements OnInit, AfterViewChecked {
       if (event.target.files[0].size < 4000000) {
         this.formdata.append('userProfile', event.target.files[0]);
       } else {
-        this.toastr.warning('Upload file size is too large', 'Warning');
+        this.toastr.warning('Upload file size is too large', 'Warning',environment.TROASTR_STYLE);
       }
     }
   }
   onAddUser() {
+    this.isLoader = true;
     this.editMode = false;
     this.formdata.append('userName', this.userForm.get('userName')?.value);
     this.formdata.append('email', this.userForm.get('email')?.value);
@@ -155,19 +162,22 @@ export class UsersComponent implements OnInit, AfterViewChecked {
     this.userService.postUser(this.formdata).subscribe({
       next: (res) => {
         if (res.user) {
-          this.toastr.success(`User Added Successfully`, 'Success');
+          this.toastr.success(`User Added Successfully`, 'Success',environment.TROASTR_STYLE);
           this.userForm.reset();
           this.formdata = new FormData();
           this.userForm.reset();
           this.onSearch();
+          this.isLoader= false;
         } else if (res.varified == false) {
           this.authService.userLogOut();
         } else if (res.error) {
-          this.toastr.error(`Error From Backend:- ${res.error}`, 'Error');
+          this.isLoader = false;
+          this.toastr.error(`Error From Backend:- ${res.error}`, 'Error',environment.TROASTR_STYLE);
         }
       },
       error: (err) => {
-        this.toastr.error(`unable to Fetch data :- ${err.message}`);
+        this.isLoader = false;
+        this.toastr.error(`unable to Fetch data :- ${err.message}`, 'Error',environment.TROASTR_STYLE);
       },
     });
   }
@@ -187,27 +197,33 @@ export class UsersComponent implements OnInit, AfterViewChecked {
         this.formdata.append('country', element._id!);
       }
     });
-    this.userService.updateUser(this.formdata).subscribe({
-      next: (res) => {
-        if (res.message) {
-          this.toastr.success(`User Updated`, 'Success');
-          this.onSearch();
-          this.editMode = false;
-          this.userForm.reset();
-          this.formdata = new FormData();
-        } else if (res.varified == false) {
-          this.authService.userLogOut();
-        } else if (res.error) {
-          this.editMode = false;
-          this.userForm.reset();
-          this.formdata = new FormData();
-          this.toastr.error(`Error From Backend:- ${res.error}`, 'Error');
-        }
-      },
-      error: (err) => {
-        this.toastr.error(`unable to Fetch data :- ${err.message}`);
-      },
-    });
+    if(this.userForm.dirty){
+      this.userService.updateUser(this.formdata).subscribe({
+        next: (res) => {
+          if (res.message) {
+            this.toastr.success(`User Updated`, 'Success',environment.TROASTR_STYLE);
+            this.onSearch();
+            this.editMode = false;
+            this.userForm.reset();
+            this.formdata = new FormData();
+          } else if (res.varified == false) {
+            this.authService.userLogOut();
+          } else if (res.error) {
+            this.editMode = false;
+            this.userForm.reset();
+            this.formdata = new FormData();
+            this.toastr.error(`Error From Backend:- ${res.error}`, 'Error',environment.TROASTR_STYLE);
+          }
+        },
+        error: (err) => {
+          this.toastr.error(`unable to Fetch data :- ${err.message}`, 'Error',environment.TROASTR_STYLE);
+        },
+      });
+    }
+    else{
+      this.toastr.info("No Changes Has Been Made", 'Info',environment.TROASTR_STYLE);
+    }
+    
   }
   onSearchInputChange(event: any) {
     this.searchInput = event.target.value;
@@ -223,15 +239,16 @@ export class UsersComponent implements OnInit, AfterViewChecked {
           } else if (res.varified == false) {
             this.authService.userLogOut();
           } else if (res.error) {
-            this.toastr.error(`Error From Backend:- ${res.error}`, 'Error');
+            this.toastr.error(`Error From Backend:- ${res.error}`, 'Error',environment.TROASTR_STYLE);
           }
         },
         error: (err) => {
-          this.toastr.error(`Unable to Fetch data:- ${err.message}`, 'Error');
+          this.toastr.error(`Unable to Fetch data:- ${err.message}`, 'Error',environment.TROASTR_STYLE);
         },
       });
   }
   cardDetails(user: UserGet) {
+    this.isLoader = true;
     let cardModal = new bootstrap.Modal(
       document.getElementById('cardModal') as HTMLElement
     ).show();
@@ -239,9 +256,11 @@ export class UsersComponent implements OnInit, AfterViewChecked {
     this.cardService.getCards(user.customerId).subscribe({
       next: (res) => {
         this.cardList = res.data;
+        this.isLoader = false;
       },
       error: (err) => {
-        this.toastr.error(`Unable to Fetch data:- ${err.message}`, 'Error');
+        this.isLoader = false;
+        this.toastr.error(`Unable to Fetch data:- ${err.message}`, 'Error',environment.TROASTR_STYLE);
       },
     });
     this.customerId = user.customerId;
@@ -283,20 +302,24 @@ export class UsersComponent implements OnInit, AfterViewChecked {
     this.formdata.append('olduserProdile', user.userProfile);
   }
   onDelete(user: UserGet) {
+    this.isLoader = true;
     if (confirm('Are you sure you want to delete this user?')) {
       this.userService.deleteUser(user._id!, user.customerId!).subscribe({
         next: (res) => {
           if (res.message) {
             this.onSearch();
-            this.toastr.success('User Deleted Successfully', 'Success');
+            this.toastr.success('User Deleted Successfully', 'Success',environment.TROASTR_STYLE);
+            this.isLoader = false;
           } else if (res.varified == false) {
             this.authService.userLogOut();
           } else if (res.error) {
-            this.toastr.error(`Error From Backend:- ${res.error}`, 'Error');
+            this.isLoader = false;
+            this.toastr.error(`Error From Backend:- ${res.error}`, 'Error',environment.TROASTR_STYLE);
           }
         },
         error: (err) => {
-          this.toastr.error(`Unable to Fetch data:- ${err.message}`, 'Error');
+          this.isLoader = false;
+          this.toastr.error(`Unable to Fetch data:- ${err.message}`, 'Error',environment.TROASTR_STYLE);
         },
       });
     } else {
@@ -311,7 +334,7 @@ export class UsersComponent implements OnInit, AfterViewChecked {
   }
   onNextPage() {
     if (this.usersList.length < 10) {
-      this.toastr.warning(`Already on last page`, 'Warning');
+      this.toastr.warning(`Already on last page`, 'Warning',environment.TROASTR_STYLE);
     } else {
       this.currentPage = this.currentPage + 1;
       this.onSearch();
@@ -322,7 +345,7 @@ export class UsersComponent implements OnInit, AfterViewChecked {
       this.currentPage = this.currentPage - 1;
       this.onSearch();
     } else {
-      this.toastr.warning(`Already on first page`, 'Warning');
+      this.toastr.warning(`Already on first page`, 'Warning',environment.TROASTR_STYLE);
     }
   }
   onClickAddUser() {
@@ -337,63 +360,74 @@ export class UsersComponent implements OnInit, AfterViewChecked {
     event.target.selectedIndex = 0;
   }
   OnAddCard(token: any) {
+    this.isLoader = true;
     const postCard: any = { customerId: this.customerId, token };
     console.log(postCard);
     this.cardService.postCard(postCard).subscribe({
       next:(res) => {
         if (res.card) {
-          this.toastr.success('Card Added Successfully', 'Success');
+          this.toastr.success('Card Added Successfully', 'Success',environment.TROASTR_STYLE);
           this.cardList.push(res.card);
+          this.isLoader = false;
         } 
         else if (res.varified == false) {
           this.authService.userLogOut();
         } 
         else if (res.error) {
-          this.toastr.error(`Error From Backend:- ${res.error}`, 'Error');
+          this.isLoader = false;
+          this.toastr.error(`Error From Backend:- ${res.error}`, 'Error',environment.TROASTR_STYLE);
         }
       },
       error:(err)=>{
-        this.toastr.error(`Unable to Fetch data:- ${err.message}`, 'Error');
+        this.isLoader = false;
+        this.toastr.error(`Unable to Fetch data:- ${err.message}`, 'Error',environment.TROASTR_STYLE);
       }
     });
   }
   deleteCard(index: number) {
+    this.isLoader = true;
     let cardId = this.cardList[index].id;
     this.cardService.deleteCard(cardId!, this.customerId).subscribe({
       next:(res) => {
         if (res.message) {
-          this.toastr.success('Card Deleted Successfully', 'Success');
+          this.toastr.success('Card Deleted Successfully', 'Success',environment.TROASTR_STYLE);
           this.cardList = this.cardList
             .slice(0, index)
             .concat(this.cardList.slice(index + 1));
+          this.isLoader = false;
         } 
         else if (res.varified == false) {
           this.authService.userLogOut();
         } 
         else if (res.error) {
-          this.toastr.error(`Error From Backend:- ${res.error}`, 'Error');
+          this.isLoader = false;
+          this.toastr.error(`Error From Backend:- ${res.error}`, 'Error',environment.TROASTR_STYLE);
         }
       },
       error:(err)=>{
-        this.toastr.error(`Unable to Fetch data:- ${err.message}`, 'Error');
+        this.isLoader = false;
+        this.toastr.error(`Unable to Fetch data:- ${err.message}`, 'Error',environment.TROASTR_STYLE);
       }
     });
   }
   setCardAsDefault(index: number) {
+    this.isLoader = true;
     let cardId = this.cardList[index].id;
     let card = this.cardList[index];
     this.cardService
       .setCardAsDefault(cardId!, this.customerId)
       .subscribe({
         next:(res) => {
-          this.toastr.info(`new Default card is:- XXXX XXXX XXXX ${card.last4}`, 'Info');
+          this.toastr.info(`new Default card is:- XXXX XXXX XXXX ${card.last4}`, 'Info',environment.TROASTR_STYLE);
             this.cardList = this.cardList
               .slice(0, index)
               .concat(this.cardList.slice(index + 1));
             this.cardList = [card, ...this.cardList];
+            this.isLoader = false;
           },
           error:(err)=>{
-            this.toastr.error(`Unable to Fetch data:- ${err.message}`, 'Error');
+            this.isLoader = false;
+            this.toastr.error(`Unable to Fetch data:- ${err.message}`, 'Error',environment.TROASTR_STYLE);
           }
       });
   }
@@ -406,12 +440,12 @@ export class UsersComponent implements OnInit, AfterViewChecked {
         if (result.token) {
           this.OnAddCard(result.token);
         } else if (result.error) {
-          this.toastr.error(result.error.message, 'Error');
+          this.toastr.error(result.error.message, 'Error',environment.TROASTR_STYLE);
         }
         this.wantToAddCard = false;
       },
       error:(err)=>{
-        this.toastr.error(`Unable to Fetch data:- ${err.message}`, 'Error');
+        this.toastr.error(`Unable to Fetch data:- ${err.message}`, 'Error',environment.TROASTR_STYLE);
       }
     });
   }

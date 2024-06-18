@@ -1,6 +1,7 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { VehiclePricing } from './vehicle-pricing.interface';
+import { Params } from '@angular/router';
 
 @Injectable({
   providedIn: 'root',
@@ -37,5 +38,19 @@ export class VehiclePricingService {
     }>('http://localhost:3000/admin/pricing/vehicle-pricing', {
       withCredentials: true,
     })
+  }
+
+  getAvailableTypes(cityId:string) {
+    const params: Params = {
+      city: cityId
+    }
+    // const params: HttpParams = new HttpParams().append('city', cityId);
+    // console.log(params);
+    
+    return this.http.get<{availableTypes:string[],varified: boolean;}>(
+      'http://localhost:3000/admin/pricing/vehicle-pricing/getAvailableTypes',
+      {params: params, withCredentials: true}
+      // {withCredentials: true}
+    )
   }
 }

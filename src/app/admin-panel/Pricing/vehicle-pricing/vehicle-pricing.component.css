@@ -73,6 +73,10 @@
     overflow-y: auto;
     overflow-x: auto;
   }
+  .input-group-append :hover{
+    cursor:pointer;
+    background-color: rgb(223, 237, 237);
+  }
   /* p{
     width: 80%; 
     word-wrap: break-word; 

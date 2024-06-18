@@ -11,6 +11,7 @@ import { VehicleType } from './vehicle.interface';
 import { AuthService } from '../../../auth/auth.service';
 import { VehicleTypeService } from './vehicle-type.service';
 import { ToastrService } from 'ngx-toastr';
+import { environment } from '../../../../environments/environment';
 
 @Component({
   selector: 'app-vehicle-type',
@@ -51,16 +52,16 @@ export class VehicleTypeComponent implements OnInit {
     this.vehicleTypeService.postVehicleType(this.formdata).subscribe({
       next: (data) => {
         if (data.vehicles) {
-          this.toastr.success('Vehicle-type added', 'Success');
+          this.toastr.success('Vehicle-type added', 'Success',environment.TROASTR_STYLE);
           this.vehiclesList = data.vehicles;
         } else if (data.varified == false) {
           this.authService.userLogOut();
         } else if (data.error) {
-          this.toastr.error(`Error From Backend:- ${data.error}`, 'Error');
+          this.toastr.error(`Error From Backend:- ${data.error}`, 'Error',environment.TROASTR_STYLE);
         }
       },
       error: (err) => {
-        this.toastr.error(`Unable to fetch data:- ${err.message}`, 'Error');
+        this.toastr.error(`Unable to fetch data:- ${err.message}`, 'Error',environment.TROASTR_STYLE);
       },
     });
     this.vehicleForm.reset();
@@ -86,23 +87,26 @@ export class VehicleTypeComponent implements OnInit {
 
   onSubmitEdit() {
     this.formdata.append('type', this.vehicleForm.value.type);
-
-    this.vehicleTypeService.putVehicleType(this.formdata).subscribe({
-      next: (res) => {
-        if (res.vehicles) {
-          this.toastr.success('Vehicle-type updated', 'Success');
-          this.vehiclesList = res.vehicles;
-        } else if (res.varified == false) {
-          this.authService.userLogOut();
-          return;
-        } else if (res.error) {
-          this.toastr.error(`Error From Backend:- ${res.error}`, 'Error');
-        }
-      },
-      error: (err) => {
-        this.toastr.error(`Unable to fetch data:- ${err.message}`, 'Error');
-      },
-    });
+    if(this.vehicleForm.dirty){
+      this.vehicleTypeService.putVehicleType(this.formdata).subscribe({
+        next: (res) => {
+          if (res.vehicles) {
+            this.toastr.success('Vehicle-type updated', 'Success',environment.TROASTR_STYLE);
+            this.vehiclesList = res.vehicles;
+          } else if (res.varified == false) {
+            this.authService.userLogOut();
+            return;
+          } else if (res.error) {
+            this.toastr.error(`Error From Backend:- ${res.error}`, 'Error',environment.TROASTR_STYLE);
+          }
+        },
+        error: (err) => {
+          this.toastr.error(`Unable to fetch data:- ${err.message}`, 'Error',environment.TROASTR_STYLE);
+        },
+      });
+    }else{
+      this.toastr.info('No changes made','Info',environment.TROASTR_STYLE)
+    }
     this.onCancel();
   }
   onFileChange(event: any) {
@@ -114,7 +118,7 @@ export class VehicleTypeComponent implements OnInit {
       } else {
         this.toastr.warning(
           'file is too large try to upload smaller file',
-          'Warning'
+          'Warning',environment.TROASTR_STYLE
         );
         this.sizeValidation = true;
         this.vehicleForm.reset();
@@ -139,17 +143,17 @@ export class VehicleTypeComponent implements OnInit {
         .subscribe({
           next: (res) => {
             if (res.vehicles) {
-              this.toastr.success('Vehicle-type deleted', 'Success');
+              this.toastr.success('Vehicle-type deleted', 'Success',environment.TROASTR_STYLE);
               this.vehiclesList = res.vehicles;
             } else if (res.varified == false) {
               this.authService.userLogOut();
               return;
             } else if (res.error) {
-              this.toastr.error(`Error From Backend:- ${res.error}`, 'Error');
+              this.toastr.error(`Error From Backend:- ${res.error}`, 'Error',environment.TROASTR_STYLE);
             }
           },
           error: (err) => {
-            this.toastr.error(`Unable to fetch data:- ${err.message}`, 'Error');
+            this.toastr.error(`Unable to fetch data:- ${err.message}`, 'Error',environment.TROASTR_STYLE);
           },
         });
     }

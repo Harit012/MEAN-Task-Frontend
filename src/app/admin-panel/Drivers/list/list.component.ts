@@ -15,6 +15,8 @@ import { Driver } from './driver.interface';
 import * as bootstrap from 'bootstrap';
 import { AuthService } from '../../../auth/auth.service';
 import { ToastrService } from 'ngx-toastr';
+import { environment } from '../../../../environments/environment';
+import { VehicleTypeService } from '../../Pricing/vehicle-type/vehicle-type.service';
 @Component({
   selector: 'app-list',
   standalone: true,
@@ -35,15 +37,16 @@ export class ListComponent implements OnInit {
   formdata = new FormData();
   editMode: boolean = false;
   sort: string = 'none';
-  serviceTypes: string[] = ['none', 'SUV', 'SEDAN', 'MINI VAN', 'PICK UP'];
+  serviceTypes: string[] = ['none'];
   selectedServiceType: string = 'none';
-  driverForService!: Driver ;
-  toastr = inject(ToastrService)
+  driverForService!: Driver;
+  toastr = inject(ToastrService);
   constructor(
     private countryService: CountriesService,
     private cityService: CityService,
     private driverService: DriverService,
-    private authService: AuthService
+    private authService: AuthService,
+    private vehicletypeService: VehicleTypeService
   ) {
     this.driverForm = new FormGroup({
       driverName: new FormControl(null, [Validators.required]),
@@ -66,18 +69,38 @@ export class ListComponent implements OnInit {
     this.getDrivers();
 
     this.countryService.getCountries().subscribe({
-      next:(res) => {
+      next: (res) => {
         if (res.countries) {
           this.countryList = res.countries;
-        }else if(res.varified === false){
+        } else if (res.varified === false) {
           this.authService.userLogOut();
-        }
-        else if(res.error){
-          this.toastr.error(`Error From Backend:- ${res.error}`, 'Error');
+        } else if (res.error) {
+          this.toastr.error(
+            `Error From Backend:- ${res.error}`,
+            'Error',
+            environment.TROASTR_STYLE
+          );
         }
       },
       error: (err) => {
-        this.toastr.error(`unable to fetch data:- ${err.message}`, 'Error');
+        this.toastr.error(
+          `unable to fetch data:- ${err.message}`,
+          'Error',
+          environment.TROASTR_STYLE
+        );
+      },
+    });
+
+    this.vehicletypeService.getAllVehicleTypes().subscribe({
+      next: (data) => {
+        if (data.allVehicleTypes) {
+          this.serviceTypes = ['none',...data.allVehicleTypes];
+        } else if (data.varified === false) {
+          this.authService.userLogOut();
+        }
+      },
+      error: (err) => {
+        this.toastr.error(`Error from Backend:- ${err.message}`, 'Error',environment.TROASTR_STYLE);
       },
     });
   }
@@ -91,19 +114,26 @@ export class ListComponent implements OnInit {
     this.driverService
       .getDrivers(this.currentPage, this.sort, this.currentSearch)
       .subscribe({
-        next:(res) => {
+        next: (res) => {
           if (res.drivers) {
             this.driversList = res.drivers;
-          }else if(res.varified === false){
+          } else if (res.varified === false) {
             this.authService.userLogOut();
-          }
-          else if(res.error){
-            this.toastr.error(`Error from backend :- ${res.error}`, "Error")
+          } else if (res.error) {
+            this.toastr.error(
+              `Error from backend :- ${res.error}`,
+              'Error',
+              environment.TROASTR_STYLE
+            );
           }
         },
-        error:(err)=>{
-          this.toastr.error(`Unable to fetch data :- ${err.message}`, "Error")
-        }
+        error: (err) => {
+          this.toastr.error(
+            `Unable to fetch data :- ${err.message}`,
+            'Error',
+            environment.TROASTR_STYLE
+          );
+        },
       });
   }
   // when user changes country
@@ -111,19 +141,27 @@ export class ListComponent implements OnInit {
     this.selectedCountry = country;
     this.countryCallCode = country.countryCallCode;
     this.cityService.getZones(country._id!).subscribe({
-      next:(data) => {
+      next: (data) => {
         if (data.zones) {
+          console.log(data.zones);
           this.cityList = data.zones;
-        }else if(data.varified === false){
+        } else if (data.varified === false) {
           this.authService.userLogOut();
-        }
-        else if(data.error){
-          this.toastr.error(`Error while getting Zones:- ${data.error}`, 'Error');
+        } else if (data.error) {
+          this.toastr.error(
+            `Error while getting Zones:- ${data.error}`,
+            'Error',
+            environment.TROASTR_STYLE
+          );
         }
       },
-      error:(err)=>{
-        this.toastr.error(`unable to fetch data:- ${err.message}`, 'Error');
-      }
+      error: (err) => {
+        this.toastr.error(
+          `unable to fetch data:- ${err.message}`,
+          'Error',
+          environment.TROASTR_STYLE
+        );
+      },
     });
   }
   // when user changes city
@@ -147,7 +185,6 @@ export class ListComponent implements OnInit {
   }
   // to add user
   onAddDriver() {
-
     // console.log(this.driverForm)
     // return
 
@@ -163,23 +200,35 @@ export class ListComponent implements OnInit {
     this.formdata.append('country', this.selectedCountry._id!);
     this.formdata.append('city', this.selectedCity._id!);
     this.driverService.postDriver(this.formdata).subscribe({
-      next:(data) => {
+      next: (data) => {
         if (data.driver) {
+          this.toastr.success(
+            'Driver Added Successfully',
+            'Success',
+            environment.TROASTR_STYLE
+          );
           this.driversList.push(data.driver);
           this.formdata = new FormData();
           this.driverForm.reset();
-        }else if(data.varified === false){
+        } else if (data.varified === false) {
           this.authService.userLogOut();
-        }
-        else if(data.error){
+        } else if (data.error) {
           this.formdata = new FormData();
           this.driverForm.reset();
-          this.toastr.error(`Error From Backend:- ${data.error}`, 'Error');
+          this.toastr.error(
+            `Error From Backend:- ${data.error}`,
+            'Error',
+            environment.TROASTR_STYLE
+          );
         }
       },
-      error:(err)=>{
-        this.toastr.error(`unable to add data:- ${err.message}`, 'Error');
-      }
+      error: (err) => {
+        this.toastr.error(
+          `unable to add data:- ${err.message}`,
+          'Error',
+          environment.TROASTR_STYLE
+        );
+      },
     });
   }
   // to update user
@@ -203,28 +252,47 @@ export class ListComponent implements OnInit {
       }
     }
     this.formdata.append('country', this.selectedCountry._id!);
-    this.driverService.putEditUser(this.formdata).subscribe({
-      next :(data) => {
-        if (data.message) {
-          this.getDrivers();
-          this.formdata = new FormData();
-          this.driverForm.reset();
-          this.editMode = false;
-          this.toastr.success('Driver Updated Successfully', 'Success');
-        }else if(data.varified === false){
-          this.authService.userLogOut();
-        }
-        else if(data.error){
-          this.formdata = new FormData();
-          this.driverForm.reset();
-          this.editMode = false;
-          this.toastr.error(`Error From Backend:- ${data.error}`, 'Error');
-        }
-      },
-      error:(err)=>{
-        this.toastr.error(`unable to fetch data:- ${err.message}`,"Error")
-      }
-    });
+    if (this.driverForm.dirty) {
+      this.driverService.putEditUser(this.formdata).subscribe({
+        next: (data) => {
+          if (data.message) {
+            this.getDrivers();
+            this.formdata = new FormData();
+            this.driverForm.reset();
+            this.editMode = false;
+            this.toastr.success(
+              'Driver Updated Successfully',
+              'Success',
+              environment.TROASTR_STYLE
+            );
+          } else if (data.varified === false) {
+            this.authService.userLogOut();
+          } else if (data.error) {
+            this.formdata = new FormData();
+            this.driverForm.reset();
+            this.editMode = false;
+            this.toastr.error(
+              `Error From Backend:- ${data.error}`,
+              'Error',
+              environment.TROASTR_STYLE
+            );
+          }
+        },
+        error: (err) => {
+          this.toastr.error(
+            `unable to fetch data:- ${err.message}`,
+            'Error',
+            environment.TROASTR_STYLE
+          );
+        },
+      });
+    } else {
+      this.toastr.info(
+        'No Changes Has Been Made',
+        'Info',
+        environment.TROASTR_STYLE
+      );
+    }
   }
   // to change driver approve status
   onApprove(i: number) {
@@ -233,18 +301,26 @@ export class ListComponent implements OnInit {
     this.driverService
       .approvelChange(this.driversList[i]['_id'], temp_status)
       .subscribe({
-        next:(data) => {
+        next: (data) => {
           if (data.message) {
             this.getDrivers();
-          }else if(data.varified === false){
+          } else if (data.varified === false) {
             this.authService.userLogOut();
+          } else if (data.error) {
+            this.toastr.error(
+              `Error from Backend:- ${data.error}`,
+              'Error',
+              environment.TROASTR_STYLE
+            );
           }
-          else if(data.error){
-            this.toastr.error(`Error from Backend:- ${data.error}`, 'Error');
-          }
-        },error:(err)=>{
-          this.toastr.error(`unable to fetch data :- ${err.message}`,"Error")
-        }
+        },
+        error: (err) => {
+          this.toastr.error(
+            `unable to fetch data :- ${err.message}`,
+            'Error',
+            environment.TROASTR_STYLE
+          );
+        },
       });
   }
   // to check form fields are valid or not
@@ -291,23 +367,28 @@ export class ListComponent implements OnInit {
       if (this.countryList[j].countryName == driver.countryName) {
         this.selectedCountry = this.countryList[j];
         temp_country.selectedIndex = j + 1;
-        this.cityService
-          .getZones(this.countryList[j]._id!)
-          .subscribe({
-            next:(data) => {
-              if (data.zones) {
-                this.cityList = data.zones;
-              }else if(data.varified === false){
-                this.authService.userLogOut();
-              }
-              else if(data.error){
-                this.toastr.error(`Error from Backend:- ${data.error}`,'Error')
-              }
-            },
-            error:(err)=>{
-              this.toastr.error(`unable to fetch data :- ${err.message}`,"Error")
+        this.cityService.getZones(this.countryList[j]._id!).subscribe({
+          next: (data) => {
+            if (data.zones) {
+              this.cityList = data.zones;
+            } else if (data.varified === false) {
+              this.authService.userLogOut();
+            } else if (data.error) {
+              this.toastr.error(
+                `Error from Backend:- ${data.error}`,
+                'Error',
+                environment.TROASTR_STYLE
+              );
             }
-          });
+          },
+          error: (err) => {
+            this.toastr.error(
+              `unable to fetch data :- ${err.message}`,
+              'Error',
+              environment.TROASTR_STYLE
+            );
+          },
+        });
         break;
       } else {
         continue;
@@ -321,28 +402,43 @@ export class ListComponent implements OnInit {
   onDelete(driver: Driver) {
     if (confirm('Are you sure you want to delete this driver?')) {
       this.driverService.deleteDriver(driver._id!).subscribe({
-        next:(data) => {
+        next: (data) => {
           if (data.message) {
-            this.toastr.success('Driver Deleted Successfully', 'Success');
+            this.toastr.success(
+              'Driver Deleted Successfully',
+              'Success',
+              environment.TROASTR_STYLE
+            );
             let index = this.driversList.indexOf(driver);
             this.driversList.splice(index, 1);
-          }else if(data.varified === false){
+          } else if (data.varified === false) {
             this.authService.userLogOut();
-          }
-          else if(data.error){
-            this.toastr.error(`Error from Backend:- ${data.error}`, 'Error');
+          } else if (data.error) {
+            this.toastr.error(
+              `Error from Backend:- ${data.error}`,
+              'Error',
+              environment.TROASTR_STYLE
+            );
           }
         },
-        error:(err)=>{
-          this.toastr.error(`unable to fetch data :- ${err.message}`,"Error")
-        }
+        error: (err) => {
+          this.toastr.error(
+            `unable to fetch data :- ${err.message}`,
+            'Error',
+            environment.TROASTR_STYLE
+          );
+        },
       });
     }
   }
   // when user wants to go to next page
   onNextPage() {
     if (this.driversList.length < 10) {
-      this.toastr.warning('Already on Last Page', 'Warning');
+      this.toastr.warning(
+        'Already on Last Page',
+        'Warning',
+        environment.TROASTR_STYLE
+      );
     } else {
       this.currentPage = this.currentPage + 1;
       this.getDrivers();
@@ -354,7 +450,11 @@ export class ListComponent implements OnInit {
       this.currentPage = this.currentPage - 1;
       this.getDrivers();
     } else {
-      this.toastr.warning('Already on First Page', 'Warning');
+      this.toastr.warning(
+        'Already on First Page',
+        'Warning',
+        environment.TROASTR_STYLE
+      );
     }
   }
   // when user click service type
@@ -375,24 +475,34 @@ export class ListComponent implements OnInit {
   }
   // to update service type
   onAddServiceType() {
-    console.log(this.driverForService._id)
     this.driverService
       .patchServiceType(this.selectedServiceType, this.driverForService._id!)
       .subscribe({
-        next:(data) => {
-          if(data.message){
-            this.toastr.success(`${data.message}`,'Success');
+        next: (data) => {
+          if (data.message) {
+            this.toastr.success(
+              `${data.message}`,
+              'Success',
+              environment.TROASTR_STYLE
+            );
             this.getDrivers();
-          }else if(data.varified === false){
+          } else if (data.varified === false) {
             this.authService.userLogOut();
-          }
-          else if(data.error){
-            this.toastr.error(`Error from Backend:- ${data.error}`,'Error')
+          } else if (data.error) {
+            this.toastr.error(
+              `Error from Backend:- ${data.error}`,
+              'Error',
+              environment.TROASTR_STYLE
+            );
           }
         },
-        error:(err)=>{
-          this.toastr.error(`unable to fetch data :- ${err.message}`,"Error")
-        }
+        error: (err) => {
+          this.toastr.error(
+            `unable to fetch data :- ${err.message}`,
+            'Error',
+            environment.TROASTR_STYLE
+          );
+        },
       });
   }
 }

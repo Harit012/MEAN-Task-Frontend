@@ -55,6 +55,9 @@
     </form>
   </div>
 </div> -->
+<div *ngIf="isLoader">
+  <app-loader></app-loader>
+</div>
 <div
     id="FailureToast"
     class="toast align-items-center text-bg-danger fs-5 border-0"

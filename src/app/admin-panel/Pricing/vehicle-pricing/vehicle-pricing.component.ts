@@ -1,4 +1,10 @@
-import { AfterViewChecked, ChangeDetectorRef, Component, OnInit, inject } from '@angular/core';
+import {
+  AfterViewChecked,
+  ChangeDetectorRef,
+  Component,
+  OnInit,
+  inject,
+} from '@angular/core';
 import { CountriesService } from '../country/countries.service';
 import { CommonModule } from '@angular/common';
 import { CityService } from '../city/city.service';
@@ -14,6 +20,7 @@ import { RecivingZone } from '../city/recivingZone.interface';
 import { AuthService } from '../../../auth/auth.service';
 import { VehiclePricingService } from './vehicle-pricing.service';
 import { ToastrService } from 'ngx-toastr';
+import { environment } from '../../../../environments/environment';
 
 @Component({
   selector: 'app-vehicle-pricing',
@@ -84,11 +91,19 @@ export class VehiclePricingComponent implements OnInit, AfterViewChecked {
         } else if (data.varified == false) {
           this.authService.userLogOut();
         } else if (data.error) {
-          this.toastr.error(`Error From Backend:- ${data.error}`, 'Error');
+          this.toastr.error(
+            `Error From Backend:- ${data.error}`,
+            'Error',
+            environment.TROASTR_STYLE
+          );
         }
       },
       error: (err) => {
-        this.toastr.error(`Unable to Fetch data:- ${err.message}`, 'Error');
+        this.toastr.error(
+          `Unable to Fetch data:- ${err.message}`,
+          'Error',
+          environment.TROASTR_STYLE
+        );
       },
     });
 
@@ -99,11 +114,19 @@ export class VehiclePricingComponent implements OnInit, AfterViewChecked {
         } else if (data.varified == false) {
           this.authService.userLogOut();
         } else if (data.error) {
-          this.toastr.error(`Error From Backend:- ${data.error}`, 'Error');
+          this.toastr.error(
+            `Error From Backend:- ${data.error}`,
+            'Error',
+            environment.TROASTR_STYLE
+          );
         }
       },
       error: (err) => {
-        this.toastr.error(`Unable to Fetch data:- ${err.message}`, 'Error');
+        this.toastr.error(
+          `Unable to Fetch data:- ${err.message}`,
+          'Error',
+          environment.TROASTR_STYLE
+        );
       },
     });
   }
@@ -130,11 +153,19 @@ export class VehiclePricingComponent implements OnInit, AfterViewChecked {
         } else if (data.varified == false) {
           this.authService.userLogOut();
         } else if (data.error) {
-          this.toastr.error(`Error From Backend:- ${data.error}`, 'Error');
+          this.toastr.error(
+            `Error From Backend:- ${data.error}`,
+            'Error',
+            environment.TROASTR_STYLE
+          );
         }
       },
       error: (err) => {
-        this.toastr.error(`Unable to Fetch data:- ${err.message}`, 'Error');
+        this.toastr.error(
+          `Unable to Fetch data:- ${err.message}`,
+          'Error',
+          environment.TROASTR_STYLE
+        );
       },
     });
   }
@@ -143,19 +174,22 @@ export class VehiclePricingComponent implements OnInit, AfterViewChecked {
     this.vehicleTypesList = [];
     this.vehiclePricingForm.reset();
     this.selectedCity = city;
-    this.cityService.getZoneForPricing(city._id!).subscribe({
+    this.vehiclePricingService.getAvailableTypes(city._id!).subscribe({
       next: (data) => {
-        if (data.pricing) {
-          let res = data.pricing;
-          res.forEach((ele: any) => {
-            if (!ele['hasvalue']) {
-              this.vehicleTypesList.push(ele['vtype']);
-            }
-          });
+        if (data.availableTypes) {
+          this.vehicleTypesList = data.availableTypes;
+        } else if (data.varified == false) {
+          this.authService.userLogOut();
         }
       },
       error: (err) => {
-        this.toastr.error(`error :- ${err.message}`, 'Error');
+        console.log(err);
+
+        this.toastr.error(
+          `error :- ${err.statusText}`,
+          'Error',
+          environment.TROASTR_STYLE
+        );
       },
     });
   }
@@ -192,19 +226,35 @@ export class VehiclePricingComponent implements OnInit, AfterViewChecked {
             tempcountry.selectedIndex = 0;
             tempcity.selectedIndex = 0;
             this.cityList = [];
-            this.toastr.success(`Vehicle Pricing Added`, 'Success');
+            this.toastr.success(
+              `Vehicle Pricing Added`,
+              'Success',
+              environment.TROASTR_STYLE
+            );
           } else if (data.varified == false) {
             this.authService.userLogOut();
           } else if (data.error) {
-            this.toastr.error(`Error From Backend:- ${data.error}`, 'Error');
+            this.toastr.error(
+              `Error From Backend:- ${data.error}`,
+              'Error',
+              environment.TROASTR_STYLE
+            );
           }
         },
         error: (err) => {
-          this.toastr.error(`Unable to Fetch data:- ${err.message}`, 'Error');
+          this.toastr.error(
+            `Unable to Fetch data:- ${err.message}`,
+            'Error',
+            environment.TROASTR_STYLE
+          );
         },
       });
     } else {
-      this.toastr.error('Enter Valid Details', 'Error');
+      this.toastr.error(
+        'Enter Valid Details',
+        'Error',
+        environment.TROASTR_STYLE
+      );
     }
   }
   onEdit(i: number) {
@@ -220,27 +270,49 @@ export class VehiclePricingComponent implements OnInit, AfterViewChecked {
     this.vehiclePricingForm.reset();
   }
   onUpdate() {
-    if (this.vehiclePricingForm.valid) {
-      let data: VehiclePricing = this.vehiclePricingForm.value;
-      data._id = this.editabledocument._id;
-      this.vehiclePricingService.patchVehiclePricing(data).subscribe({
-        next: (data) => {
-          if (data.vehiclePricing) {
-            this.pricingList[this.editIndex] = data.vehiclePricing;
-            this.leaveEditMode();
-            this.toastr.success(`Vehicle Pricing Updated`, 'Success');
-          } else if (data.varified == false) {
-            this.authService.userLogOut();
-          } else if (data.error) {
-            this.toastr.error(`Error From Backend:- ${data.error}`, 'Error');
-          }
-        },
-        error: (err) => {
-          this.toastr.error(`Unable to Fetch data:- ${err.message}`, 'Error');
-        },
-      });
-    } else {
-      this.toastr.error('Enter Valid Details', 'Error');
+    if(this.vehiclePricingForm.dirty){
+      if (this.vehiclePricingForm.valid) {
+        let data: VehiclePricing = this.vehiclePricingForm.value;
+        data._id = this.editabledocument._id;
+        this.vehiclePricingService.patchVehiclePricing(data).subscribe({
+          next: (data) => {
+            if (data.vehiclePricing) {
+              this.pricingList[this.editIndex] = data.vehiclePricing;
+              this.leaveEditMode();
+              this.toastr.success(
+                `Vehicle Pricing Updated`,
+                'Success',
+                environment.TROASTR_STYLE
+              );
+            } else if (data.varified == false) {
+              this.authService.userLogOut();
+            } else if (data.error) {
+              this.toastr.error(
+                `Error From Backend:- ${data.error}`,
+                'Error',
+                environment.TROASTR_STYLE
+              );
+            }
+          },
+          error: (err) => {
+            this.toastr.error(
+              `Unable to Fetch data:- ${err.message}`,
+              'Error',
+              environment.TROASTR_STYLE
+            );
+          },
+        });
+      } else {
+        this.toastr.error(
+          'Enter Valid Details',
+          'Error',
+          environment.TROASTR_STYLE
+        );
+      }
+    }
+    else{
+      this.leaveEditMode();
+      this.toastr.info("No changes made","Info",environment.TROASTR_STYLE);
     }
   }
   // Method to check if a field is touched or dirty and invalid

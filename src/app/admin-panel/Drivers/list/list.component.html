@@ -397,11 +397,12 @@
                     class="form-select"
                     (change)="serviceTypeChange($event)"
                   >
-                    <option value="none">none</option>
-                    <option value="SUV">SUV</option>
-                    <option value="SEDAN">SEDAN</option>
-                    <option value="MINI VAN">MINI VAN</option>
-                    <option value="PICK UP">PICK UP</option>
+                    <option
+                      *ngFor="let serviceType of serviceTypes"
+                      [value]="serviceType"
+                    >
+                      {{ serviceType }}
+                    </option>
                   </select>
                 </div>
               </div>

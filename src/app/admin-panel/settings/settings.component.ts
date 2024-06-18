@@ -3,11 +3,13 @@ import { SettingsService } from './settings.service';
 import { CommonModule } from '@angular/common';
 import { AuthService } from '../../auth/auth.service';
 import { ToastrService } from 'ngx-toastr';
+import { environment } from '../../../environments/environment';
+import { LoaderComponent } from '../../loader/loader.component';
 
 @Component({
   selector: 'app-settings',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule,LoaderComponent],
   templateUrl: './settings.component.html',
   styleUrl: './settings.component.css',
 })
@@ -18,9 +20,11 @@ export class SettingsComponent implements OnInit {
   selectedTimeOut!: number;
   selectedStops!: number;
   toastr= inject(ToastrService)
+  isLoader: boolean = false
   constructor(private settingsService: SettingsService,private authService: AuthService) {}
 
   ngOnInit(): void {
+    this.isLoader=true;
     this.settingsService.getSettings().subscribe({
       next:(data) => {
         if (data.settings) {
@@ -32,14 +36,16 @@ export class SettingsComponent implements OnInit {
           stops.selectedIndex = this.stopOptions.indexOf(data.settings.stops);
           this.selectedTimeOut = data.settings.timeOut;
           this.selectedStops = data.settings.stops;
+          this.isLoader=false;
         }else if (data.varified == false) {
           this.authService.userLogOut();
         } else if (data.error) {
-          this.toastr.error(`Error From Backend:- ${data.error}`, 'Error');
+          this.toastr.error(`Error From Backend:- ${data.error}`, 'Error',environment.TROASTR_STYLE);
         }
       },
       error: (err)=>{
-        this.toastr.error(`unable to Fetch data :- ${err.message}`)
+        this.isLoader=false;
+        this.toastr.error(`unable to Fetch data :- ${err.message}`, 'Error',environment.TROASTR_STYLE);
       }
     });
   }
@@ -51,6 +57,7 @@ export class SettingsComponent implements OnInit {
     this.selectedStops = Number(event.target.value);
   }
   onSaveChanges() {
+    this.isLoader=true;
     this.settingsService
       .putSettings(this.selectedTimeOut, this.selectedStops)
       .subscribe({
@@ -62,15 +69,18 @@ export class SettingsComponent implements OnInit {
               this.selectedTimeOut
             );
             stops.selectedIndex = this.stopOptions.indexOf(this.selectedStops);
-            this.toastr.success(`${data.message}`, 'Success');
+            this.toastr.success(`${data.message}`, 'Success',environment.TROASTR_STYLE);
+            this.isLoader=false;
           }else if (data.varified == false) {
             this.authService.userLogOut();
           } else if (data.error) {
-            this.toastr.error(`Error From Backend:- ${data.error}`, 'Error');
+            this.isLoader=false;
+            this.toastr.error(`Error From Backend:- ${data.error}`, 'Error',environment.TROASTR_STYLE);
           }
         },
         error:(err)=>{
-          this.toastr.error(`unable to Fetch data :- ${err.message}`)
+          this.isLoader=false;
+          this.toastr.error(`unable to Fetch data :- ${err.message}`, 'Error',environment.TROASTR_STYLE);
         }
       });
   }

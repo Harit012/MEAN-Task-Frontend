@@ -50,4 +50,13 @@ export class VehicleTypeService {
       withCredentials: true,
     });
   }
+
+  getAllVehicleTypes() {
+    return this.http.get<{
+      allVehicleTypes: string[];
+      varified: boolean;
+    }>('http://localhost:3000/admin/pricing/vehicle-type/getAllTypes', {
+      withCredentials: true,
+    });
+  }
 }

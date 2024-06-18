@@ -18,6 +18,7 @@ export const appConfig: ApplicationConfig = {
     GoogleMapsModule,
     provideNgxStripe(environment.STRIPE_PUBLISHABLE_KEY),
     provideAnimations(),
+    
     provideToastr()
   ],
 };
