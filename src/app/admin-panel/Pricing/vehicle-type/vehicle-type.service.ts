@@ -12,8 +12,7 @@ export class VehicleTypeService {
   getVehicleTypes() {
     return this.http.get<{
       vehicle: VehicleType[];
-      varified: boolean;
-      error: string;
+      status: string;
     }>('http://localhost:3000/admin/pricing/vehicle-type', {
       withCredentials: true,
     });
@@ -22,8 +21,7 @@ export class VehicleTypeService {
   postVehicleType(vehicleType: FormData) {
     return this.http.post<{
       vehicles: VehicleType[];
-      error: string;
-      varified: boolean;
+      status: string;
     }>('http://localhost:3000/admin/pricing/vehicle-type', vehicleType, {
       withCredentials: true,
     });
@@ -32,8 +30,7 @@ export class VehicleTypeService {
   putVehicleType(vehicleType: FormData) {
     return this.http.put<{
       vehicles: VehicleType[];
-      error: string;
-      varified: boolean;
+      status: string;
     }>('http://localhost:3000/admin/pricing/vehicle-type', vehicleType, {
       withCredentials: true,
     });
@@ -43,8 +40,7 @@ export class VehicleTypeService {
     const params: Params = { id: id };
     return this.http.delete<{
       vehicles: VehicleType[];
-      error: string;
-      varified: boolean;
+      status: string;
     }>('http://localhost:3000/admin/pricing/vehicle-type', {
       params: params,
       withCredentials: true,

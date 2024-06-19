@@ -25,11 +25,11 @@ export class CityService {
       }
     );
   }
-  getZones(csn: string) {
+  getZones(countryId: string) {
     const params: Params = {
-      countryId: csn,
+      countryId: countryId,
     };
-    return this.http.get<{ zones: RecivingZone[]; error: string ,varified: boolean}>(
+    return this.http.get<{ zones: RecivingZone[]; status: string}>(
       'http://localhost:3000/admin/pricing/city',
       { params: params, withCredentials: true }
     );

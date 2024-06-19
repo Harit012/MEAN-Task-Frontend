@@ -108,20 +108,37 @@ export class UsersComponent implements OnInit, AfterViewChecked {
       country: new FormControl(null),
     });
   }
+  commonErrorHandler(err: any) {
+    if (!err.error.status) {
+      this.toastr.error(
+        `Error while sending request to server`,
+        'Error',
+        environment.TROASTR_STYLE
+      );
+    } else if (err.error.status == 'Failure') {
+      if (err.status == 401) {
+        this.authService.userLogOut();
+      } else {
+        this.toastr.error(
+          `${err.error.message}`,
+          'Error',
+          environment.TROASTR_STYLE
+        );
+      }
+    } else {
+      this.toastr.error(`Unknown Error`, 'Error', environment.TROASTR_STYLE);
+    }
+  }
   ngOnInit() {
     this.isLoader = true;
     this.countryService.getCountries().subscribe({
       next: (res) => {
         if (res.countries) {
           this.countryList = res.countries;
-        } else if (res.varified == false) {
-          // this.authService.userLogOut();
-        } else if (res.error) {
-          this.toastr.error(`Error From Backend:- ${res.error}`, 'Error',environment.TROASTR_STYLE);
-        }
+        } 
       },
       error: (err) => {
-        this.toastr.error(`Unable to Fetch data:- ${err.message}`, 'Error',environment.TROASTR_STYLE);
+        this.commonErrorHandler(err);
       },
     });
     this.onSearch();
@@ -168,16 +185,11 @@ export class UsersComponent implements OnInit, AfterViewChecked {
           this.userForm.reset();
           this.onSearch();
           this.isLoader= false;
-        } else if (res.varified == false) {
-          this.authService.userLogOut();
-        } else if (res.error) {
-          this.isLoader = false;
-          this.toastr.error(`Error From Backend:- ${res.error}`, 'Error',environment.TROASTR_STYLE);
-        }
+        } 
       },
       error: (err) => {
         this.isLoader = false;
-        this.toastr.error(`unable to Fetch data :- ${err.message}`, 'Error',environment.TROASTR_STYLE);
+        this.commonErrorHandler(err);
       },
     });
   }
@@ -206,17 +218,10 @@ export class UsersComponent implements OnInit, AfterViewChecked {
             this.editMode = false;
             this.userForm.reset();
             this.formdata = new FormData();
-          } else if (res.varified == false) {
-            this.authService.userLogOut();
-          } else if (res.error) {
-            this.editMode = false;
-            this.userForm.reset();
-            this.formdata = new FormData();
-            this.toastr.error(`Error From Backend:- ${res.error}`, 'Error',environment.TROASTR_STYLE);
-          }
+          } 
         },
         error: (err) => {
-          this.toastr.error(`unable to Fetch data :- ${err.message}`, 'Error',environment.TROASTR_STYLE);
+          this.commonErrorHandler(err)
         },
       });
     }
@@ -236,14 +241,10 @@ export class UsersComponent implements OnInit, AfterViewChecked {
         next: (res) => {
           if (res.users) {
             this.usersList = res.users;
-          } else if (res.varified == false) {
-            this.authService.userLogOut();
-          } else if (res.error) {
-            this.toastr.error(`Error From Backend:- ${res.error}`, 'Error',environment.TROASTR_STYLE);
-          }
+          } 
         },
         error: (err) => {
-          this.toastr.error(`Unable to Fetch data:- ${err.message}`, 'Error',environment.TROASTR_STYLE);
+          this.commonErrorHandler(err)
         },
       });
   }
@@ -310,16 +311,11 @@ export class UsersComponent implements OnInit, AfterViewChecked {
             this.onSearch();
             this.toastr.success('User Deleted Successfully', 'Success',environment.TROASTR_STYLE);
             this.isLoader = false;
-          } else if (res.varified == false) {
-            this.authService.userLogOut();
-          } else if (res.error) {
-            this.isLoader = false;
-            this.toastr.error(`Error From Backend:- ${res.error}`, 'Error',environment.TROASTR_STYLE);
-          }
+          } 
         },
         error: (err) => {
           this.isLoader = false;
-          this.toastr.error(`Unable to Fetch data:- ${err.message}`, 'Error',environment.TROASTR_STYLE);
+          this.commonErrorHandler(err);
         },
       });
     } else {
@@ -362,25 +358,18 @@ export class UsersComponent implements OnInit, AfterViewChecked {
   OnAddCard(token: any) {
     this.isLoader = true;
     const postCard: any = { customerId: this.customerId, token };
-    console.log(postCard);
+    // console.log(postCard);
     this.cardService.postCard(postCard).subscribe({
       next:(res) => {
         if (res.card) {
           this.toastr.success('Card Added Successfully', 'Success',environment.TROASTR_STYLE);
           this.cardList.push(res.card);
           this.isLoader = false;
-        } 
-        else if (res.varified == false) {
-          this.authService.userLogOut();
-        } 
-        else if (res.error) {
-          this.isLoader = false;
-          this.toastr.error(`Error From Backend:- ${res.error}`, 'Error',environment.TROASTR_STYLE);
         }
       },
       error:(err)=>{
         this.isLoader = false;
-        this.toastr.error(`Unable to Fetch data:- ${err.message}`, 'Error',environment.TROASTR_STYLE);
+        this.commonErrorHandler(err);
       }
     });
   }
@@ -396,17 +385,10 @@ export class UsersComponent implements OnInit, AfterViewChecked {
             .concat(this.cardList.slice(index + 1));
           this.isLoader = false;
         } 
-        else if (res.varified == false) {
-          this.authService.userLogOut();
-        } 
-        else if (res.error) {
-          this.isLoader = false;
-          this.toastr.error(`Error From Backend:- ${res.error}`, 'Error',environment.TROASTR_STYLE);
-        }
       },
       error:(err)=>{
         this.isLoader = false;
-        this.toastr.error(`Unable to Fetch data:- ${err.message}`, 'Error',environment.TROASTR_STYLE);
+        this.commonErrorHandler(err);
       }
     });
   }

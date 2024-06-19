@@ -1,23 +1,23 @@
 import { HttpEventType, HttpInterceptorFn } from '@angular/common/http';
-import { catchError, tap } from 'rxjs';
+import { catchError, map, tap } from 'rxjs';
 
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
-  // if(req.url=='http://localhost:3000/user/login') {
   if (
     req.headers.has('Authorization') ||
     req.url == 'http://localhost:3000/user/login'
   ) {
-    console.log(req.url)
+    // console.log(req.url)
     return next(req)
-    // .pipe(
-    //   tap((event) => {
-    //     if (event.type === HttpEventType.Sent) {
-    //       console.log(`sent`);
-    //     } else if (event.type === HttpEventType.Response) {
-    //       console.log(`response`);
-    //     }
-    //   })
-    // );
+    .pipe(
+      tap((res:any)=>{
+        
+        console.log(res)
+        if(res.status == 401){
+          console.log(`${res.body.message}`);
+          
+        }
+      })
+    );
   }
   if (localStorage.getItem('token')) {
     let authToken = localStorage.getItem('token');

@@ -12,8 +12,7 @@ export class VehiclePricingService {
   patchVehiclePricing(vehiclePricing: VehiclePricing) {
     return this.http.patch<{
       vehiclePricing: VehiclePricing;
-      error: string;
-      varified: boolean;
+      status: string;
     }>(`http://localhost:3000/admin/pricing/vehicle-pricing`, vehiclePricing, {
       withCredentials: true,
     });
@@ -22,35 +21,31 @@ export class VehiclePricingService {
   postVehiclePricing(vehiclePricing: VehiclePricing) {
     return this.http.post<{
       vehiclePricing: VehiclePricing;
-      error: string;
-      varified: boolean;
+      status: string;
     }>('http://localhost:3000/admin/pricing/vehicle-pricing', vehiclePricing, {
       withCredentials: true,
     });
   }
 
   getVehiclePricing() {
-    return this.http
-    .get<{
+    return this.http.get<{
       vehiclePricing: VehiclePricing[];
-      error: string;
-      varified: boolean;
+      status: string;
     }>('http://localhost:3000/admin/pricing/vehicle-pricing', {
       withCredentials: true,
-    })
+    });
   }
 
-  getAvailableTypes(cityId:string) {
+  getAvailableTypes(cityId: string) {
     const params: Params = {
-      city: cityId
-    }
+      city: cityId,
+    };
     // const params: HttpParams = new HttpParams().append('city', cityId);
     // console.log(params);
-    
-    return this.http.get<{availableTypes:string[],varified: boolean;}>(
+
+    return this.http.get<{ availableTypes: string[]; status: string }>(
       'http://localhost:3000/admin/pricing/vehicle-pricing/getAvailableTypes',
-      {params: params, withCredentials: true}
-      // {withCredentials: true}
-    )
+      { params: params, withCredentials: true }
+    );
   }
 }

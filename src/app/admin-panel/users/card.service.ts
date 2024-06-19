@@ -18,19 +18,19 @@ export class CardService {
   }
 
   postCard(card: Card) {
-    return this.http.post<{ card: Card; error: string,varified: false }>(
+    return this.http.post<{ card: Card; status: string}>(
       'http://localhost:3000/admin/users/card',
       card,
       { withCredentials: true }
     );
   }
 
-  deleteCard(cardId: string, userId: string) {
+  deleteCard(cardId: string, customerId: string) {
     let params: Params = {
       cardId: cardId,
-      customerId: userId,
+      customerId: customerId,
     };
-    return this.http.delete<{ message: string; error: string,varified: false }>(
+    return this.http.delete<{ message: string; status: string}>(
       `http://localhost:3000/admin/users/card`,
       {
         params: params,
@@ -40,7 +40,7 @@ export class CardService {
   }
 
   setCardAsDefault(cardId: string, customerId: string) {
-    return this.http.post<{ card:Card; error: string,varified:boolean }>(
+    return this.http.post<{ card:Card; status: string}>(
       'http://localhost:3000/admin/users/card/default',
       {
         cardId: cardId,

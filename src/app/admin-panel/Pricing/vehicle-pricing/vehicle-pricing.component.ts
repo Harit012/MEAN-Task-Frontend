@@ -83,27 +83,37 @@ export class VehiclePricingComponent implements OnInit, AfterViewChecked {
     });
   }
 
+  commonErrorHandler(err: any) {
+    if (!err.error.status) {
+      this.toastr.error(
+        `Error while sending request to server`,
+        'Error',
+        environment.TROASTR_STYLE
+      );
+    } else if (err.error.status == 'Failure') {
+      if (err.status == 401) {
+        this.authService.userLogOut();
+      } else {
+        this.toastr.error(
+          `${err.error.message}`,
+          'Error',
+          environment.TROASTR_STYLE
+        );
+      }
+    } else {
+      this.toastr.error(`Unknown Error`, 'Error', environment.TROASTR_STYLE);
+    }
+  }
+
   ngOnInit(): void {
     this.countryService.getCountries().subscribe({
       next: (data) => {
         if (data.countries) {
           this.countryList = data.countries;
-        } else if (data.varified == false) {
-          this.authService.userLogOut();
-        } else if (data.error) {
-          this.toastr.error(
-            `Error From Backend:- ${data.error}`,
-            'Error',
-            environment.TROASTR_STYLE
-          );
         }
       },
       error: (err) => {
-        this.toastr.error(
-          `Unable to Fetch data:- ${err.message}`,
-          'Error',
-          environment.TROASTR_STYLE
-        );
+        this.commonErrorHandler(err);
       },
     });
 
@@ -111,22 +121,10 @@ export class VehiclePricingComponent implements OnInit, AfterViewChecked {
       next: (data) => {
         if (data.vehiclePricing) {
           this.pricingList = data.vehiclePricing;
-        } else if (data.varified == false) {
-          this.authService.userLogOut();
-        } else if (data.error) {
-          this.toastr.error(
-            `Error From Backend:- ${data.error}`,
-            'Error',
-            environment.TROASTR_STYLE
-          );
-        }
+        } 
       },
       error: (err) => {
-        this.toastr.error(
-          `Unable to Fetch data:- ${err.message}`,
-          'Error',
-          environment.TROASTR_STYLE
-        );
+        this.commonErrorHandler(err);
       },
     });
   }
@@ -150,22 +148,10 @@ export class VehiclePricingComponent implements OnInit, AfterViewChecked {
       next: (data) => {
         if (data.zones) {
           this.cityList = data.zones;
-        } else if (data.varified == false) {
-          this.authService.userLogOut();
-        } else if (data.error) {
-          this.toastr.error(
-            `Error From Backend:- ${data.error}`,
-            'Error',
-            environment.TROASTR_STYLE
-          );
-        }
+        } 
       },
       error: (err) => {
-        this.toastr.error(
-          `Unable to Fetch data:- ${err.message}`,
-          'Error',
-          environment.TROASTR_STYLE
-        );
+        this.commonErrorHandler(err);
       },
     });
   }
@@ -178,18 +164,10 @@ export class VehiclePricingComponent implements OnInit, AfterViewChecked {
       next: (data) => {
         if (data.availableTypes) {
           this.vehicleTypesList = data.availableTypes;
-        } else if (data.varified == false) {
-          this.authService.userLogOut();
-        }
+        } 
       },
       error: (err) => {
-        console.log(err);
-
-        this.toastr.error(
-          `error :- ${err.statusText}`,
-          'Error',
-          environment.TROASTR_STYLE
-        );
+        this.commonErrorHandler(err);
       },
     });
   }
@@ -231,22 +209,10 @@ export class VehiclePricingComponent implements OnInit, AfterViewChecked {
               'Success',
               environment.TROASTR_STYLE
             );
-          } else if (data.varified == false) {
-            this.authService.userLogOut();
-          } else if (data.error) {
-            this.toastr.error(
-              `Error From Backend:- ${data.error}`,
-              'Error',
-              environment.TROASTR_STYLE
-            );
-          }
+          } 
         },
         error: (err) => {
-          this.toastr.error(
-            `Unable to Fetch data:- ${err.message}`,
-            'Error',
-            environment.TROASTR_STYLE
-          );
+          this.commonErrorHandler(err);
         },
       });
     } else {
@@ -284,22 +250,10 @@ export class VehiclePricingComponent implements OnInit, AfterViewChecked {
                 'Success',
                 environment.TROASTR_STYLE
               );
-            } else if (data.varified == false) {
-              this.authService.userLogOut();
-            } else if (data.error) {
-              this.toastr.error(
-                `Error From Backend:- ${data.error}`,
-                'Error',
-                environment.TROASTR_STYLE
-              );
-            }
+            } 
           },
           error: (err) => {
-            this.toastr.error(
-              `Unable to Fetch data:- ${err.message}`,
-              'Error',
-              environment.TROASTR_STYLE
-            );
+            this.commonErrorHandler(err);
           },
         });
       } else {

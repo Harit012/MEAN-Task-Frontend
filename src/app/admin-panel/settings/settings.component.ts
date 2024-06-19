@@ -6,10 +6,11 @@ import { ToastrService } from 'ngx-toastr';
 import { environment } from '../../../environments/environment';
 import { LoaderComponent } from '../../loader/loader.component';
 
+
 @Component({
   selector: 'app-settings',
   standalone: true,
-  imports: [CommonModule,LoaderComponent],
+  imports: [CommonModule, LoaderComponent],
   templateUrl: './settings.component.html',
   styleUrl: './settings.component.css',
 })
@@ -19,14 +20,43 @@ export class SettingsComponent implements OnInit {
   stopOptions: number[] = [1, 2, 3, 4, 5];
   selectedTimeOut!: number;
   selectedStops!: number;
-  toastr= inject(ToastrService)
-  isLoader: boolean = false
-  constructor(private settingsService: SettingsService,private authService: AuthService) {}
+  toastr = inject(ToastrService);
+  isLoader: boolean = false;
+  constructor(
+    private settingsService: SettingsService,
+    private authService: AuthService
+  ) {}
 
+  commonErrorHandler(err:any) {
+    if (!err.error.status) {
+      this.toastr.error(
+        `Error while sending request to server`,
+        'Error',
+        environment.TROASTR_STYLE
+      );
+    } else if (err.error.status == 'Failure') {
+      if (err.status == 401) {
+        this.authService.userLogOut();
+      } else {
+        this.toastr.error(
+          `${err.error.message}`,
+          'Error',
+          environment.TROASTR_STYLE
+        );
+      }
+    } else {
+      this.toastr.error(
+        `Unknown Error`,
+        'Error',
+        environment.TROASTR_STYLE
+      );
+    }
+  }
+  
   ngOnInit(): void {
-    this.isLoader=true;
+    this.isLoader = true;
     this.settingsService.getSettings().subscribe({
-      next:(data) => {
+      next: (data) => {
         if (data.settings) {
           var timeOut = document.getElementById('timeOut') as HTMLSelectElement;
           var stops = document.getElementById('stops') as HTMLSelectElement;
@@ -36,17 +66,14 @@ export class SettingsComponent implements OnInit {
           stops.selectedIndex = this.stopOptions.indexOf(data.settings.stops);
           this.selectedTimeOut = data.settings.timeOut;
           this.selectedStops = data.settings.stops;
-          this.isLoader=false;
-        }else if (data.varified == false) {
-          this.authService.userLogOut();
-        } else if (data.error) {
-          this.toastr.error(`Error From Backend:- ${data.error}`, 'Error',environment.TROASTR_STYLE);
+          this.isLoader = false;
         }
+        
       },
-      error: (err)=>{
-        this.isLoader=false;
-        this.toastr.error(`unable to Fetch data :- ${err.message}`, 'Error',environment.TROASTR_STYLE);
-      }
+      error: (err) => {
+        this.isLoader = false;
+        this.commonErrorHandler(err);
+      },
     });
   }
 
@@ -57,31 +84,32 @@ export class SettingsComponent implements OnInit {
     this.selectedStops = Number(event.target.value);
   }
   onSaveChanges() {
-    this.isLoader=true;
+    this.isLoader = true;
     this.settingsService
       .putSettings(this.selectedTimeOut, this.selectedStops)
       .subscribe({
-        next:(data) => {
+        next: (data) => {
           if (data.message) {
-            var timeOut = document.getElementById('timeOut') as HTMLSelectElement;
+            var timeOut = document.getElementById(
+              'timeOut'
+            ) as HTMLSelectElement;
             var stops = document.getElementById('stops') as HTMLSelectElement;
             timeOut.selectedIndex = this.timeOutOptions.indexOf(
               this.selectedTimeOut
             );
             stops.selectedIndex = this.stopOptions.indexOf(this.selectedStops);
-            this.toastr.success(`${data.message}`, 'Success',environment.TROASTR_STYLE);
-            this.isLoader=false;
-          }else if (data.varified == false) {
-            this.authService.userLogOut();
-          } else if (data.error) {
-            this.isLoader=false;
-            this.toastr.error(`Error From Backend:- ${data.error}`, 'Error',environment.TROASTR_STYLE);
+            this.toastr.success(
+              `${data.message}`,
+              'Success',
+              environment.TROASTR_STYLE
+            );
+            this.isLoader = false;
           }
         },
-        error:(err)=>{
-          this.isLoader=false;
-          this.toastr.error(`unable to Fetch data :- ${err.message}`, 'Error',environment.TROASTR_STYLE);
-        }
+        error: (err) => {
+          this.isLoader = false;
+          this.commonErrorHandler(err);
+        },
       });
   }
 }

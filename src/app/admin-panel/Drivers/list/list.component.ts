@@ -65,6 +65,32 @@ export class ListComponent implements OnInit {
       city: new FormControl(null, [Validators.required]),
     });
   }
+
+  commonErrorHandler(err: any) {
+      if (!err.error.status) {
+        this.toastr.error(
+          `Error while sending request to server`,
+          'Error',
+          environment.TROASTR_STYLE
+        );
+      } else if (err.error.status == 'Failure') {
+        if (err.status == 401) {
+          this.authService.userLogOut();
+        } else {
+          this.toastr.error(
+            `${err.error.message}`,
+            'Error',
+            environment.TROASTR_STYLE
+          );
+        }
+      } else {
+        this.toastr.error(
+          `Unknown Error`,
+          'Error',
+          environment.TROASTR_STYLE
+        );
+      }
+  }
   ngOnInit(): void {
     this.getDrivers();
 
@@ -72,22 +98,10 @@ export class ListComponent implements OnInit {
       next: (res) => {
         if (res.countries) {
           this.countryList = res.countries;
-        } else if (res.varified === false) {
-          this.authService.userLogOut();
-        } else if (res.error) {
-          this.toastr.error(
-            `Error From Backend:- ${res.error}`,
-            'Error',
-            environment.TROASTR_STYLE
-          );
-        }
+        } 
       },
       error: (err) => {
-        this.toastr.error(
-          `unable to fetch data:- ${err.message}`,
-          'Error',
-          environment.TROASTR_STYLE
-        );
+        this.commonErrorHandler(err);
       },
     });
 
@@ -117,22 +131,10 @@ export class ListComponent implements OnInit {
         next: (res) => {
           if (res.drivers) {
             this.driversList = res.drivers;
-          } else if (res.varified === false) {
-            this.authService.userLogOut();
-          } else if (res.error) {
-            this.toastr.error(
-              `Error from backend :- ${res.error}`,
-              'Error',
-              environment.TROASTR_STYLE
-            );
-          }
+          } 
         },
         error: (err) => {
-          this.toastr.error(
-            `Unable to fetch data :- ${err.message}`,
-            'Error',
-            environment.TROASTR_STYLE
-          );
+          this.commonErrorHandler(err);
         },
       });
   }
@@ -145,22 +147,10 @@ export class ListComponent implements OnInit {
         if (data.zones) {
           console.log(data.zones);
           this.cityList = data.zones;
-        } else if (data.varified === false) {
-          this.authService.userLogOut();
-        } else if (data.error) {
-          this.toastr.error(
-            `Error while getting Zones:- ${data.error}`,
-            'Error',
-            environment.TROASTR_STYLE
-          );
         }
       },
       error: (err) => {
-        this.toastr.error(
-          `unable to fetch data:- ${err.message}`,
-          'Error',
-          environment.TROASTR_STYLE
-        );
+        this.commonErrorHandler(err);
       },
     });
   }
@@ -185,9 +175,6 @@ export class ListComponent implements OnInit {
   }
   // to add user
   onAddDriver() {
-    // console.log(this.driverForm)
-    // return
-
     this.formdata.append(
       'driverName',
       this.driverForm.get('driverName')?.value
@@ -210,24 +197,10 @@ export class ListComponent implements OnInit {
           this.driversList.push(data.driver);
           this.formdata = new FormData();
           this.driverForm.reset();
-        } else if (data.varified === false) {
-          this.authService.userLogOut();
-        } else if (data.error) {
-          this.formdata = new FormData();
-          this.driverForm.reset();
-          this.toastr.error(
-            `Error From Backend:- ${data.error}`,
-            'Error',
-            environment.TROASTR_STYLE
-          );
         }
       },
       error: (err) => {
-        this.toastr.error(
-          `unable to add data:- ${err.message}`,
-          'Error',
-          environment.TROASTR_STYLE
-        );
+        this.commonErrorHandler(err)
       },
     });
   }
@@ -265,25 +238,10 @@ export class ListComponent implements OnInit {
               'Success',
               environment.TROASTR_STYLE
             );
-          } else if (data.varified === false) {
-            this.authService.userLogOut();
-          } else if (data.error) {
-            this.formdata = new FormData();
-            this.driverForm.reset();
-            this.editMode = false;
-            this.toastr.error(
-              `Error From Backend:- ${data.error}`,
-              'Error',
-              environment.TROASTR_STYLE
-            );
-          }
+          } 
         },
         error: (err) => {
-          this.toastr.error(
-            `unable to fetch data:- ${err.message}`,
-            'Error',
-            environment.TROASTR_STYLE
-          );
+          this.commonErrorHandler(err)
         },
       });
     } else {
@@ -303,23 +261,11 @@ export class ListComponent implements OnInit {
       .subscribe({
         next: (data) => {
           if (data.message) {
-            this.getDrivers();
-          } else if (data.varified === false) {
-            this.authService.userLogOut();
-          } else if (data.error) {
-            this.toastr.error(
-              `Error from Backend:- ${data.error}`,
-              'Error',
-              environment.TROASTR_STYLE
-            );
-          }
+            this.driversList[i]['approved'] = temp_status;
+          } 
         },
         error: (err) => {
-          this.toastr.error(
-            `unable to fetch data :- ${err.message}`,
-            'Error',
-            environment.TROASTR_STYLE
-          );
+          this.commonErrorHandler(err)
         },
       });
   }
@@ -371,22 +317,10 @@ export class ListComponent implements OnInit {
           next: (data) => {
             if (data.zones) {
               this.cityList = data.zones;
-            } else if (data.varified === false) {
-              this.authService.userLogOut();
-            } else if (data.error) {
-              this.toastr.error(
-                `Error from Backend:- ${data.error}`,
-                'Error',
-                environment.TROASTR_STYLE
-              );
             }
           },
           error: (err) => {
-            this.toastr.error(
-              `unable to fetch data :- ${err.message}`,
-              'Error',
-              environment.TROASTR_STYLE
-            );
+            this.commonErrorHandler(err)
           },
         });
         break;
@@ -403,6 +337,7 @@ export class ListComponent implements OnInit {
     if (confirm('Are you sure you want to delete this driver?')) {
       this.driverService.deleteDriver(driver._id!).subscribe({
         next: (data) => {
+          console.log(data)
           if (data.message) {
             this.toastr.success(
               'Driver Deleted Successfully',
@@ -411,22 +346,10 @@ export class ListComponent implements OnInit {
             );
             let index = this.driversList.indexOf(driver);
             this.driversList.splice(index, 1);
-          } else if (data.varified === false) {
-            this.authService.userLogOut();
-          } else if (data.error) {
-            this.toastr.error(
-              `Error from Backend:- ${data.error}`,
-              'Error',
-              environment.TROASTR_STYLE
-            );
-          }
+          } 
         },
         error: (err) => {
-          this.toastr.error(
-            `unable to fetch data :- ${err.message}`,
-            'Error',
-            environment.TROASTR_STYLE
-          );
+          this.commonErrorHandler(err)
         },
       });
     }
@@ -486,22 +409,10 @@ export class ListComponent implements OnInit {
               environment.TROASTR_STYLE
             );
             this.getDrivers();
-          } else if (data.varified === false) {
-            this.authService.userLogOut();
-          } else if (data.error) {
-            this.toastr.error(
-              `Error from Backend:- ${data.error}`,
-              'Error',
-              environment.TROASTR_STYLE
-            );
           }
         },
         error: (err) => {
-          this.toastr.error(
-            `unable to fetch data :- ${err.message}`,
-            'Error',
-            environment.TROASTR_STYLE
-          );
+          this.commonErrorHandler(err)
         },
       });
   }

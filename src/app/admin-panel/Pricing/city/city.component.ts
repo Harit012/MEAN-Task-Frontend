@@ -361,25 +361,44 @@ export class CityComponent implements OnInit {
     private cityService: CityService,
     private authService: AuthService
   ) {}
-  ngOnInit(): void {
-    this.countryService.getCountries().subscribe((data) => {
-      if (data.countries) {
-        let data1: Country[] = data.countries;
-        data1.forEach((element: Country) => {
-          this.countries.push({
-            _id: element._id,
-            countryName: element.countryName,
-            countryShortName: element.countryShortName,
-            countryLatLng: element.latlng!,
-          });
-        });
-      } else if (data.varified == false) {
+  commonErrorHandler(err: any) {
+    if (!err.error.status) {
+      this.toastr.error(
+        `Error while sending request to server`,
+        'Error',
+        environment.TROASTR_STYLE
+      );
+    } else if (err.error.status == 'Failure') {
+      if (err.status == 401) {
         this.authService.userLogOut();
-      } else if (data.error) {
+      } else {
         this.toastr.error(
-          `Error in Fatching Countrys:- ${data.error}`,
-          'Error',environment.TROASTR_STYLE
+          `${err.error.message}`,
+          'Error',
+          environment.TROASTR_STYLE
         );
+      }
+    } else {
+      this.toastr.error(`Unknown Error`, 'Error', environment.TROASTR_STYLE);
+    }
+  }
+  ngOnInit(): void {
+    this.countryService.getCountries().subscribe({
+      next:(data) => {
+        if (data.countries) {
+          let data1: Country[] = data.countries;
+          data1.forEach((element: Country) => {
+            this.countries.push({
+              _id: element._id,
+              countryName: element.countryName,
+              countryShortName: element.countryShortName,
+              countryLatLng: element.latlng!,
+            });
+          });
+        } 
+      },
+      error: (err) => {
+        this.commonErrorHandler(err);
       }
     });
     this.initMap();
@@ -558,16 +577,25 @@ export class CityComponent implements OnInit {
               this.filteredZones[this.updatedInputIndex] = data.zone;
               this.toastr.success(
                 `Zone ${data.zone.zoneName} updated`,
-                'Success',environment.TROASTR_STYLE
+                'Success',
+                environment.TROASTR_STYLE
               );
             } else if (data.varified == false) {
               this.authService.userLogOut();
             } else if (data.error) {
-              this.toastr.error(`Error From Backend:- ${data.error}`, 'Error',environment.TROASTR_STYLE);
+              this.toastr.error(
+                `Error From Backend:- ${data.error}`,
+                'Error',
+                environment.TROASTR_STYLE
+              );
             }
           },
           error: (err) => {
-            this.toastr.error(`Unable to fetch data:- ${err.message}`, 'Error',environment.TROASTR_STYLE);
+            this.toastr.error(
+              `Unable to fetch data:- ${err.message}`,
+              'Error',
+              environment.TROASTR_STYLE
+            );
           },
         });
       this.updatedPolyCoordinates = [];
@@ -575,7 +603,11 @@ export class CityComponent implements OnInit {
       this.editedpolygon.setMap(null);
       this.map.panTo(this.center);
     } else {
-      this.toastr.warning(`Values are Not Valid`, 'Warning',environment.TROASTR_STYLE);
+      this.toastr.warning(
+        `Values are Not Valid`,
+        'Warning',
+        environment.TROASTR_STYLE
+      );
     }
   }
   addNewZone() {
@@ -590,10 +622,14 @@ export class CityComponent implements OnInit {
         // countryShortName: this.countryShortName,
       };
       this.cityService.addZone(zone).subscribe({
-        next :(data) => {
+        next: (data) => {
           if (data.zones) {
             this.filteredZones = data.zones;
-            this.toastr.success(`Zone ${zone.zoneName} added`, 'Success',environment.TROASTR_STYLE);
+            this.toastr.success(
+              `Zone ${zone.zoneName} added`,
+              'Success',
+              environment.TROASTR_STYLE
+            );
             this.zoneName = '';
             this.polygon.setMap(null);
             this.map.panTo({ lat: 22.3039, lng: 70.8022 });
@@ -607,30 +643,38 @@ export class CityComponent implements OnInit {
           } else if (data.varified == false) {
             this.authService.userLogOut();
           } else if (data.error) {
-            this.toastr.error(`Error From Backend:- ${data.error}`, 'Error',environment.TROASTR_STYLE);
+            this.toastr.error(
+              `Error From Backend:- ${data.error}`,
+              'Error',
+              environment.TROASTR_STYLE
+            );
           }
         },
         error: (err) => {
-          this.toastr.error(`Unable to fetch data:- ${err.message}`, 'Error',environment.TROASTR_STYLE);
+          this.toastr.error(
+            `Unable to fetch data:- ${err.message}`,
+            'Error',
+            environment.TROASTR_STYLE
+          );
         },
       });
     } else {
-      this.toastr.warning(`Zone has no boundries`, 'Warning',environment.TROASTR_STYLE);
+      this.toastr.warning(
+        `Zone has no boundries`,
+        'Warning',
+        environment.TROASTR_STYLE
+      );
     }
   }
   getZone() {
     this.cityService.getZones(this.selectedCountry._id!).subscribe({
-      next:(data) => {
+      next: (data) => {
         if (data.zones) {
           this.filteredZones = data.zones;
-        } else if (data.varified == false) {
-          this.authService.userLogOut();
-        } else if (data.error) {
-          this.toastr.error(`Error From Backend:- ${data.error}`, 'Error',environment.TROASTR_STYLE);
-        }
+        } 
       },
       error: (err) => {
-        this.toastr.error(`Unable to fetch data:- ${err.message}`, 'Error',environment.TROASTR_STYLE);
+        this.commonErrorHandler(err);
       },
     });
   }

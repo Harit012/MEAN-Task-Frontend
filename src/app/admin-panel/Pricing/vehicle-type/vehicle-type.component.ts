@@ -29,7 +29,7 @@ export class VehicleTypeComponent implements OnInit {
   selectedImg: string = '';
   sizeValidation: boolean = false;
   vehicleTypes: string[] = ['SEDAN', 'SUV', 'MINI VAN', 'PICK UP'];
-  toastr = inject(ToastrService)
+  toastr = inject(ToastrService);
 
   constructor(
     private fb: FormBuilder,
@@ -45,6 +45,28 @@ export class VehicleTypeComponent implements OnInit {
     this.getVehiclesData();
   }
 
+  commonErrorHandler(err: any) {
+    if (!err.error.status) {
+      this.toastr.error(
+        `Error while sending request to server`,
+        'Error',
+        environment.TROASTR_STYLE
+      );
+    } else if (err.error.status == 'Failure') {
+      if (err.status == 401) {
+        this.authService.userLogOut();
+      } else {
+        this.toastr.error(
+          `${err.error.message}`,
+          'Error',
+          environment.TROASTR_STYLE
+        );
+      }
+    } else {
+      this.toastr.error(`Unknown Error`, 'Error', environment.TROASTR_STYLE);
+    }
+  }
+
   onSubmit() {
     this.formdata.append('type', this.vehicleForm.value.type);
     console.log(this.formdata);
@@ -52,16 +74,16 @@ export class VehicleTypeComponent implements OnInit {
     this.vehicleTypeService.postVehicleType(this.formdata).subscribe({
       next: (data) => {
         if (data.vehicles) {
-          this.toastr.success('Vehicle-type added', 'Success',environment.TROASTR_STYLE);
+          this.toastr.success(
+            'Vehicle-type added',
+            'Success',
+            environment.TROASTR_STYLE
+          );
           this.vehiclesList = data.vehicles;
-        } else if (data.varified == false) {
-          this.authService.userLogOut();
-        } else if (data.error) {
-          this.toastr.error(`Error From Backend:- ${data.error}`, 'Error',environment.TROASTR_STYLE);
         }
       },
       error: (err) => {
-        this.toastr.error(`Unable to fetch data:- ${err.message}`, 'Error',environment.TROASTR_STYLE);
+        this.commonErrorHandler(err);
       },
     });
     this.vehicleForm.reset();
@@ -73,39 +95,34 @@ export class VehicleTypeComponent implements OnInit {
       next: (data) => {
         if (data.vehicle) {
           this.vehiclesList = data.vehicle;
-        } else if (data.varified == false) {
-          this.authService.userLogOut();
-        } else if (data.error) {
-          this.toastr.error(`Error From Backend:- ${data.error}`, 'Error');
         }
       },
       error: (err) => {
-        this.toastr.error(`Unable to fetch data:- ${err.message}`, 'Error');
+        this.commonErrorHandler(err);
       },
     });
   }
 
   onSubmitEdit() {
     this.formdata.append('type', this.vehicleForm.value.type);
-    if(this.vehicleForm.dirty){
+    if (this.vehicleForm.dirty) {
       this.vehicleTypeService.putVehicleType(this.formdata).subscribe({
         next: (res) => {
           if (res.vehicles) {
-            this.toastr.success('Vehicle-type updated', 'Success',environment.TROASTR_STYLE);
+            this.toastr.success(
+              'Vehicle-type updated',
+              'Success',
+              environment.TROASTR_STYLE
+            );
             this.vehiclesList = res.vehicles;
-          } else if (res.varified == false) {
-            this.authService.userLogOut();
-            return;
-          } else if (res.error) {
-            this.toastr.error(`Error From Backend:- ${res.error}`, 'Error',environment.TROASTR_STYLE);
           }
         },
         error: (err) => {
-          this.toastr.error(`Unable to fetch data:- ${err.message}`, 'Error',environment.TROASTR_STYLE);
+          this.commonErrorHandler(err);
         },
       });
-    }else{
-      this.toastr.info('No changes made','Info',environment.TROASTR_STYLE)
+    } else {
+      this.toastr.info('No changes made', 'Info', environment.TROASTR_STYLE);
     }
     this.onCancel();
   }
@@ -118,7 +135,8 @@ export class VehicleTypeComponent implements OnInit {
       } else {
         this.toastr.warning(
           'file is too large try to upload smaller file',
-          'Warning',environment.TROASTR_STYLE
+          'Warning',
+          environment.TROASTR_STYLE
         );
         this.sizeValidation = true;
         this.vehicleForm.reset();
@@ -143,17 +161,16 @@ export class VehicleTypeComponent implements OnInit {
         .subscribe({
           next: (res) => {
             if (res.vehicles) {
-              this.toastr.success('Vehicle-type deleted', 'Success',environment.TROASTR_STYLE);
+              this.toastr.success(
+                'Vehicle-type deleted',
+                'Success',
+                environment.TROASTR_STYLE
+              );
               this.vehiclesList = res.vehicles;
-            } else if (res.varified == false) {
-              this.authService.userLogOut();
-              return;
-            } else if (res.error) {
-              this.toastr.error(`Error From Backend:- ${res.error}`, 'Error',environment.TROASTR_STYLE);
             }
           },
           error: (err) => {
-            this.toastr.error(`Unable to fetch data:- ${err.message}`, 'Error',environment.TROASTR_STYLE);
+            this.commonErrorHandler(err);
           },
         });
     }

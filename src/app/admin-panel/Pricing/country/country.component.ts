@@ -39,6 +39,27 @@ export class CountryComponent implements OnInit {
       countryCallCode: new FormControl(null, [Validators.required]),
     });
   }
+  commonErrorHandler(err: any) {
+    if (!err.error.status) {
+      this.toastr.error(
+        `Error while sending request to server`,
+        'Error',
+        environment.TROASTR_STYLE
+      );
+    } else if (err.error.status == 'Failure') {
+      if (err.status == 401) {
+        this.authService.userLogOut();
+      } else {
+        this.toastr.error(
+          `${err.error.message}`,
+          'Error',
+          environment.TROASTR_STYLE
+        );
+      }
+    } else {
+      this.toastr.error(`Unknown Error`, 'Error', environment.TROASTR_STYLE);
+    }
+  }
 
   ngOnInit(): void {
     this.getCountries();
@@ -96,17 +117,9 @@ export class CountryComponent implements OnInit {
               this.countryForm.reset();
               this.toBeAddedCountry = null;
             } 
-            else if (res.varified == false) {
-              this.authService.userLogOut();
-            } 
-            else if (res.error) {
-              this.toBeAddedCountry = null;
-              this.countryname = '';
-              this.toastr.error(`Error From Backend:- ${res.error}`, 'Error',environment.TROASTR_STYLE);
-            }
           },
           error: (err) => {
-            this.toastr.error(`Unable to fetch data:- ${err.message}`, 'Error',environment.TROASTR_STYLE);
+            this.commonErrorHandler(err)
           },
         });
     } 
@@ -123,18 +136,14 @@ export class CountryComponent implements OnInit {
   getCountries() {
     this.countryService.getCountries().subscribe({
       next:(res) => {
+        console.log(res)
         if (res.countries) {
           this.AddedCountry = res.countries;
           this.filteredCountry = res.countries;
-        } else if (res.varified == false) {
-          this.authService.userLogOut();
-          return;
-        } else if (res.error) {
-          this.toastr.error(`Error From Backend:- ${res.error}`, 'Error',environment.TROASTR_STYLE);
         }
       },
       error: (err) => {
-        this.toastr.error(`Unable to fetch data:- ${err.message}`, 'Error',environment.TROASTR_STYLE);
+        this.commonErrorHandler(err);
       },
     });
   }
