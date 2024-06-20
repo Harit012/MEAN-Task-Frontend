@@ -7,7 +7,6 @@ export const authorizationGuard: CanActivateFn = (route, state) => {
     return true;
   }
   else{
-    // alert("You are not logged in");
     router.navigate(['/login']);
     return false;
   }

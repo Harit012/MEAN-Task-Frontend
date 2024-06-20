@@ -1,7 +1,6 @@
 import { Routes } from '@angular/router';
 import { UserLoginComponent } from './auth/user-login/user-login.component';
 import { authorizationGuard } from './auth/authorization.guard';
-import { wildcardGuard } from './auth/wildcard.guard';
 
 export const routes: Routes = [
   {
@@ -19,7 +18,6 @@ export const routes: Routes = [
   {
     path: 'admin',
     canActivate: [authorizationGuard],
-    canActivateChild: [authorizationGuard],
     loadComponent: () =>
       import('./admin-panel/admin-panel.component').then(
         (m) => m.AdminPanelComponent

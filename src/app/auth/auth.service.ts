@@ -1,7 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
-import { ToastrModule, ToastrService } from 'ngx-toastr';
+import { ToastrService } from 'ngx-toastr';
 import { environment } from '../../environments/environment';
 
 @Injectable({
@@ -15,7 +15,7 @@ export class AuthService {
     if (form.email != null && form.password != null) {
       this.http
         .post<{ token: string; status: string }>(
-          'http://localhost:3000/user/login',
+          `${environment.BASE_URL}/user/login`,
           form
         )
         .subscribe({

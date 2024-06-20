@@ -8,7 +8,6 @@ import { environment } from '../environments/environment';
   standalone: true,
   imports: [RouterOutlet,UserLoginComponent],
   templateUrl: './app.component.html',
-  styleUrl: './app.component.css'
 })
 export class AppComponent implements OnDestroy , OnInit{
 

@@ -1,6 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Country } from './country.interface';
+import { environment } from '../../../../environments/environment';
 
 @Injectable({
   providedIn: 'root',
@@ -10,7 +11,7 @@ export class CountriesService {
 
   getCountries() {
     return this.http.get<{ countries: Country[] ,status: string}>(
-      'http://localhost:3000/admin/pricing/country',
+      `${environment.BASE_URL}/admin/pricing/country`,
       {
         withCredentials: true,
       }
@@ -19,7 +20,7 @@ export class CountriesService {
 
   postCountry(country: Country) {
     return this.http.post<{ country: Country; status: string }>(
-      'http://localhost:3000/admin/pricing/country',
+      `${environment.BASE_URL}/admin/pricing/country`,
       country,
       { withCredentials: true }
     );

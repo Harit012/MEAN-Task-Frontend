@@ -161,7 +161,9 @@ export class UsersComponent implements OnInit, AfterViewChecked {
     this.onSearch();
   }
   onFileChange(event: any) {
-    if (event.target.files && event.target.files.length) {
+    let files=event.target.files;
+    let length = files.length;
+    if (files && length) {
       if (event.target.files[0].size < 4000000) {
         this.formdata.append('userProfile', event.target.files[0]);
       } else {
@@ -203,7 +205,6 @@ export class UsersComponent implements OnInit, AfterViewChecked {
     this.formdata.append('userName', temp_username.value);
     this.formdata.append('email', temp_email.value);
     this.formdata.append('phone', temp_phone.value);
-    this.formdata.append('countryCode', temp_countrycode.value);
     this.countryList.forEach((element) => {
       if (element.countryCallCode == temp_countrycode.value) {
         this.formdata.append('country', element._id!);
@@ -252,7 +253,8 @@ export class UsersComponent implements OnInit, AfterViewChecked {
     this.isLoader = true;
     let cardModal = new bootstrap.Modal(
       document.getElementById('cardModal') as HTMLElement
-    ).show();
+    );
+    cardModal.show();
     // console.log(user.customerId)
     this.cardService.getCards(user.customerId).subscribe({
       next: (res) => {
@@ -267,7 +269,6 @@ export class UsersComponent implements OnInit, AfterViewChecked {
     this.customerId = user.customerId;
   }
   onEdit(user: UserGet) {
-    console.log(user);
     this.editMode = true;
     let modal = new bootstrap.Modal(
       document.getElementById('staticBackdrop') as HTMLElement
@@ -299,13 +300,13 @@ export class UsersComponent implements OnInit, AfterViewChecked {
         continue;
       }
     }
-    this.formdata.append('id', user._id!);
-    this.formdata.append('olduserProdile', user.userProfile);
+    this.formdata.append('id', user._id);
+    this.formdata.append('olduserProfile', user.userProfile);
   }
   onDelete(user: UserGet) {
     this.isLoader = true;
     if (confirm('Are you sure you want to delete this user?')) {
-      this.userService.deleteUser(user._id!, user.customerId!).subscribe({
+      this.userService.deleteUser(user._id, user.customerId).subscribe({
         next: (res) => {
           if (res.message) {
             this.onSearch();
@@ -358,7 +359,6 @@ export class UsersComponent implements OnInit, AfterViewChecked {
   OnAddCard(token: any) {
     this.isLoader = true;
     const postCard: any = { customerId: this.customerId, token };
-    // console.log(postCard);
     this.cardService.postCard(postCard).subscribe({
       next:(res) => {
         if (res.card) {
@@ -376,7 +376,7 @@ export class UsersComponent implements OnInit, AfterViewChecked {
   deleteCard(index: number) {
     this.isLoader = true;
     let cardId = this.cardList[index].id;
-    this.cardService.deleteCard(cardId!, this.customerId).subscribe({
+    this.cardService.deleteCard(cardId, this.customerId).subscribe({
       next:(res) => {
         if (res.message) {
           this.toastr.success('Card Deleted Successfully', 'Success',environment.TROASTR_STYLE);
@@ -397,7 +397,7 @@ export class UsersComponent implements OnInit, AfterViewChecked {
     let cardId = this.cardList[index].id;
     let card = this.cardList[index];
     this.cardService
-      .setCardAsDefault(cardId!, this.customerId)
+      .setCardAsDefault(cardId, this.customerId)
       .subscribe({
         next:(res) => {
           this.toastr.info(`new Default card is:- XXXX XXXX XXXX ${card.last4}`, 'Info',environment.TROASTR_STYLE);

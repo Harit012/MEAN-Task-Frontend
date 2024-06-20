@@ -406,9 +406,9 @@ export class CityComponent implements OnInit {
 
   onCountryChanged(event: any) {
     let tempCountry = event.target.value;
-    for (let i = 0; i < this.countries.length; i++) {
-      if (this.countries[i].countryShortName == tempCountry) {
-        this.selectedCountry = this.countries[i];
+    for(let cntry of this.countries){
+      if(cntry.countryShortName == tempCountry){
+        this.selectedCountry = cntry;
       }
     }
     this.map.setCenter(this.selectedCountry.countryLatLng);
@@ -515,7 +515,6 @@ export class CityComponent implements OnInit {
       drawingMode: null,
       drawingControl: false,
     });
-    // this.polygon.setMap(null);
     const citybox = document.getElementById('searchcity') as HTMLInputElement;
     citybox.value = this.filteredZones[i].zoneName;
     const zone = this.filteredZones[i];
@@ -550,6 +549,7 @@ export class CityComponent implements OnInit {
       citybox.value = '';
       this.polygon.setMap(null);
       this.map.panTo(this.center);
+      // this.initMap()
     } else {
       return;
     }
@@ -580,22 +580,10 @@ export class CityComponent implements OnInit {
                 'Success',
                 environment.TROASTR_STYLE
               );
-            } else if (data.varified == false) {
-              this.authService.userLogOut();
-            } else if (data.error) {
-              this.toastr.error(
-                `Error From Backend:- ${data.error}`,
-                'Error',
-                environment.TROASTR_STYLE
-              );
             }
           },
           error: (err) => {
-            this.toastr.error(
-              `Unable to fetch data:- ${err.message}`,
-              'Error',
-              environment.TROASTR_STYLE
-            );
+            this.commonErrorHandler(err);
           },
         });
       this.updatedPolyCoordinates = [];
@@ -640,22 +628,10 @@ export class CityComponent implements OnInit {
             this.map.setCenter(this.selectedCountry.countryLatLng);
             this.map.setZoom(6);
             citybox.value = '';
-          } else if (data.varified == false) {
-            this.authService.userLogOut();
-          } else if (data.error) {
-            this.toastr.error(
-              `Error From Backend:- ${data.error}`,
-              'Error',
-              environment.TROASTR_STYLE
-            );
           }
         },
         error: (err) => {
-          this.toastr.error(
-            `Unable to fetch data:- ${err.message}`,
-            'Error',
-            environment.TROASTR_STYLE
-          );
+          this.commonErrorHandler(err);
         },
       });
     } else {

@@ -4,21 +4,22 @@ import { Zone } from './zone.interface';
 import { Params } from '@angular/router';
 import { RecivingZone } from './recivingZone.interface';
 import { RecivedCity } from '../vehicle-pricing/recivedcity.interface';
+import { environment } from '../../../../environments/environment';
 
 @Injectable({ providedIn: 'root' })
 export class CityService {
   constructor(private http: HttpClient) {}
 
   updateZone(obj: { boundry: google.maps.LatLngLiteral[]; id: string }) {
-    return this.http.patch<{ zone: RecivingZone; error: string,varified: boolean }>(
-      'http://localhost:3000/admin/pricing/city',
+    return this.http.patch<{ zone: RecivingZone; status: string}>(
+      `${environment.BASE_URL}/admin/pricing/city`,
       obj,
       { withCredentials: true }
     );
   }
   addZone(zone: Zone) {
     return this.http.post<{ zones: RecivingZone[]; error: string ,varified: boolean}>(
-      'http://localhost:3000/admin/pricing/city',
+      `${environment.BASE_URL}/admin/pricing/city`,
       zone,
       {
         withCredentials: true,
@@ -30,7 +31,7 @@ export class CityService {
       countryId: countryId,
     };
     return this.http.get<{ zones: RecivingZone[]; status: string}>(
-      'http://localhost:3000/admin/pricing/city',
+      `${environment.BASE_URL}/admin/pricing/city`,
       { params: params, withCredentials: true }
     );
   }
@@ -40,7 +41,7 @@ export class CityService {
       cityId: cityId,
     };
     return this.http.get<RecivedCity>(
-      'http://localhost:3000/admin/pricing/cityForPricing',
+      `${environment.BASE_URL}/admin/pricing/cityForPricing`,
       {
         params: params,
         withCredentials: true,

@@ -2,6 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Driver } from './driver.interface';
 import { Params } from '@angular/router';
+import { environment } from '../../../../environments/environment';
 
 @Injectable({
   providedIn: 'root',
@@ -28,7 +29,7 @@ export class DriverService {
 
   postDriver(driver: FormData) {
     return this.http.post<{ driver: Driver; status: string}>(
-      'http://localhost:3000/admin/drivers/list',
+      `${environment.BASE_URL}/admin/drivers/list`,
       driver,
       { withCredentials: true }
     );
@@ -39,14 +40,14 @@ export class DriverService {
       id: id,
     };
     return this.http.delete<{ message: string; status: string }>(
-      'http://localhost:3000/admin/drivers/list',
+       `${environment.BASE_URL}/admin/drivers/list`,
       { params: params, withCredentials: true }
     );
   }
 
   approvelChange(id: string, approvel: boolean) {
     return this.http.patch<{ message: string; status: string}>(
-      'http://localhost:3000/admin/drivers/list',
+      `${environment.BASE_URL}/admin/drivers/list`,
       { id: id, approvel: approvel },
       { withCredentials: true }
     );
@@ -54,7 +55,7 @@ export class DriverService {
 
   putEditUser(formData: FormData) {
     return this.http.put<{ message: string; status: string}>(
-      'http://localhost:3000/admin/drivers/list',
+      `${environment.BASE_URL}/admin/drivers/list`,
       formData,
       { withCredentials: true }
     );
@@ -62,7 +63,7 @@ export class DriverService {
 
   patchServiceType(serviceType: string , id:string) {
     return this.http.patch<{message:string,status:string}>(
-      'http://localhost:3000/admin/drivers/list/serviceType',
+      `${environment.BASE_URL}/admin/drivers/list/serviceType`,
       {  id: id ,serviceType: serviceType  },
       { withCredentials: true }
     );

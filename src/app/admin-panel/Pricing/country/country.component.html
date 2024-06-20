@@ -113,7 +113,7 @@
                   id="countryName"
                   formControlName="countryName"
                   class="form-control"
-                  [(ngModel)]="countryname"
+                  (input)="onInputCountryName($event)"
                 />
                 <p *ngIf="countryForm.get('countryName')?.invalid && countryForm.get('countryName')?.touched" class="text-danger">This field should not be empty</p>
               </div>

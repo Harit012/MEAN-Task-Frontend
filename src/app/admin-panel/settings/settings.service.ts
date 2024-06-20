@@ -1,6 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Settings } from './settings.interface';
+import { environment } from '../../../environments/environment';
 
 @Injectable({ providedIn: 'root' })
 export class SettingsService {
@@ -12,7 +13,7 @@ export class SettingsService {
       stops:stops
     }
     return this.http.patch<{ message:string; status: string }>(
-      'http://localhost:3000/admin/settings/patchSettings',
+      `${environment.BASE_URL}/admin/settings/patchSettings`,
        settings,
       {
         withCredentials: true,
@@ -22,7 +23,7 @@ export class SettingsService {
 
   getSettings() {
     return this.http.get<{ settings: Settings; status: string }>(
-      'http://localhost:3000/admin/settings/getSettings',
+      `${environment.BASE_URL}/admin/settings/getSettings`,
       { withCredentials: true }
     );
   }

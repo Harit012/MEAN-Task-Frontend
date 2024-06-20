@@ -2,6 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { VehicleType } from './vehicle.interface';
 import { Params } from '@angular/router';
+import { environment } from '../../../../environments/environment';
 
 @Injectable({
   providedIn: 'root',
@@ -13,7 +14,7 @@ export class VehicleTypeService {
     return this.http.get<{
       vehicle: VehicleType[];
       status: string;
-    }>('http://localhost:3000/admin/pricing/vehicle-type', {
+    }>(`${environment.BASE_URL}/admin/pricing/vehicle-type`, {
       withCredentials: true,
     });
   }
@@ -22,7 +23,7 @@ export class VehicleTypeService {
     return this.http.post<{
       vehicles: VehicleType[];
       status: string;
-    }>('http://localhost:3000/admin/pricing/vehicle-type', vehicleType, {
+    }>(`${environment.BASE_URL}/admin/pricing/vehicle-type`, vehicleType, {
       withCredentials: true,
     });
   }
@@ -31,7 +32,7 @@ export class VehicleTypeService {
     return this.http.put<{
       vehicles: VehicleType[];
       status: string;
-    }>('http://localhost:3000/admin/pricing/vehicle-type', vehicleType, {
+    }>(`${environment.BASE_URL}/admin/pricing/vehicle-type`, vehicleType, {
       withCredentials: true,
     });
   }
@@ -41,7 +42,7 @@ export class VehicleTypeService {
     return this.http.delete<{
       vehicles: VehicleType[];
       status: string;
-    }>('http://localhost:3000/admin/pricing/vehicle-type', {
+    }>(`${environment.BASE_URL}/admin/pricing/vehicle-type`, {
       params: params,
       withCredentials: true,
     });
@@ -51,7 +52,7 @@ export class VehicleTypeService {
     return this.http.get<{
       allVehicleTypes: string[];
       varified: boolean;
-    }>('http://localhost:3000/admin/pricing/vehicle-type/getAllTypes', {
+    }>(`${environment.BASE_URL}/admin/pricing/vehicle-type/getAllTypes`, {
       withCredentials: true,
     });
   }

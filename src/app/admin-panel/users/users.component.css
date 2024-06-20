@@ -1,7 +1,6 @@
 .scrollable-section{
     align-self: center;
     height: 520px;
-    /* height: 85dvh; */
     overflow-y: auto;
     overflow-x: auto;
   }

@@ -10,7 +10,6 @@ input[type="search"] {
   font-size: 16px;
   width: 200px;
   color: black;
-  width: 50%;
 }
 
 input[type="search"]::placeholder {

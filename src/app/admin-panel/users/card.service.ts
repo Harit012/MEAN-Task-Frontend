@@ -19,7 +19,7 @@ export class CardService {
 
   postCard(card: Card) {
     return this.http.post<{ card: Card; status: string}>(
-      'http://localhost:3000/admin/users/card',
+      `${environment.BASE_URL}/admin/users/card`,
       card,
       { withCredentials: true }
     );
@@ -31,7 +31,7 @@ export class CardService {
       customerId: customerId,
     };
     return this.http.delete<{ message: string; status: string}>(
-      `http://localhost:3000/admin/users/card`,
+      `${environment.BASE_URL}/admin/users/card`,
       {
         params: params,
         withCredentials: true,
@@ -41,7 +41,7 @@ export class CardService {
 
   setCardAsDefault(cardId: string, customerId: string) {
     return this.http.post<{ card:Card; status: string}>(
-      'http://localhost:3000/admin/users/card/default',
+      `${environment.BASE_URL}/admin/users/card/default`,
       {
         cardId: cardId,
         customerId: customerId,
@@ -49,6 +49,4 @@ export class CardService {
       { withCredentials: true }
     );
   }
-
-
 }

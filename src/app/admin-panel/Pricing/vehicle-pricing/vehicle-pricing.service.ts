@@ -2,6 +2,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { VehiclePricing } from './vehicle-pricing.interface';
 import { Params } from '@angular/router';
+import { environment } from '../../../../environments/environment';
 
 @Injectable({
   providedIn: 'root',
@@ -13,7 +14,7 @@ export class VehiclePricingService {
     return this.http.patch<{
       vehiclePricing: VehiclePricing;
       status: string;
-    }>(`http://localhost:3000/admin/pricing/vehicle-pricing`, vehiclePricing, {
+    }>(`${environment.BASE_URL}/admin/pricing/vehicle-pricing`, vehiclePricing, {
       withCredentials: true,
     });
   }
@@ -22,7 +23,7 @@ export class VehiclePricingService {
     return this.http.post<{
       vehiclePricing: VehiclePricing;
       status: string;
-    }>('http://localhost:3000/admin/pricing/vehicle-pricing', vehiclePricing, {
+    }>(`${environment.BASE_URL}/admin/pricing/vehicle-pricing`, vehiclePricing, {
       withCredentials: true,
     });
   }
@@ -31,7 +32,7 @@ export class VehiclePricingService {
     return this.http.get<{
       vehiclePricing: VehiclePricing[];
       status: string;
-    }>('http://localhost:3000/admin/pricing/vehicle-pricing', {
+    }>(`${environment.BASE_URL}/admin/pricing/vehicle-pricing`, {
       withCredentials: true,
     });
   }
@@ -44,7 +45,7 @@ export class VehiclePricingService {
     // console.log(params);
 
     return this.http.get<{ availableTypes: string[]; status: string }>(
-      'http://localhost:3000/admin/pricing/vehicle-pricing/getAvailableTypes',
+      `${environment.BASE_URL}/admin/pricing/vehicle-pricing/getAvailableTypes`,
       { params: params, withCredentials: true }
     );
   }

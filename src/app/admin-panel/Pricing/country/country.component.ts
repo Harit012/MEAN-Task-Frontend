@@ -64,28 +64,31 @@ export class CountryComponent implements OnInit {
   ngOnInit(): void {
     this.getCountries();
   }
+
+  onInputCountryName(event: Event) {
+    this.countryname = (<HTMLInputElement>event.target).value;
+  }
   onSearchCountry() {
     let input = this.countryname;
     let searchRegEx = new RegExp(`^${input}$`, 'gi');
     this.countryService.getCountriesFromApi().subscribe({
-      next: (data) => {
-        for (let i = 0; i < data.length; i++) {
-          if (data[i]['name']['common'].match(searchRegEx)) {
-            let currencyRequirment = data[i]['currencies'];
+      next: (res) => {
+        for(let data of res){
+          if (data['name']['common'].match(searchRegEx)) {
+            let currencyRequirment = data['currencies'];
             let countryCurrency = Object.keys(currencyRequirment).toString();
             let obj: Country = {
-              countryName: data[i]['name']['common'],
+              countryName: data['name']['common'],
               countryCallCode:
-                data[i]['idd']['root'] + data[i]['idd']['suffixes'][0],
+                data['idd']['root'] + data['idd']['suffixes'][0],
               currency:
-                data[i]['currencies'][countryCurrency]['name'] +
-                ` (${data[i]['currencies'][countryCurrency]['symbol']})`,
-              timezones: data[i]['timezones'],
-              FlagUrl: data[i]['flags']['png'],
-              latlng: { lat: data[i]['latlng'][0], lng: data[i]['latlng'][1] },
-              countryShortName: data[i]['cca2'],
+                data['currencies'][countryCurrency]['name'] +
+                ` (${data['currencies'][countryCurrency]['symbol']})`,
+              timezones: data['timezones'],
+              FlagUrl: data['flags']['png'],
+              latlng: { lat: data['latlng'][0], lng: data['latlng'][1] },
+              countryShortName: data['cca2'],
             };
-            // console.log(obj);
             this.countrycallcode = obj.countryCallCode;
             this.countrycurrency = obj.currency;
             this.toBeAddedCountry = obj;
@@ -129,14 +132,15 @@ export class CountryComponent implements OnInit {
     const input = event.target.value;
     let serchregEx = new RegExp(input, 'gi');
     this.filteredCountry = this.AddedCountry.filter((country) =>
-      country.countryName.match(serchregEx)
+      // country.countryName.match(serchregEx)
+    RegExp(serchregEx).exec(country.countryName)
+
     );
   }
 
   getCountries() {
     this.countryService.getCountries().subscribe({
       next:(res) => {
-        console.log(res)
         if (res.countries) {
           this.AddedCountry = res.countries;
           this.filteredCountry = res.countries;

@@ -58,8 +58,8 @@ export class SettingsComponent implements OnInit {
     this.settingsService.getSettings().subscribe({
       next: (data) => {
         if (data.settings) {
-          var timeOut = document.getElementById('timeOut') as HTMLSelectElement;
-          var stops = document.getElementById('stops') as HTMLSelectElement;
+          const timeOut = document.getElementById('timeOut') as HTMLSelectElement;
+          const stops = document.getElementById('stops') as HTMLSelectElement;
           timeOut.selectedIndex = this.timeOutOptions.indexOf(
             data.settings.timeOut
           );
@@ -73,6 +73,10 @@ export class SettingsComponent implements OnInit {
       error: (err) => {
         this.isLoader = false;
         this.commonErrorHandler(err);
+        // console.log("Error Part Started")
+        // ErrorHandling.commonErrorHandler(err);
+        // AdminPanelComponent.commonErrorHandler(err);
+        // console.log("Error Part Ended")
       },
     });
   }
@@ -90,10 +94,10 @@ export class SettingsComponent implements OnInit {
       .subscribe({
         next: (data) => {
           if (data.message) {
-            var timeOut = document.getElementById(
+            let timeOut = document.getElementById(
               'timeOut'
             ) as HTMLSelectElement;
-            var stops = document.getElementById('stops') as HTMLSelectElement;
+            let stops = document.getElementById('stops') as HTMLSelectElement;
             timeOut.selectedIndex = this.timeOutOptions.indexOf(
               this.selectedTimeOut
             );
@@ -109,6 +113,9 @@ export class SettingsComponent implements OnInit {
         error: (err) => {
           this.isLoader = false;
           this.commonErrorHandler(err);
+          // ErrorHandling.commonErrorHandler(err);
+          // AdminPanelComponent.commonErrorHandler(err);
+          
         },
       });
   }

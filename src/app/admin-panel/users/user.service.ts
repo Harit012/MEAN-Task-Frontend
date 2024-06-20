@@ -2,6 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Params } from '@angular/router';
 import { UserGet } from './userGet.inerface';
+import { environment } from '../../../environments/environment';
 
 @Injectable({
   providedIn: 'root',
@@ -20,22 +21,22 @@ export class UserService {
       sort : sort
     };
     return this.http.get<{ users: UserGet[]; status: string }>(
-      'http://localhost:3000/admin/users',
+      `${environment.BASE_URL}/admin/users`,
       { params: params, withCredentials: true }
     );
   }
 
   postUser(user: FormData) {
     return this.http.post<{ user: UserGet; status: string}>(
-      'http://localhost:3000/admin/users',
+      `${environment.BASE_URL}/admin/users`,
       user,
       { withCredentials: true }
     );
   }
 
   updateUser(user: FormData) {
-    return this.http.put<{ message: String; status: string}>(
-      'http://localhost:3000/admin/users',
+    return this.http.put<{ message: string; status: string}>(
+      `${environment.BASE_URL}/admin/users`,
       user,
       { withCredentials: true }
     );
@@ -47,7 +48,7 @@ export class UserService {
       customerId: customerId
     };
     return this.http.delete<{ message: string; status: string}>(
-      'http://localhost:3000/admin/users',
+      `${environment.BASE_URL}/admin/users`,
       { params: params, withCredentials: true }
     );
   }
