@@ -9,7 +9,10 @@
     height: 220px;
     width:30dvw;
     overflow-y: auto;
-    overflow-x: auto;
+    /* overflow-x: auto; */
+  }
+  .card{
+    border-radius: 20px;
   }
 
   hr {

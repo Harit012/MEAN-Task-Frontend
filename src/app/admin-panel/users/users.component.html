@@ -82,7 +82,7 @@
             id="action-selector"
             class="form-select"
             (change)="onActionSelect($event)"
-            style="background-color: rgb(190, 190, 190);"
+            style="background-color: rgba(115, 118, 121, 0.297);"
           >
             <option value="" [defaultSelected]="true" [disabled]="true">
               Select Action
@@ -218,7 +218,7 @@
                 </option>
                 <option
                   *ngFor="let country of countryList"
-                  value=""
+                  [value]="country"
                   (click)="onCountryChange(country)"
                 >
                   {{ country.countryName }}
@@ -357,12 +357,12 @@
         <div class="modal-body">
           <div class="container scrollable-section2">
             @if(cardList.length >0){
-            <div class="row mb-3" *ngFor="let card of cardList; index as i">
+            <div class="row mb-3" style="width: 100%;" *ngFor="let card of cardList; index as i" >
               <div class="col-12">
-                <div class="row" style="background-color: rgb(170, 171, 172)">
+                <div class="row card" [ngStyle]="{ 'background-color': i === 0 ? 'rgba(77, 86, 62, 0.49)' : 'rgba(120, 210, 232, 0.49)'}">
                   <h6 class="m-1 p-2 fs-3">XXXX XXXX XXXX {{ card.last4 }}</h6>
                   <h5 class="m-1 p-2">{{ card.brand }}</h5>
-                  <div class="d-flex justify-content-between m-1 p-2">
+                  <div class="d-flex justify-content-between m-1 p-2 mb-3">
                     <p>{{ card.exp_month }}/{{ card.exp_year }}</p>
                     @if(i === 0){
                       <button
@@ -380,7 +380,7 @@
                       </button>
                     }
                     <button
-                      class="btn btn-large btn-danger"
+                      class="btn btn-large btn-danger me-2"
                       (click)="deleteCard(i)"
                     >
                       Delete

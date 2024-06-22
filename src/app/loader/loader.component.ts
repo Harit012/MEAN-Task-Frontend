@@ -13,6 +13,7 @@ import { NgxSpinnerModule, NgxSpinnerService } from 'ngx-spinner';
       color="rgb(216, 221, 226)"
       type="square-spin"
       [fullScreen]="true"
+      
       >Loading . . .</ngx-spinner
     >
   `,

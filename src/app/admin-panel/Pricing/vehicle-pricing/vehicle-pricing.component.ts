@@ -121,7 +121,7 @@ export class VehiclePricingComponent implements OnInit, AfterViewChecked {
       next: (data) => {
         if (data.vehiclePricing) {
           this.pricingList = data.vehiclePricing;
-        } 
+        }
       },
       error: (err) => {
         this.commonErrorHandler(err);
@@ -148,7 +148,7 @@ export class VehiclePricingComponent implements OnInit, AfterViewChecked {
       next: (data) => {
         if (data.zones) {
           this.cityList = data.zones;
-        } 
+        }
       },
       error: (err) => {
         this.commonErrorHandler(err);
@@ -164,7 +164,7 @@ export class VehiclePricingComponent implements OnInit, AfterViewChecked {
       next: (data) => {
         if (data.availableTypes) {
           this.vehicleTypesList = data.availableTypes;
-        } 
+        }
       },
       error: (err) => {
         this.commonErrorHandler(err);
@@ -209,7 +209,7 @@ export class VehiclePricingComponent implements OnInit, AfterViewChecked {
               'Success',
               environment.TROASTR_STYLE
             );
-          } 
+          }
         },
         error: (err) => {
           this.commonErrorHandler(err);
@@ -236,8 +236,8 @@ export class VehiclePricingComponent implements OnInit, AfterViewChecked {
     this.vehiclePricingForm.reset();
   }
   onUpdate() {
-    if(this.vehiclePricingForm.dirty){
-      if (this.vehiclePricingForm.valid) {
+    if (this.vehiclePricingForm.dirty) {
+    if (this.vehiclePricingForm.valid) {
         let data: VehiclePricing = this.vehiclePricingForm.value;
         data._id = this.editabledocument._id;
         this.vehiclePricingService.patchVehiclePricing(data).subscribe({
@@ -250,7 +250,7 @@ export class VehiclePricingComponent implements OnInit, AfterViewChecked {
                 'Success',
                 environment.TROASTR_STYLE
               );
-            } 
+            }
           },
           error: (err) => {
             this.commonErrorHandler(err);
@@ -263,10 +263,9 @@ export class VehiclePricingComponent implements OnInit, AfterViewChecked {
           environment.TROASTR_STYLE
         );
       }
-    }
-    else{
+    } else {
       this.leaveEditMode();
-      this.toastr.info("No changes made","Info",environment.TROASTR_STYLE);
+      this.toastr.info('No changes made', 'Info', environment.TROASTR_STYLE);
     }
   }
   // Method to check if a field is touched or dirty and invalid
