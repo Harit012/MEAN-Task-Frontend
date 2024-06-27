@@ -43,6 +43,8 @@ export class VehiclePricingComponent implements OnInit, AfterViewChecked {
   editabledocument!: VehiclePricing;
   numbers = [1, 2, 3, 4, 5];
   toastr = inject(ToastrService);
+  patternValidationAlert: string =
+    '*Driver Profit Must be a non decimal number';
 
   constructor(
     private countryService: CountriesService,
@@ -87,7 +89,7 @@ export class VehiclePricingComponent implements OnInit, AfterViewChecked {
     if (!err.error.status) {
       this.toastr.error(
         `Error while sending request to server`,
-        'Error',
+        `Error :- ${err.status}`,
         environment.TROASTR_STYLE
       );
     } else if (err.error.status == 'Failure') {
@@ -96,12 +98,12 @@ export class VehiclePricingComponent implements OnInit, AfterViewChecked {
       } else {
         this.toastr.error(
           `${err.error.message}`,
-          'Error',
+          `Error :- ${err.status}`,
           environment.TROASTR_STYLE
         );
       }
     } else {
-      this.toastr.error(`Unknown Error`, 'Error', environment.TROASTR_STYLE);
+      this.toastr.error(`Unknown Error`, `Error :- ${err.status}`, environment.TROASTR_STYLE);
     }
   }
 
@@ -141,6 +143,14 @@ export class VehiclePricingComponent implements OnInit, AfterViewChecked {
       temp_vehicleType.value = this.editabledocument.vehicleType;
     }
   }
+  perOnCountryChange(event: any) {
+    let index = this.countryList.findIndex(
+      (X) => X._id == event.target.value
+    );
+    if (index != -1) {
+      this.onCountryChange(this.countryList[index]);
+    }
+  }
   onCountryChange(country: Country) {
     this.selectedCountry = country;
     this.vehiclePricingForm.reset();
@@ -155,7 +165,12 @@ export class VehiclePricingComponent implements OnInit, AfterViewChecked {
       },
     });
   }
-
+  preOnCityChange(event: any) {
+    let index = this.cityList.findIndex((X) => X._id == event.target.value);
+    if (index != -1) {
+      this.onCityChange(this.cityList[index]);
+    }
+  }
   onCityChange(city: RecivingZone) {
     this.vehicleTypesList = [];
     this.vehiclePricingForm.reset();
@@ -236,8 +251,8 @@ export class VehiclePricingComponent implements OnInit, AfterViewChecked {
     this.vehiclePricingForm.reset();
   }
   onUpdate() {
-    if (this.vehiclePricingForm.dirty) {
     if (this.vehiclePricingForm.valid) {
+      if (this.vehiclePricingForm.dirty) {
         let data: VehiclePricing = this.vehiclePricingForm.value;
         data._id = this.editabledocument._id;
         this.vehiclePricingService.patchVehiclePricing(data).subscribe({
@@ -257,22 +272,15 @@ export class VehiclePricingComponent implements OnInit, AfterViewChecked {
           },
         });
       } else {
-        this.toastr.error(
-          'Enter Valid Details',
-          'Error',
-          environment.TROASTR_STYLE
-        );
+        this.leaveEditMode();
+        this.toastr.info('No changes made', 'Info', environment.TROASTR_STYLE);
       }
     } else {
-      this.leaveEditMode();
-      this.toastr.info('No changes made', 'Info', environment.TROASTR_STYLE);
+      this.toastr.error(
+        'Enter Valid Details',
+        'Error',
+        environment.TROASTR_STYLE
+      );
     }
-  }
-  // Method to check if a field is touched or dirty and invalid
-  isFieldInvalid(field: string): boolean {
-    const control = this.vehiclePricingForm.get(field);
-    return control
-      ? control.invalid && (control.dirty || control.touched)
-      : false;
   }
 }

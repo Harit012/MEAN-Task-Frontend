@@ -67,29 +67,25 @@ export class ListComponent implements OnInit {
   }
 
   commonErrorHandler(err: any) {
-      if (!err.error.status) {
-        this.toastr.error(
-          `Error while sending request to server`,
-          'Error',
-          environment.TROASTR_STYLE
-        );
-      } else if (err.error.status == 'Failure') {
-        if (err.status == 401) {
-          this.authService.userLogOut();
-        } else {
-          this.toastr.error(
-            `${err.error.message}`,
-            'Error',
-            environment.TROASTR_STYLE
-          );
-        }
+    if (!err.error.status) {
+      this.toastr.error(
+        `Error while sending request to server`,
+        `Error :- ${err.status}`,
+        environment.TROASTR_STYLE
+      );
+    } else if (err.error.status == 'Failure') {
+      if (err.status == 401) {
+        this.authService.userLogOut();
       } else {
         this.toastr.error(
-          `Unknown Error`,
-          'Error',
+          `${err.error.message}`,
+          `Error :- ${err.status}`,
           environment.TROASTR_STYLE
         );
       }
+    } else {
+      this.toastr.error(`Unknown Error`, `Error :- ${err.status}`, environment.TROASTR_STYLE);
+    }
   }
   ngOnInit(): void {
     this.getDrivers();
@@ -98,7 +94,7 @@ export class ListComponent implements OnInit {
       next: (res) => {
         if (res.countries) {
           this.countryList = res.countries;
-        } 
+        }
       },
       error: (err) => {
         this.commonErrorHandler(err);
@@ -108,13 +104,13 @@ export class ListComponent implements OnInit {
     this.vehicletypeService.getAllVehicleTypes().subscribe({
       next: (data) => {
         if (data.allVehicleTypes) {
-          this.serviceTypes = ['none',...data.allVehicleTypes];
+          this.serviceTypes = ['none', ...data.allVehicleTypes];
         } else if (data.varified === false) {
           this.authService.userLogOut();
         }
       },
       error: (err) => {
-        this.toastr.error(`Error from Backend:- ${err.message}`, 'Error',environment.TROASTR_STYLE);
+        this.commonErrorHandler(err);
       },
     });
   }
@@ -131,7 +127,7 @@ export class ListComponent implements OnInit {
         next: (res) => {
           if (res.drivers) {
             this.driversList = res.drivers;
-          } 
+          }
         },
         error: (err) => {
           this.commonErrorHandler(err);
@@ -139,13 +135,20 @@ export class ListComponent implements OnInit {
       });
   }
   // when user changes country
+
+  preOnCountryChange(event:any){
+    let index = this.countryList.findIndex((X)=>X.countryName == event.target.value)
+    if(index != -1){
+      this.onCountryChange(this.countryList[index])
+    }
+  }
+
   onCountryChange(country: Country) {
     this.selectedCountry = country;
     this.countryCallCode = country.countryCallCode;
     this.cityService.getZones(country._id!).subscribe({
       next: (data) => {
         if (data.zones) {
-          console.log(data.zones);
           this.cityList = data.zones;
         }
       },
@@ -154,13 +157,22 @@ export class ListComponent implements OnInit {
       },
     });
   }
+
+  preonCityChange(event:any){
+    let index = this.cityList.findIndex((X)=>X.zoneName == event.target.value)
+    if(index != -1){
+      this.onCityChange(this.cityList[index])
+    }
+  }
   // when user changes city
   onCityChange(city: RecivingZone) {
     this.selectedCity = city;
   }
   // ehwn user changes file
   onFileChange(event: any) {
-    if (event.target.files && event.target.files.length) {
+    let files =event.target.files;
+    let length =event.target.files.length;
+    if (files && length) {
       if (event.target.files[0].size < 4000000) {
         this.formdata.append('driverProfile', event.target.files[0]);
       } else {
@@ -200,7 +212,7 @@ export class ListComponent implements OnInit {
         }
       },
       error: (err) => {
-        this.commonErrorHandler(err)
+        this.commonErrorHandler(err);
       },
     });
   }
@@ -216,9 +228,9 @@ export class ListComponent implements OnInit {
     );
     this.formdata.append('phone', this.driverForm.get('phone')?.value);
     let temp_city = this.driverForm.get('city')?.value;
-    for (let i = 0; i < this.cityList.length; i++) {
-      if (this.cityList[i]['zoneName'] === temp_city) {
-        this.formdata.append('city', this.cityList[i]['_id']!);
+    for (let city of this.cityList) {
+      if (city['zoneName'] === temp_city) {
+        this.formdata.append('city', city._id!);
         break;
       } else {
         continue;
@@ -238,10 +250,10 @@ export class ListComponent implements OnInit {
               'Success',
               environment.TROASTR_STYLE
             );
-          } 
+          }
         },
         error: (err) => {
-          this.commonErrorHandler(err)
+          this.commonErrorHandler(err);
         },
       });
     } else {
@@ -262,22 +274,26 @@ export class ListComponent implements OnInit {
         next: (data) => {
           if (data.message) {
             this.driversList[i]['approved'] = temp_status;
-          } 
+          }
         },
         error: (err) => {
-          this.commonErrorHandler(err)
+          this.commonErrorHandler(err);
         },
       });
   }
-  // to check form fields are valid or not
-  isFieldInvalid(field: string): boolean {
-    const control = this.driverForm.get(field);
-    return control
-      ? control.invalid && (control.dirty || control.touched)
-      : false;
-  }
   // when user selects action like edit / delete
-  onActionSelect(event: any) {
+  onActionSelect(event: any, driver: Driver) {
+    switch (event.target.value) {
+      case 'edit':
+        this.onEdit(driver);
+        break;
+      case 'delete':
+        this.onDelete(driver);
+        break;
+      case 'serviceType':
+        this.serviceType(driver);
+        break;
+    }
     event.target.selectedIndex = 0;
   }
   // when user clicks on edit
@@ -293,7 +309,7 @@ export class ListComponent implements OnInit {
       'countrycode'
     ) as HTMLInputElement;
     let temp_country = document.getElementById('country') as HTMLSelectElement;
-    let temp_city = document.getElementById('City') as HTMLSelectElement;
+    let temp_city = document.getElementById('city') as HTMLSelectElement;
     let selectedDriverProfile = document.getElementById(
       'selectedDriverProfile'
     ) as HTMLElement;
@@ -320,15 +336,29 @@ export class ListComponent implements OnInit {
             }
           },
           error: (err) => {
-            this.commonErrorHandler(err)
+            this.commonErrorHandler(err);
           },
         });
         break;
       } else {
         continue;
       }
-    }
-
+    } 
+    // for (let city of this.cityList){
+    //   if(city.zoneName == driver.city){
+    //     console.log("-----------------------------------------------------------")
+    //     console.log(temp_city.options)
+    //     console.log("-----------------------------------------------------------")
+    //     let ind = this.cityList.indexOf(city)+1;
+    //     temp_city.selectedIndex =ind;
+    //     break;
+    //   }else{
+    //     console.log(city.zoneName)
+    //     console.log(driver.city)
+    //     console.log("-------------------------------")
+    //     // console.log(city.zoneName);
+    //   }
+    // }
     this.formdata.append('driverProfile', driver.driverProfile);
     this.formdata.append('id', driver._id!);
   }
@@ -337,7 +367,7 @@ export class ListComponent implements OnInit {
     if (confirm('Are you sure you want to delete this driver?')) {
       this.driverService.deleteDriver(driver._id!).subscribe({
         next: (data) => {
-          console.log(data)
+          console.log(data);
           if (data.message) {
             this.toastr.success(
               'Driver Deleted Successfully',
@@ -346,10 +376,10 @@ export class ListComponent implements OnInit {
             );
             let index = this.driversList.indexOf(driver);
             this.driversList.splice(index, 1);
-          } 
+          }
         },
         error: (err) => {
-          this.commonErrorHandler(err)
+          this.commonErrorHandler(err);
         },
       });
     }
@@ -412,7 +442,7 @@ export class ListComponent implements OnInit {
           }
         },
         error: (err) => {
-          this.commonErrorHandler(err)
+          this.commonErrorHandler(err);
         },
       });
   }

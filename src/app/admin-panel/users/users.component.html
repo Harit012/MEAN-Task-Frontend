@@ -17,9 +17,14 @@
         (input)="onSearchInputChange($event)"
       />
     </div>
-    <div class="col-2 align-self-center" >
-      <select name="sortBy" id="sortBy" class="form-select" (change)="onSortByChange($event)">
-        <option value="none" [defaultSelected]="true" >no sort(default)</option>
+    <div class="col-2 align-self-center">
+      <select
+        name="sortBy"
+        id="sortBy"
+        class="form-select"
+        (change)="onSortByChange($event)"
+      >
+        <option value="none" [defaultSelected]="true">no sort(default)</option>
         <option value="name">UserName</option>
         <option value="email">Email</option>
         <option value="phone">Phone</option>
@@ -48,66 +53,55 @@
   </div>
   <hr />
   @if(usersList.length >0){
-    <div class="ms-1 p-2 scrollable-section mt-3">
-      <div
-        class="row mb-2 fs-5"
-        *ngFor="let user of usersList; index as i"
-      >
-        <div class="col-1 align-self-center">
-          <p>{{ currentPage * 10 + (i + 1) }}</p>
-        </div>
-        <div class="col-2">
-          <img
-            src="http://localhost:3000/{{ user.userProfile }}"
-            alt="{{ user.userProfile }}"
-            height="100px"
-            width="150px"
-          />
-        </div>
-        <div class="col-1 align-self-center">
-          <p>{{ user.userName }}</p>
-        </div>
-        <div class="col-3 align-self-center">
-          <p>{{ user.email }}</p>
-        </div>
-        <div class="col-1 align-self-center">
-          <p>{{ user.countryCode }}</p>
-        </div>
-        <div class="col-2 align-self-center">
-          <p>{{ user.phone }}</p>
-        </div>
-        <div class="col-2 align-self-center">
-          <select
-            name="action-selector"
-            id="action-selector"
-            class="form-select"
-            (change)="onActionSelect($event)"
-            style="background-color: rgba(115, 118, 121, 0.297);"
-          >
-            <option value="" [defaultSelected]="true" [disabled]="true">
-              Select Action
-            </option>
-            <option
-              value="CardDetails"
-              (click)="cardDetails(user)"
-              style="color: rgb(0, 146, 12)"
-            >
-              Show cards
-            </option>
-            <option value="Edit" (click)="onEdit(user)" style="color: blue">
-              Edit User
-            </option>
-            <option value="Delete" (click)="onDelete(user)" style="color: red">
-              Delete User
-            </option>
-          </select>
-        </div>
+  <div class="ms-1 p-2 scrollable-section mt-3">
+    <div class="row mb-2 fs-5" *ngFor="let user of usersList; index as i">
+      <div class="col-1 align-self-center">
+        <p>{{ currentPage * 10 + (i + 1) }}</p>
+      </div>
+      <div class="col-2">
+        <img
+          src="http://localhost:3000/{{ user.userProfile }}"
+          alt="{{ user.userProfile }}"
+          height="100px"
+          width="150px"
+        />
+      </div>
+      <div class="col-1 align-self-center">
+        <p>{{ user.userName }}</p>
+      </div>
+      <div class="col-3 align-self-center">
+        <p>{{ user.email }}</p>
+      </div>
+      <div class="col-1 align-self-center">
+        <p>{{ user.countryCode }}</p>
+      </div>
+      <div class="col-2 align-self-center">
+        <p>{{ user.phone }}</p>
+      </div>
+      <div class="col-2 align-self-center">
+        <select
+          name="action-selector"
+          id="action-selector"
+          class="form-select"
+          (change)="onActionSelect($event, user)"
+          style="background-color: rgba(115, 118, 121, 0.297)"
+        >
+          <option value="" [defaultSelected]="true" [disabled]="true">
+            Select Action
+          </option>
+          <option value="CardDetails" style="color: rgb(0, 146, 12)">
+            Show cards
+          </option>
+          <option value="Edit" style="color: blue">Edit User</option>
+          <option value="Delete" style="color: red">Delete User</option>
+        </select>
       </div>
     </div>
+  </div>
   }@else {
-    <div class="d-flex justify-content-center align-self-center">
-      <h3>No users Added</h3>
-    </div>
+  <div class="d-flex justify-content-center align-self-center">
+    <h3>No users Added</h3>
+  </div>
   }
   <div class="row paginaton">
     <div class="col-12 d-flex justify-content-center">
@@ -179,9 +173,12 @@
                 formControlName="userName"
               />
               <small
-                *ngIf="isFieldInvalid('userName')"
-                class="text-danger justify-content-center"
-                >This value is not correct</small
+                *ngIf="userForm.get('userName')?.errors?.['required'] && (userForm.get('userName')?.dirty || userForm.get('userName')?.touched)"
+                >*Username is required</small
+              >
+              <small
+                *ngIf="userForm.get('userName')?.errors?.['maxlength'] && (userForm.get('userName')?.dirty || userForm.get('userName')?.touched)"
+                >*Username can't contain more than 20 characters</small
               >
             </div>
           </div>
@@ -197,9 +194,12 @@
                 formControlName="email"
               />
               <small
-                *ngIf="isFieldInvalid('email')"
-                class="text-danger justify-content-center"
-                >This value is not correct</small
+                *ngIf="userForm.get('email')?.errors?.['required'] && (userForm.get('email')?.dirty || userForm.get('email')?.touched)"
+                >*Email is required</small
+              >
+              <small
+                *ngIf="userForm.get('email')?.errors?.['email'] && (userForm.get('email')?.dirty || userForm.get('email')?.touched)"
+                >*Email Formate is not correct</small
               >
             </div>
           </div>
@@ -212,70 +212,78 @@
                 id="country"
                 class="form-select"
                 formControlName="country"
+                (change)="preOnCountryChange($event)"
               >
                 <option [defaultSelected]="true" disabled>
                   Select Country
                 </option>
                 <option
                   *ngFor="let country of countryList"
-                  [value]="country"
-                  (click)="onCountryChange(country)"
+                  [value]="country._id"
                 >
                   {{ country.countryName }}
                 </option>
               </select>
               <small
-                *ngIf="isFieldInvalid('country')"
-                class="text-danger justify-content-center"
-                >This value is not correct</small
+                *ngIf="userForm.get('country')?.errors?.['required'] && (userForm.get('country')?.dirty || userForm.get('country')?.touched)"
+                >*Country is required</small
               >
             </div>
           </div>
           <!-- phone -->
           <div class="row mt-3 d-flex">
             <label class="col-3" for="email">Phone :-</label>
-
-            <div class="col-9 d-flex">
-              <input
-                class="col-2 p-1"
-                type="text"
-                id="countrycode"
-                [disabled]="true"
-                value=""
-              />
-              <input
-                class="col-8 ms-1"
-                type="text"
-                maxlength="10"
-                id="phone"
-                class="form-control"
-                [placeholder]="'Enter Phone'"
-                formControlName="phone"
-              />
+            <div class="col-9">
+              <div class="d-flex">
+                <input
+                  class="col-2 p-1"
+                  type="text"
+                  id="countrycode"
+                  [disabled]="true"
+                  value=""
+                />
+                <input
+                  class="col-8 ms-1"
+                  type="text"
+                  maxlength="10"
+                  id="phone"
+                  class="form-control"
+                  [placeholder]="'Enter Phone'"
+                  formControlName="phone"
+                />
+              </div>
+              <small
+                *ngIf="userForm.get('phone')?.errors?.['required'] && (userForm.get('phone')?.dirty || userForm.get('phone')?.touched)"
+                >*This field is required</small
+              >
+              <small
+                *ngIf="userForm.get('phone')?.errors?.['pattern'] && (userForm.get('phone')?.dirty || userForm.get('phone')?.touched)"
+                >*Phone must be DIGITS and must be 10</small
+              >
             </div>
-            <small
-              *ngIf="isFieldInvalid('phone')"
-              class="text-danger justify-content-center"
-              >This value is not correct</small
-            >
           </div>
           <!-- profile -->
           <div class="row mt-3 d-flex">
             <label class="col-3" for="userProfile">Profile :-</label>
-            <input
-              class="col-9"
-              type="file"
-              id="userProfile"
-              accept="image/*"
-              formControlName="userProfile"
-              (change)="onFileChange($event)"
-            />
-            <small
-              *ngIf="isFieldInvalid('userProfile')"
-              class="text-danger justify-content-center"
-              >This value is not correct</small
-            >
-            <small id="selectedUserProfile" [hidden]="!editMode"></small>
+            <div class="col-9">
+              <input
+                class="form-control"
+                type="file"
+                id="userProfile"
+                accept="image/*"
+                formControlName="userProfile"
+                (change)="onFileChange($event)"
+              />
+              <small
+                *ngIf="userForm.get('userProfile')?.errors?.['required'] && (userForm.get('userProfile')?.dirty || userForm.get('userProfile')?.touched)"
+                >*This field is required</small
+              >
+              <p
+                class="oldProfile"
+                id="selectedUserProfile"
+                [hidden]="!editMode"
+              ></p>
+            </div>
           </div>
         </form>
       </div>
@@ -357,27 +365,34 @@
         <div class="modal-body">
           <div class="container scrollable-section2">
             @if(cardList.length >0){
-            <div class="row mb-3" style="width: 100%;" *ngFor="let card of cardList; index as i" >
+            <div
+              class="row mb-3"
+              style="width: 100%"
+              *ngFor="let card of cardList; index as i"
+            >
               <div class="col-12">
-                <div class="row card" [ngStyle]="{ 'background-color': i === 0 ? 'rgba(77, 86, 62, 0.49)' : 'rgba(120, 210, 232, 0.49)'}">
+                <div
+                  class="row card"
+                  [ngStyle]="{
+                    'background-color':
+                      i === 0
+                        ? 'rgba(77, 86, 62, 0.49)'
+                        : 'rgba(120, 210, 232, 0.49)'
+                  }"
+                >
                   <h6 class="m-1 p-2 fs-3">XXXX XXXX XXXX {{ card.last4 }}</h6>
                   <h5 class="m-1 p-2">{{ card.brand }}</h5>
                   <div class="d-flex justify-content-between m-1 p-2 mb-3">
                     <p>{{ card.exp_month }}/{{ card.exp_year }}</p>
                     @if(i === 0){
-                      <button
-                      class="btn btn-large btn-secondary"
-                    >
-                      Default
-                    </button>
+                    <button class="btn btn-large btn-secondary">Default</button>
                     }@else{
-                      <button
-                        class="btn btn-large btn-warning"
-                        (click)="setCardAsDefault(i)"
-  
-                      >
-                        Set as Default
-                      </button>
+                    <button
+                      class="btn btn-large btn-warning"
+                      (click)="setCardAsDefault(i)"
+                    >
+                      Set as Default
+                    </button>
                     }
                     <button
                       class="btn btn-large btn-danger me-2"
@@ -396,34 +411,46 @@
             }
           </div>
           @if(wantToAddCard){
-            <div class="container mt-3">
-              <div class="row">
-                <div class="col-12">
-                  <ngx-stripe-card
+          <div class="container mt-3">
+            <div class="row">
+              <div class="col-12">
+                <ngx-stripe-card
                   [options]="cardOptions"
                   [elementsOptions]="elementsOptions"
                   clas="mt-3"
                 ></ngx-stripe-card>
-                <button type="submit" class="btn button1 mt-3" (click)="createToken()">
+                <button
+                  type="submit"
+                  class="btn button1 mt-3"
+                  (click)="createToken()"
+                >
                   Add Card
-                </button> 
-                </div>
-              </div>     
+                </button>
+              </div>
             </div>
-          
-        }
+          </div>
+
+          }
         </div>
         <div class="modal-footer">
           @if(wantToAddCard){
-            <button type="button" class="btn btn-primary" (click)="OnChangeWantToAddCard()">Close Form</button>
-          }@else {
-            <button type="button" class="btn btn-primary" (click)="OnChangeWantToAddCard()">Add Card</button>
-          }
           <button
             type="button"
-            class="btn btn-danger "
-            data-bs-dismiss="modal"
+            class="btn btn-primary"
+            (click)="OnChangeWantToAddCard()"
           >
+            Close Form
+          </button>
+          }@else {
+          <button
+            type="button"
+            class="btn btn-primary"
+            (click)="OnChangeWantToAddCard()"
+          >
+            Add Card
+          </button>
+          }
+          <button type="button" class="btn btn-danger" data-bs-dismiss="modal">
             Close
           </button>
         </div>

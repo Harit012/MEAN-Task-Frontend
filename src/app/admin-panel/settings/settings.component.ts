@@ -5,6 +5,7 @@ import { AuthService } from '../../auth/auth.service';
 import { ToastrService } from 'ngx-toastr';
 import { environment } from '../../../environments/environment';
 import { LoaderComponent } from '../../loader/loader.component';
+import { AdminPanelComponent } from '../admin-panel.component';
 
 
 @Component({
@@ -25,13 +26,15 @@ export class SettingsComponent implements OnInit {
   constructor(
     private settingsService: SettingsService,
     private authService: AuthService
-  ) {}
+  ) {
+    
+  }
 
-  commonErrorHandler(err:any) {
+  commonErrorHandler(err: any) {
     if (!err.error.status) {
       this.toastr.error(
         `Error while sending request to server`,
-        'Error',
+        `Error :- ${err.status}`,
         environment.TROASTR_STYLE
       );
     } else if (err.error.status == 'Failure') {
@@ -40,16 +43,12 @@ export class SettingsComponent implements OnInit {
       } else {
         this.toastr.error(
           `${err.error.message}`,
-          'Error',
+          `Error :- ${err.status}`,
           environment.TROASTR_STYLE
         );
       }
     } else {
-      this.toastr.error(
-        `Unknown Error`,
-        'Error',
-        environment.TROASTR_STYLE
-      );
+      this.toastr.error(`Unknown Error`, `Error :- ${err.status}`, environment.TROASTR_STYLE);
     }
   }
   
@@ -73,10 +72,7 @@ export class SettingsComponent implements OnInit {
       error: (err) => {
         this.isLoader = false;
         this.commonErrorHandler(err);
-        // console.log("Error Part Started")
-        // ErrorHandling.commonErrorHandler(err);
-        // AdminPanelComponent.commonErrorHandler(err);
-        // console.log("Error Part Ended")
+        
       },
     });
   }
@@ -112,10 +108,7 @@ export class SettingsComponent implements OnInit {
         },
         error: (err) => {
           this.isLoader = false;
-          this.commonErrorHandler(err);
-          // ErrorHandling.commonErrorHandler(err);
-          // AdminPanelComponent.commonErrorHandler(err);
-          
+          this.commonErrorHandler(err);          
         },
       });
   }

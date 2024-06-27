@@ -1,5 +1,6 @@
 
 export interface UserGet {
+userEmail: any;
     _id: string;
     userName: string;
     email: string;

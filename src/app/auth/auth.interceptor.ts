@@ -5,15 +5,7 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
     req.headers.has('Authorization') ||
     req.url == 'http://localhost:3000/user/login'
   ) {
-    return next(req)
-    // .pipe(
-    //   tap((res:any)=>{    
-    //     console.log(res)
-    //     if(res.status == 401){
-    //       console.log(`${res.body.message}`);   
-    //     }
-    //   })
-    // );
+    return next(req);
   }
   if (localStorage.getItem('token')) {
     let authToken = localStorage.getItem('token');

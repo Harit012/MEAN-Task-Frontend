@@ -11,14 +11,15 @@ export class DriverService {
   constructor(private http: HttpClient) {}
 
   getDrivers(page: number, sort: string, input: string) {
+    let modifiedInput =""
     if (input === null || input === '' || input === undefined) {
-      var modifiedInput = 'ThereIsNothing';
+      modifiedInput = 'ThereIsNothing';
     } else {
       modifiedInput = input;
     }
     let params: Params = {
       page: page,
-      sort: sort,
+      sort: sort ,
       input: modifiedInput,
     };
     return this.http.get<{ drivers: Driver[]; status: string}>(

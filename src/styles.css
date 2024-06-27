@@ -2,3 +2,14 @@
 
 html, body { height: 100%; }
 body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
+small{
+    color: rgb(255, 0, 0);
+    font-weight: bold;
+    font-family: monospace;
+}
+.oldProfile{
+    color: rgba(129, 16, 71, 0.783);
+    font-size: large;
+    font-weight: 700;
+    font-family: monospace;
+}

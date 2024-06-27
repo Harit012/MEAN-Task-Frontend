@@ -1,9 +1,17 @@
-hr{
-    height: 3px;
-    background-color: rgb(0, 0, 0);
+hr {
+  height: 3px;
+  background-color: rgb(0, 0, 0);
 }
-.scrollable-section{
+.scrollable-section {
   max-height: 60vh;
   overflow-y: auto;
   overflow-x: auto;
+}
+.cityBox {
+  height: 5rem;
+  width: 100%;
+  background-color: rgb(9, 84, 182);
+  border-radius: 20px;
+  color: aliceblue;
+  cursor: pointer;
 }

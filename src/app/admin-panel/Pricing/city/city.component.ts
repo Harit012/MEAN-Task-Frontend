@@ -365,7 +365,7 @@ export class CityComponent implements OnInit {
     if (!err.error.status) {
       this.toastr.error(
         `Error while sending request to server`,
-        'Error',
+        `Error :- ${err.status}`,
         environment.TROASTR_STYLE
       );
     } else if (err.error.status == 'Failure') {
@@ -374,12 +374,12 @@ export class CityComponent implements OnInit {
       } else {
         this.toastr.error(
           `${err.error.message}`,
-          'Error',
+          `Error :- ${err.status}`,
           environment.TROASTR_STYLE
         );
       }
     } else {
-      this.toastr.error(`Unknown Error`, 'Error', environment.TROASTR_STYLE);
+      this.toastr.error(`Unknown Error`, `Error :- ${err.status}`, environment.TROASTR_STYLE);
     }
   }
   ngOnInit(): void {
@@ -471,6 +471,8 @@ export class CityComponent implements OnInit {
       polygonOptions: {
         zIndex: 1,
         strokeWeight: 2,
+        strokeColor: 'rgb(255, 255, 0)',
+        fillColor: 'rgb(255, 255, 0)',
       },
     });
     this.drawingManager.setMap(this.map);
@@ -546,6 +548,7 @@ export class CityComponent implements OnInit {
   resetMap() {
     if (confirm('Are you sure want to reset map?')) {
       let citybox = document.getElementById('searchcity') as HTMLInputElement;
+      this.zoneName="";
       citybox.value = '';
       this.polygon.setMap(null);
       this.map.panTo(this.center);

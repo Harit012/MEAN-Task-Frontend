@@ -105,14 +105,14 @@ export class UsersComponent implements OnInit, AfterViewChecked {
         Validators.minLength(10),
       ]),
       userProfile: new FormControl(null, [Validators.required]),
-      country: new FormControl(null),
+      country: new FormControl(null ,[Validators.required] ),
     });
   }
   commonErrorHandler(err: any) {
     if (!err.error.status) {
       this.toastr.error(
         `Error while sending request to server`,
-        'Error',
+        `Error :- ${err.status}`,
         environment.TROASTR_STYLE
       );
     } else if (err.error.status == 'Failure') {
@@ -121,16 +121,15 @@ export class UsersComponent implements OnInit, AfterViewChecked {
       } else {
         this.toastr.error(
           `${err.error.message}`,
-          'Error',
+          `Error :- ${err.status}`,
           environment.TROASTR_STYLE
         );
       }
     } else {
-      this.toastr.error(`Unknown Error`, 'Error', environment.TROASTR_STYLE);
+      this.toastr.error(`Unknown Error`, `Error :- ${err.status}`, environment.TROASTR_STYLE);
     }
   }
   ngOnInit() {
-    this.isLoader = true;
     this.countryService.getCountries().subscribe({
       next: (res) => {
         if (res.countries) {
@@ -142,7 +141,6 @@ export class UsersComponent implements OnInit, AfterViewChecked {
       },
     });
     this.onSearch();
-    this.isLoader = false;
   }
   ngAfterViewChecked() {
     if (this.countryCode) {
@@ -150,6 +148,15 @@ export class UsersComponent implements OnInit, AfterViewChecked {
         'countrycode'
       ) as HTMLInputElement;
       temp_countrycode.value = this.countryCode;
+    }
+  }
+  preOnCountryChange(event:any) {
+    console.log(event.target.value);
+    let index = this.countryList.findIndex(
+      (X) => X._id == event.target.value
+    );
+    if (index != -1) {
+      this.onCountryChange(this.countryList[index]);
     }
   }
   onCountryChange(country: Country) {
@@ -323,12 +330,6 @@ export class UsersComponent implements OnInit, AfterViewChecked {
       return;
     }
   }
-  isFieldInvalid(field: string): boolean {
-    const control = this.userForm.get(field);
-    return control
-      ? control.invalid && (control.dirty || control.touched)
-      : false;
-  }
   onNextPage() {
     if (this.usersList.length < 10) {
       this.toastr.warning(`Already on last page`, 'Warning',environment.TROASTR_STYLE);
@@ -353,7 +354,18 @@ export class UsersComponent implements OnInit, AfterViewChecked {
     );
     modal.show();
   }
-  onActionSelect(event: any) {
+  onActionSelect(event: any,user:UserGet) {
+    switch(event.target.value) {
+      case 'CardDetails':
+        this.cardDetails(user);
+        break;
+      case 'Edit':
+        this.onEdit(user);
+        break;
+      case 'Delete':
+        this.onDelete(user);
+        break;
+    }
     event.target.selectedIndex = 0;
   }
   OnAddCard(token: any) {

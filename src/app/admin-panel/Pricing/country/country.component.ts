@@ -43,7 +43,7 @@ export class CountryComponent implements OnInit {
     if (!err.error.status) {
       this.toastr.error(
         `Error while sending request to server`,
-        'Error',
+        `Error :- ${err.status}`,
         environment.TROASTR_STYLE
       );
     } else if (err.error.status == 'Failure') {
@@ -52,12 +52,12 @@ export class CountryComponent implements OnInit {
       } else {
         this.toastr.error(
           `${err.error.message}`,
-          'Error',
+          `Error :- ${err.status}`,
           environment.TROASTR_STYLE
         );
       }
     } else {
-      this.toastr.error(`Unknown Error`, 'Error', environment.TROASTR_STYLE);
+      this.toastr.error(`Unknown Error`, `Error :- ${err.status}`, environment.TROASTR_STYLE);
     }
   }
 

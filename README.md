@@ -35,9 +35,9 @@ STEP-2 :- create two files with name <b>environment.prod.ts</b> and <b>environme
 STEP-3 :- put this code in it </br>
 <code>
     export const environment = {
-  STRIPE_PUBLISHABLE_KEY : 'Your Key',
-  STRIPE_SECRET_KEY: 'Your key',
-  GOOGLE_MAPS_API_KEY : 'Your key',
+  STRIPE_PUBLISHABLE_KEY : 'Your stripe public Key',
+  STRIPE_SECRET_KEY: 'Your stripe secret key',
+  GOOGLE_MAPS_API_KEY : 'Your google maps api key',
   TROASTR_STYLE:{progressBar:true,timeOut:2500},
   INACTIVE_TIME:1200000,
   BASE_URL:'Your Backend base url ex. "http://localhost:3000"'

@@ -1,62 +1,60 @@
-<div class="">
-  <div class="row mt-3">
-    <div class="col-4"></div>
-    <div class="col-7">
-      <!-- country -->
+<div class="container d-flex justify-content-center">
+  <div class="col-7 offset-5 m-4">
+    <!-- country -->
     <div class="row mt-1 align-content-center">
       <div class="col-3 align-self-center">
         <label for="country">Country </label>
       </div>
       @if(!editMode){
-        <div class="col-4">
-          <select
-            name="country"
-            id="country"
-            class="form-select"
+      <div class="col-9">
+        <select name="country" id="country" class="form-select" (change)="perOnCountryChange($event)">
+          <option [defaultSelected]="true" disabled>Select Country</option>
+          <option
+            *ngFor="let country of countryList"
+            value='{{ country._id }}'
           >
-            <option [defaultSelected]="true" disabled>Select Country</option>
-            <option
-              *ngFor="let country of countryList"
-              value="{{ country.countryShortName }}"
-              (click)="onCountryChange(country)"
-            >
-              {{ country.countryName }}
-            </option>
-          </select>
-        </div>
+            {{ country.countryName }}
+          </option>
+        </select>
+      </div>
       }@else {
-        <div class="col-4">
-          <input type="text" id="country" class="form-control" [disabled]="true">
-        </div>
+      <div class="col-9">
+        <input
+          type="text"
+          id="country"
+          class="form-control"
+          [disabled]="true"
+        />
+      </div>
       }
-      
     </div>
     <!-- city -->
-    <div class="row mt-3 ">
+    <div class="row mt-3">
       <div class="col-3 align-self-center"><label for="city">City </label></div>
       @if(!editMode){
-        <div class="col-4">
-          <select
-            name="city"
-            id="city"
-            class="form-select"
+      <div class="col-9">
+        <select name="city" id="city" class="form-select" (change)="preOnCityChange($event)">
+          @if (selectedCountry ) {
+          <option [defaultSelected]="true" disabled>Select city</option>
+          <option
+            *ngFor="let city of cityList"
+            value="{{ city._id }}"
           >
-            @if (selectedCountry ) {
-            <option [defaultSelected]="true" disabled>Select city</option>
-            <option *ngFor="let city of cityList" value="{{ city.zoneName }}" (click)="onCityChange(city)">
-              {{ city.zoneName }}
-            </option>
-            }@else if(cityList == []){
-            <option [defaultSelected]="true" disabled>no City Available</option>
-            } @else {
-            <option [defaultSelected]="true" disabled>Select Country first</option>
-            }
-          </select>
-        </div>
+            {{ city.zoneName }}
+          </option>
+          }@else if(cityList == []){
+          <option [defaultSelected]="true" disabled>no City Available</option>
+          } @else {
+          <option [defaultSelected]="true" disabled>
+            Select Country first
+          </option>
+          }
+        </select>
+      </div>
       }@else {
-        <div class="col-4">
-          <input type="text" id="city" class="form-control" [disabled]="true">
-        </div>
+      <div class="col-9">
+        <input type="text" id="city" class="form-control" [disabled]="true" />
+      </div>
       }
     </div>
     <!-- vehicle-type -->
@@ -65,37 +63,55 @@
         <label for="vehicleType">Vehicle-Type </label>
       </div>
       @if(!editMode){
-        <div class="col-4">
-          <select id="vehicleType" name="vehicleType" class="form-select" (change)="onVehicleTypeChange($event)">
-            @if(vehicleTypesList.length >0){
-              <option [defaultSelected]="true" disabled>Select vehicle-type</option>
-            <option
-              *ngFor="let vehicleType of vehicleTypesList"
-              value="{{ vehicleType }}"
-            >
-              {{ vehicleType }}
-            </option>
-            }@else{
-              <option [defaultSelected]="true" disabled>no vehicle available</option>
-            }
-            
-          </select>
-        </div>
+      <div class="col-9">
+        <select
+          id="vehicleType"
+          name="vehicleType"
+          class="form-select"
+          (change)="onVehicleTypeChange($event)"
+        >
+          @if(vehicleTypesList.length >0){
+          <option [defaultSelected]="true" disabled>Select vehicle-type</option>
+          <option
+            *ngFor="let vehicleType of vehicleTypesList"
+            value="{{ vehicleType }}"
+          >
+            {{ vehicleType }}
+          </option>
+          }@else{
+          <option [defaultSelected]="true" disabled>
+            no vehicle available
+          </option>
+          }
+        </select>
+      </div>
       }@else{
-        <div class="col-4">
-          <input type="text" id="vehicleType" class="form-control" [disabled]="true">
-        </div>
+      <div class="col-9">
+        <input
+          type="text"
+          id="vehicleType"
+          class="form-control"
+          [disabled]="true"
+        />
+      </div>
       }
     </div>
-    <form [formGroup]="vehiclePricingForm">  
+    <form [formGroup]="vehiclePricingForm">
       <!-- driver profit -->
       <div class="row mt-2">
         <div class="col-3 align-self-center">
           <label for="DriverProfit">Driver Profit </label>
         </div>
-        <div class="col-4">
+        <div class="col-9">
           <div class="input-group">
-            <input type="text" min="0" class="form-control" id="DriverProfit" placeholder="" formControlName="driverProfit" />
+            <input
+              type="text"
+              min="0"
+              class="form-control"
+              id="DriverProfit"
+              placeholder=""
+              formControlName="driverProfit"
+            />
             <div class="input-group-append">
               <span
                 class="input-group-text"
@@ -106,7 +122,14 @@
               >
             </div>
           </div>
-          <small *ngIf="isFieldInvalid('driverProfit')" class="text-danger">This value is not correct</small>
+          <small
+            *ngIf="vehiclePricingForm.get('driverProfit')?.errors?.['required'] && (vehiclePricingForm.get('driverProfit')?.dirty || vehiclePricingForm.get('driverProfit')?.touched)"
+            >*Driver Profit is required</small
+          >
+          <small
+            *ngIf="vehiclePricingForm.get('driverProfit')?.errors?.['pattern'] && (vehiclePricingForm.get('driverProfit')?.dirty || vehiclePricingForm.get('driverProfit')?.touched)"
+            >{{ patternValidationAlert }}</small
+          >
         </div>
       </div>
       <!-- min-fare -->
@@ -114,9 +137,16 @@
         <div class="col-3 align-self-center">
           <label for="MinFare">Min. Fare</label>
         </div>
-        <div class="col-4">
+        <div class="col-9">
           <div class="input-group">
-            <input type="text" min="0" class="form-control" id="MinFare" placeholder="" formControlName="minFare"/>
+            <input
+              type="text"
+              min="0"
+              class="form-control"
+              id="MinFare"
+              placeholder=""
+              formControlName="minFare"
+            />
             <div class="input-group-append">
               <span
                 class="input-group-text"
@@ -127,8 +157,14 @@
               >
             </div>
           </div>
-          <small *ngIf="isFieldInvalid('minFare')" class="text-danger">This value is not correct</small>
-
+          <small
+            *ngIf="vehiclePricingForm.get('minFare')?.errors?.['required'] && (vehiclePricingForm.get('minFare')?.dirty || vehiclePricingForm.get('minFare')?.touched)"
+            >*Min Fare is required</small
+          >
+          <small
+            *ngIf="vehiclePricingForm.get('minFare')?.errors?.['pattern'] && (vehiclePricingForm.get('minFare')?.dirty || vehiclePricingForm.get('minFare')?.touched)"
+            >{{ patternValidationAlert }}</small
+          >
         </div>
       </div>
       <!-- Distance for base price -->
@@ -136,11 +172,18 @@
         <div class="col-3 align-self-center">
           <label for="DFBP">Distance For base price</label>
         </div>
-        <div class="col-4">
+        <div class="col-9">
           <div class="input-group">
-            <select id="DFBP" style="width: 60%;" class="form-select" formControlName="distanceForBasePrice">
+            <select
+              id="DFBP"
+              style="width: 60%"
+              class="form-select"
+              formControlName="distanceForBasePrice"
+            >
               <option [defaultSelected]="true" value="0">0</option>
-              <option *ngFor="let val of [1,2,3,4,5]" value={{val}}>{{val}}</option>
+              <option *ngFor="let val of [1, 2, 3, 4, 5]" value="{{ val }}">
+                {{ val }}
+              </option>
             </select>
             <div class="input-group-append">
               <span
@@ -152,7 +195,14 @@
               >
             </div>
           </div>
-          <small *ngIf="isFieldInvalid('distanceForBasePrice')" class="text-danger">This value is not correct</small>
+          <small
+            *ngIf="vehiclePricingForm.get('distanceForBasePrice')?.errors?.['required'] && (vehiclePricingForm.get('distanceForBasePrice')?.dirty || vehiclePricingForm.get('distanceForBasePrice')?.touched)"
+            >*Distance for base price is required</small
+          >
+          <small
+            *ngIf="vehiclePricingForm.get('distanceForBasePrice')?.errors?.['pattern'] && (vehiclePricingForm.get('distanceForBasePrice')?.dirty || vehiclePricingForm.get('distanceForBasePrice')?.touched)"
+            >{{ patternValidationAlert }}</small
+          >
         </div>
       </div>
       <!-- Base price -->
@@ -160,9 +210,16 @@
         <div class="col-3 align-self-center">
           <label for="BasePrice">Base price</label>
         </div>
-        <div class="col-4">
+        <div class="col-9">
           <div class="input-group">
-            <input type="text" min="0" class="form-control" id="BasePrice" placeholder="" formControlName="basePrice"/>
+            <input
+              type="text"
+              min="0"
+              class="form-control"
+              id="BasePrice"
+              placeholder=""
+              formControlName="basePrice"
+            />
             <div class="input-group-append">
               <span
                 class="input-group-text"
@@ -173,7 +230,14 @@
               >
             </div>
           </div>
-          <small *ngIf="isFieldInvalid('basePrice')" class="text-danger">This value is not correct</small>
+          <small
+            *ngIf="vehiclePricingForm.get('basePrice')?.errors?.['required'] && (vehiclePricingForm.get('basePrice')?.dirty || vehiclePricingForm.get('basePrice')?.touched)"
+            >*Base Price is required</small
+          >
+          <small
+            *ngIf="vehiclePricingForm.get('basePrice')?.errors?.['pattern'] && (vehiclePricingForm.get('basePrice')?.dirty || vehiclePricingForm.get('basePrice')?.touched)"
+            >{{ patternValidationAlert }}</small
+          >
         </div>
       </div>
       <!-- Price per Unit Distance -->
@@ -181,9 +245,16 @@
         <div class="col-3 align-self-center">
           <label for="PPUD">Price per Unit Distance</label>
         </div>
-        <div class="col-4">
+        <div class="col-9">
           <div class="input-group">
-            <input type="text" min="0" class="form-control" id="PPUD" placeholder="" formControlName="pricePerUnitDistance" />
+            <input
+              type="text"
+              min="0"
+              class="form-control"
+              id="PPUD"
+              placeholder=""
+              formControlName="pricePerUnitDistance"
+            />
             <div class="input-group-append">
               <span
                 class="input-group-text"
@@ -194,7 +265,14 @@
               >
             </div>
           </div>
-          <small *ngIf="isFieldInvalid('pricePerUnitDistance')" class="text-danger">This value is not correct</small>
+          <small
+            *ngIf="vehiclePricingForm.get('pricePerUnitDistance')?.errors?.['required'] && (vehiclePricingForm.get('pricePerUnitDistance')?.dirty || vehiclePricingForm.get('pricePerUnitDistance')?.touched)"
+            >*Price/Unit Distance is required</small
+          >
+          <small
+            *ngIf="vehiclePricingForm.get('pricePerUnitDistance')?.errors?.['pattern'] && (vehiclePricingForm.get('pricePerUnitDistance')?.dirty || vehiclePricingForm.get('pricePerUnitDistance')?.touched)"
+            >{{ patternValidationAlert }}</small
+          >
         </div>
       </div>
       <!-- Price per Unit Time -->
@@ -202,9 +280,16 @@
         <div class="col-3 align-self-center">
           <label for="PPUT">Price/Unit Time(min)</label>
         </div>
-        <div class="col-4">
+        <div class="col-9">
           <div class="input-group">
-            <input type="text" min="0" class="form-control" id="PPUT" placeholder="" formControlName="pricePerUnitTime"/>
+            <input
+              type="text"
+              min="0"
+              class="form-control"
+              id="PPUT"
+              placeholder=""
+              formControlName="pricePerUnitTime"
+            />
             <div class="input-group-append">
               <span
                 class="input-group-text"
@@ -215,8 +300,14 @@
               >
             </div>
           </div>
-          <small *ngIf="isFieldInvalid('pricePerUnitTime')" class="text-danger">This value is not correct</small>
-
+          <small
+            *ngIf="vehiclePricingForm.get('pricePerUnitTime')?.errors?.['required'] && (vehiclePricingForm.get('pricePerUnitTime')?.dirty || vehiclePricingForm.get('pricePerUnitTime')?.touched)"
+            >*Price/Unit Time is required</small
+          >
+          <small
+            *ngIf="vehiclePricingForm.get('pricePerUnitTime')?.errors?.['pattern'] && (vehiclePricingForm.get('pricePerUnitTime')?.dirty || vehiclePricingForm.get('pricePerUnitTime')?.touched)"
+            >{{ patternValidationAlert }}</small
+          >
         </div>
       </div>
       <!-- Max Space -->
@@ -224,9 +315,16 @@
         <div class="col-3 align-self-center">
           <label for="MaxSpace">Max Space</label>
         </div>
-        <div class="col-4">
+        <div class="col-9">
           <div class="input-group">
-            <input type="text" min="0" class="form-control" id="MaxSpace" placeholder="" formControlName="maxSpace" />
+            <input
+              type="text"
+              min="0"
+              class="form-control"
+              id="MaxSpace"
+              placeholder=""
+              formControlName="maxSpace"
+            />
             <div class="input-group-append">
               <span
                 class="input-group-text"
@@ -237,42 +335,80 @@
               >
             </div>
           </div>
-          <small *ngIf="isFieldInvalid('maxSpace')" class="text-danger">This value is not correct</small>
+          <small
+            *ngIf="vehiclePricingForm.get('maxSpace')?.errors?.['required'] && (vehiclePricingForm.get('maxSpace')?.dirty || vehiclePricingForm.get('maxSpace')?.touched)"
+            >*Max Space is required</small
+          >
+          <small
+            *ngIf="vehiclePricingForm.get('maxSpace')?.errors?.['pattern'] && (vehiclePricingForm.get('maxSpace')?.dirty || vehiclePricingForm.get('maxSpace')?.touched)"
+            >{{ patternValidationAlert }}</small
+          >
         </div>
       </div>
       <!-- buttons -->
 
       @if (!editMode) {
 
-        <div class="row mt-2 ">
-          <div class="col-4">
-            <button style="height: 3rem;width: 5rem;" class="btn btn-dark btn-large" [disabled]="!vehiclePricingForm.valid" (click)="onSubmitVehicleForm()">Add </button>
-          </div>
-          <div class="col-4">
-            <button style="height: 3rem;width: 5rem;;" class="btn btn-dark btn-large" (click)="vehiclePricingForm.reset()">reset</button>
-          </div>
+      <div class="row mt-4">
+
+        <div class="offset-3 col-4">
+          <button
+            style="height: 3rem; width: 5rem"
+            class="btn btn-success btn-large"
+            [disabled]="!vehiclePricingForm.valid"
+            (click)="onSubmitVehicleForm()"
+          >
+            Add
+          </button>
         </div>
+        <div class="col-4">
+          <button
+            style="height: 3rem; width: 5rem"
+            class="btn btn-danger btn-large"
+            (click)="vehiclePricingForm.reset()"
+          >
+            reset
+          </button>
+        </div>
+      </div>
       }@else{
-        <div class="row mt-2 " >
-          <div class="col-3">
-            <button style="height: 3rem;width: 5rem;;" class="btn btn-dark btn-large"  (click)="onUpdate()">Update</button>
-          </div>
-          <div class="col-3">
-            <button style="height: 3rem;width: 5rem;;" class="btn btn-dark btn-large" (click)="vehiclePricingForm.reset()">reset</button>
-          </div>
-          <div class="col-3">
-            <button style="height: 3rem;width: 5rem;;" class="btn btn-danger btn-large" (click)="leaveEditMode()">cancel</button>
-          </div>
+      <div class="row mt-4">
+        <div class="offset-3 col-3">
+          <button
+            style="height: 3rem; width: 5rem"
+            class="btn btn-success btn-large"
+            (click)="onUpdate()"
+          >
+            Update
+          </button>
         </div>
+        <div class="col-3">
+          <button
+            style="height: 3rem; width: 5rem"
+            class="btn btn-dark btn-large"
+            (click)="vehiclePricingForm.reset()"
+          >
+            reset
+          </button>
+        </div>
+        <div class="col-3">
+          <button
+            style="height: 3rem; width: 5rem"
+            class="btn btn-danger btn-large"
+            (click)="leaveEditMode()"
+          >
+            cancel
+          </button>
+        </div>
+      </div>
       }
     </form>
-    </div>
   </div>
- 
 </div>
-<div class=" mt-5">
-  <div class="scrollable-section2" >
-    <div class="row bg-dark text-white p-2" >
+
+<div class="mt-5">
+  <div class="scrollable-section2">
+    <div class="row bg-dark text-white p-2">
       <div class="col-1"><p>Index</p></div>
       <div class="col-1"><p>Country</p></div>
       <div class="col-1"><p>City</p></div>
@@ -287,21 +423,52 @@
       <div class="col-1"><p>Options</p></div>
     </div>
   </div>
-    <div class="scrollable-section">
+  <div class="scrollable-section">
     <div class="row" *ngFor="let vehicle of pricingList; index as i">
-      <div class="col-1 p-3"><p>{{i+1}}</p></div>
-      <div class="col-1 "><p>{{vehicle.country}}</p></div>
-      <div class="col-1 "><p>{{vehicle.city}}</p></div>
-      <div class="col-1 "><p>{{vehicle.vehicleType}}</p></div>
-      <div class="col-1 align-self-center"><p>{{vehicle.driverProfit}}</p></div>
-      <div class="col-1 align-self-center"><p>{{vehicle.minFare}}<p></div>
-      <div class="col-1 align-self-center"><p>{{vehicle.distanceForBasePrice}}<p></div>
-      <div class="col-1 align-self-center"><p>{{vehicle.basePrice}}</p></div>
-      <div class="col-1 align-self-center"><p>{{vehicle.pricePerUnitDistance}}</p></div>
-      <div class="col-1 align-self-center"><p>{{vehicle.pricePerUnitTime}}</p></div>
-      <div class="col-1 align-self-center"><p>{{vehicle.maxSpace}}</p></div>
-      <div class="col-1 align-self-center "><button class="btn btn-success" style="height: 40px;width: 50px;" (click)="onEdit(i)">Edit</button></div>
+      <div class="col-1 p-3">
+        <p>{{ i + 1 }}</p>
+      </div>
+      <div class="col-1 text-break">
+        <p>{{ vehicle.country }}</p>
+      </div>
+      <div class="col-1 text-break">
+        <p>{{ vehicle.city }}</p>
+      </div>
+      <div class="col-1 text-break">
+        <p>{{ vehicle.vehicleType }}</p>
+      </div>
+      <div class="col-1 align-self-center">
+        <p>{{ vehicle.driverProfit }}</p>
+      </div>
+      <div class="col-1 align-self-center">
+        <p>{{ vehicle.minFare }}</p>
+        <p></p>
+      </div>
+      <div class="col-1 align-self-center">
+        <p>{{ vehicle.distanceForBasePrice }}</p>
+        <p></p>
+      </div>
+      <div class="col-1 align-self-center">
+        <p>{{ vehicle.basePrice }}</p>
+      </div>
+      <div class="col-1 align-self-center">
+        <p>{{ vehicle.pricePerUnitDistance }}</p>
+      </div>
+      <div class="col-1 align-self-center">
+        <p>{{ vehicle.pricePerUnitTime }}</p>
+      </div>
+      <div class="col-1 align-self-center">
+        <p>{{ vehicle.maxSpace }}</p>
+      </div>
+      <div class="col-1 align-self-center">
+        <button
+          class="btn btn-success"
+          style="height: 40px; width: 50px"
+          (click)="onEdit(i)"
+        >
+          Edit
+        </button>
+      </div>
     </div>
   </div>
-  
-</div> 
+</div>

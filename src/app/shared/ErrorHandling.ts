@@ -1,15 +1,21 @@
-// import { AuthService } from "../auth/a
+// import { inject } from "@angular/core";
+// import { environment } from "../../environments/environment";
+// import { AuthService } from "../auth/auth.service";
+// import { ToastrService } from "ngx-toastr";
 // export  class ErrorHandling {
-//   static authService: any;
-//   static toastr: any;
-//   constructor(public authService:AuthService,public toastr:ToastrService){}
-//     static authService:AuthService = inject(AuthService);
+//     static toastr= inject(ToastrService);
+//     static authService: any;
+// //   static authService: any;
+// //   static toastr: any;
+//   constructor(){}
+//     // static authService:AuthService = inject(AuthService);
+//     // this.toastr = inject(ToastrService);
 
-//     static toastr:ToastrService = inject(ToastrService);
+//     // static toastr:ToastrService = inject(ToastrService);
 
 //     static commonErrorHandler(err:any) {
 //     if (!err.error.status) {
-//       this.toastr.error(
+//         ErrorHandling.toastr.error(
 //         `Error while sending request to server`,
 //         'Error',
 //         environment.TROASTR_STYLE

@@ -9,7 +9,7 @@ import { environment } from '../../environments/environment';
 })
 export class AuthService {
   toastr = inject(ToastrService);
-  constructor(private router: Router, private http: HttpClient) {}
+  constructor(public router: Router, private http: HttpClient) {}
 
   userLogIn(form: { email: string; password: string }) {
     if (form.email != null && form.password != null) {
@@ -40,7 +40,7 @@ export class AuthService {
             else if (err.error.status == 'Failure') {
               this.toastr.error(
                 `${err.error.message}`,
-                'Error',
+                `Error :- ${err.status}`,
                 environment.TROASTR_STYLE
               );
             }
@@ -53,7 +53,7 @@ export class AuthService {
   }
   userLogOut() {
     window.localStorage.removeItem('token');
-    this.toastr.error('User is not verified', 'Error', {
+    this.toastr.error('User dont have valid token', `Error :- 401`, {
       progressBar: true,
       timeOut: 5000,
     });

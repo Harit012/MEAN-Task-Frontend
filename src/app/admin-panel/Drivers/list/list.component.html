@@ -98,28 +98,16 @@
             name="action-selector"
             id="action-selector"
             class="form-select"
-            (change)="onActionSelect($event)"
+            (change)="onActionSelect($event, driver)"
           >
             <option value="" [defaultSelected]="true" [disabled]="true">
               Select Action
             </option>
-            <option
-              value="serviceType"
-              (click)="serviceType(driver)"
-              style="color: rgb(0, 146, 12)"
-            >
+            <option value="serviceType" style="color: rgb(0, 146, 12)">
               Service Type
             </option>
-            <option value="Edit" (click)="onEdit(driver)" style="color: blue">
-              Edit Driver
-            </option>
-            <option
-              value="Delete"
-              (click)="onDelete(driver)"
-              style="color: red"
-            >
-              Delete Driver
-            </option>
+            <option value="edit" style="color: blue">Edit Driver</option>
+            <option value="delete" style="color: red">Delete Driver</option>
           </select>
         </div>
       </div>
@@ -189,9 +177,8 @@
                   formControlName="driverName"
                 />
                 <small
-                  *ngIf="isFieldInvalid('driverName')"
-                  class="text-danger justify-content-center"
-                  >This value is not correct</small
+                  *ngIf="driverForm.get('driverName')?.errors?.['required'] && (driverForm.get('driverName')?.dirty || driverForm.get('driverName')?.touched)"
+                  >*Driver Name is required</small
                 >
               </div>
             </div>
@@ -207,9 +194,12 @@
                   formControlName="driverEmail"
                 />
                 <small
-                  *ngIf="isFieldInvalid('driverEmail')"
-                  class="text-danger justify-content-center"
-                  >This value is not correct</small
+                  *ngIf="driverForm.get('driverEmail')?.errors?.['required'] && (driverForm.get('driverEmail')?.dirty || driverForm.get('driverEmail')?.touched)"
+                  >*Driver email is required</small
+                >
+                <small
+                  *ngIf="driverForm.get('driverEmail')?.errors?.['email'] && (driverForm.get('driverEmail')?.dirty || driverForm.get('driverEmail')?.touched)"
+                  >*Email Formate is not correct</small
                 >
               </div>
             </div>
@@ -222,6 +212,7 @@
                   id="country"
                   class="form-select"
                   formControlName="country"
+                  (change)="preOnCountryChange($event)"
                 >
                   <option [defaultSelected]="true" disabled>
                     Select Country
@@ -229,42 +220,39 @@
                   <option
                     *ngFor="let country of countryList"
                     value="{{ country.countryName }}"
-                    (click)="onCountryChange(country)"
                   >
                     {{ country.countryName }}
                   </option>
                 </select>
                 <small
-                  *ngIf="isFieldInvalid('country')"
-                  class="text-danger justify-content-center"
-                  >This value is not correct</small
+                  *ngIf="driverForm.get('country')?.errors?.['required'] && (driverForm.get('country')?.dirty || driverForm.get('country')?.touched)"
+                  >*Country is required</small
                 >
               </div>
             </div>
             <!-- city -->
 
             <div class="row mt-3">
-              <label class="col-3" for="City">City :-</label>
+              <label class="col-3" for="city">City :-</label>
               <div class="col-9">
                 <select
                   name="city"
                   id="city"
                   class="form-select"
                   formControlName="city"
+                  (change)="preonCityChange($event)"
                 >
                   <option [defaultSelected]="true" disabled>Select City</option>
                   <option
                     *ngFor="let city of cityList"
                     value="{{ city.zoneName }}"
-                    (click)="onCityChange(city)"
                   >
                     {{ city.zoneName }}
                   </option>
                 </select>
                 <small
-                  *ngIf="isFieldInvalid('city')"
-                  class="text-danger justify-content-center"
-                  >This value is not correct</small
+                  *ngIf="driverForm.get('city')?.errors?.['required'] && (driverForm.get('city')?.dirty || driverForm.get('city')?.touched)"
+                  >*City is required</small
                 >
               </div>
             </div>
@@ -272,57 +260,66 @@
             <!-- phone -->
             <div class="row mt-3 d-flex">
               <label class="col-3" for="email">Phone :-</label>
-
-              <div class="col-9 d-flex">
-                <input
-                  class="col-2 p-1"
-                  type="text"
-                  id="countrycode"
-                  [disabled]="true"
-                  value="{{ countryCallCode }}"
-                />
-                <input
-                  class="col-8 ms-1"
-                  type="text"
-                  maxlength="10"
-                  id="phone"
-                  class="form-control"
-                  [placeholder]="'Enter Phone'"
-                  formControlName="phone"
-                />
+              <div class="col-9">
+                <div class="d-flex">
+                  <input
+                    class="col-2 p-1"
+                    type="text"
+                    id="countrycode"
+                    [disabled]="true"
+                    value="{{ countryCallCode }}"
+                  />
+                  <input
+                    class="col-10 ms-1"
+                    type="text"
+                    maxlength="10"
+                    id="phone"
+                    class="form-control"
+                    [placeholder]="'Enter Phone'"
+                    formControlName="phone"
+                  />
+                </div>
+                <small
+                  *ngIf="driverForm.get('phone')?.errors?.['required'] && (driverForm.get('phone')?.dirty || driverForm.get('phone')?.touched)"
+                  >*Phone number is required</small
+                >
+                <small
+                  *ngIf="driverForm.get('phone')?.errors?.['pattern'] && (driverForm.get('phone')?.dirty || driverForm.get('phone')?.touched)"
+                  >**Phone must be DIGITS and must be 10</small
+                >
               </div>
-              <small
-                *ngIf="isFieldInvalid('phone')"
-                class="text-danger justify-content-center"
-                >This value is not correct</small
-              >
             </div>
             <!-- profile -->
             <div class="row mt-3 d-flex">
               <label class="col-3" for="driverProfile">Profile :-</label>
-              <input
-                class="col-9"
-                type="file"
-                id="driverProfile"
-                accept="image/*"
-                formControlName="driverProfile"
-                (change)="onFileChange($event)"
-              />
-              <small
-                *ngIf="isFieldInvalid('driverProfile')"
-                class="text-danger justify-content-center"
-                >This value is not correct</small
-              >
-              <small id="selectedDriverProfile" [hidden]="!editMode"></small>
+              <div class="col-9">
+                <input
+                  class="form-control"
+                  type="file"
+                  id="driverProfile"
+                  accept="image/*"
+                  formControlName="driverProfile"
+                  (change)="onFileChange($event)"
+                />
+                <small
+                  *ngIf="driverForm.get('driverProfile')?.errors?.['required'] && (driverForm.get('driverProfile')?.dirty || driverForm.get('driverProfile')?.touched)"
+                  >*Driver Profile is required</small
+                >
+                <p
+                  class="oldProfile"
+                  id="selectedDriverProfile"
+                  [hidden]="!editMode"
+                ></p>
+              </div>
             </div>
           </form>
         </div>
-        <div class="modal-footer">
+        <div class="modal-footer d-flex justify-content-between">
           <div>
             @if(!editMode){
             <button
               type="button"
-              class="btn btn-dark"
+              class="btn btn-success"
               [disabled]="driverForm.invalid"
               (click)="onAddDriver()"
               data-bs-dismiss="modal"
@@ -331,7 +328,7 @@
             </button>
             <button
               type="button"
-              class="btn btn-primary ms-2"
+              class="btn btn-dark ms-2"
               (click)="driverForm.reset()"
             >
               Reset
@@ -339,7 +336,7 @@
             }@else{
             <button
               type="button"
-              class="btn btn-dark"
+              class="btn btn-success"
               (click)="onUpdateDriver()"
               data-bs-dismiss="modal"
             >
@@ -354,13 +351,15 @@
             </button>
             }
           </div>
-          <button
-            type="button"
-            class="btn btn-secondary"
-            data-bs-dismiss="modal"
-          >
-            Close
-          </button>
+          <div>
+            <button
+              type="button"
+              class="btn btn-danger"
+              data-bs-dismiss="modal"
+            >
+              Close
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -410,16 +409,12 @@
           </div>
         </div>
         <div class="modal-footer">
-          <button
-            type="button"
-            class="btn btn-secondary"
-            data-bs-dismiss="modal"
-          >
+          <button type="button" class="btn btn-danger" data-bs-dismiss="modal">
             Close
           </button>
           <button
             type="button"
-            class="btn btn-dark"
+            class="btn btn-success"
             (click)="onAddServiceType()"
           >
             Save changes

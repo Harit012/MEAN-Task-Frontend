@@ -115,7 +115,7 @@
                   class="form-control"
                   (input)="onInputCountryName($event)"
                 />
-                <p *ngIf="countryForm.get('countryName')?.invalid && countryForm.get('countryName')?.touched" class="text-danger">This field should not be empty</p>
+                <small *ngIf="countryForm.get('countryName')?.errors?.['required'] && countryForm.get('countryName')?.touched" class="text-danger">*CountryName should not be empty</small>
               </div>
             </div>
           </div>
