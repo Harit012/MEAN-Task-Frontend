@@ -1,5 +1,5 @@
 export interface RecivingZone {
-    _id?: string;
+    _id: string;
     zoneName: string;
     boundry: google.maps.LatLngLiteral[];
     country: {

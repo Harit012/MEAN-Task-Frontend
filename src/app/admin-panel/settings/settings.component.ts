@@ -5,7 +5,6 @@ import { AuthService } from '../../auth/auth.service';
 import { ToastrService } from 'ngx-toastr';
 import { environment } from '../../../environments/environment';
 import { LoaderComponent } from '../../loader/loader.component';
-import { AdminPanelComponent } from '../admin-panel.component';
 
 
 @Component({
@@ -29,28 +28,6 @@ export class SettingsComponent implements OnInit {
   ) {
     
   }
-
-  commonErrorHandler(err: any) {
-    if (!err.error.status) {
-      this.toastr.error(
-        `Error while sending request to server`,
-        `Error :- ${err.status}`,
-        environment.TROASTR_STYLE
-      );
-    } else if (err.error.status == 'Failure') {
-      if (err.status == 401) {
-        this.authService.userLogOut();
-      } else {
-        this.toastr.error(
-          `${err.error.message}`,
-          `Error :- ${err.status}`,
-          environment.TROASTR_STYLE
-        );
-      }
-    } else {
-      this.toastr.error(`Unknown Error`, `Error :- ${err.status}`, environment.TROASTR_STYLE);
-    }
-  }
   
   ngOnInit(): void {
     this.isLoader = true;
@@ -68,12 +45,7 @@ export class SettingsComponent implements OnInit {
           this.isLoader = false;
         }
         
-      },
-      error: (err) => {
-        this.isLoader = false;
-        this.commonErrorHandler(err);
-        
-      },
+      }
     });
   }
 
@@ -84,7 +56,7 @@ export class SettingsComponent implements OnInit {
     this.selectedStops = Number(event.target.value);
   }
   onSaveChanges() {
-    this.isLoader = true;
+    // this.isLoader = true;
     this.settingsService
       .putSettings(this.selectedTimeOut, this.selectedStops)
       .subscribe({
@@ -105,11 +77,7 @@ export class SettingsComponent implements OnInit {
             );
             this.isLoader = false;
           }
-        },
-        error: (err) => {
-          this.isLoader = false;
-          this.commonErrorHandler(err);          
-        },
+        }
       });
   }
 }

@@ -66,27 +66,27 @@ export class ListComponent implements OnInit {
     });
   }
 
-  commonErrorHandler(err: any) {
-    if (!err.error.status) {
-      this.toastr.error(
-        `Error while sending request to server`,
-        `Error :- ${err.status}`,
-        environment.TROASTR_STYLE
-      );
-    } else if (err.error.status == 'Failure') {
-      if (err.status == 401) {
-        this.authService.userLogOut();
-      } else {
-        this.toastr.error(
-          `${err.error.message}`,
-          `Error :- ${err.status}`,
-          environment.TROASTR_STYLE
-        );
-      }
-    } else {
-      this.toastr.error(`Unknown Error`, `Error :- ${err.status}`, environment.TROASTR_STYLE);
-    }
-  }
+  // commonErrorHandler(err: any) {
+  //   if (!err.error.status) {
+  //     this.toastr.error(
+  //       `Error while sending request to server`,
+  //       `Error :- ${err.status}`,
+  //       environment.TROASTR_STYLE
+  //     );
+  //   } else if (err.error.status == 'Failure') {
+  //     if (err.status == 401) {
+  //       this.authService.userLogOut();
+  //     } else {
+  //       this.toastr.error(
+  //         `${err.error.message}`,
+  //         `Error :- ${err.status}`,
+  //         environment.TROASTR_STYLE
+  //       );
+  //     }
+  //   } else {
+  //     this.toastr.error(`Unknown Error`, `Error :- ${err.status}`, environment.TROASTR_STYLE);
+  //   }
+  // }
   ngOnInit(): void {
     this.getDrivers();
 
@@ -95,10 +95,7 @@ export class ListComponent implements OnInit {
         if (res.countries) {
           this.countryList = res.countries;
         }
-      },
-      error: (err) => {
-        this.commonErrorHandler(err);
-      },
+      }
     });
 
     this.vehicletypeService.getAllVehicleTypes().subscribe({
@@ -108,10 +105,7 @@ export class ListComponent implements OnInit {
         } else if (data.varified === false) {
           this.authService.userLogOut();
         }
-      },
-      error: (err) => {
-        this.commonErrorHandler(err);
-      },
+      }
     });
   }
   // when sort method changes
@@ -128,10 +122,7 @@ export class ListComponent implements OnInit {
           if (res.drivers) {
             this.driversList = res.drivers;
           }
-        },
-        error: (err) => {
-          this.commonErrorHandler(err);
-        },
+        }
       });
   }
   // when user changes country
@@ -151,10 +142,7 @@ export class ListComponent implements OnInit {
         if (data.zones) {
           this.cityList = data.zones;
         }
-      },
-      error: (err) => {
-        this.commonErrorHandler(err);
-      },
+      }
     });
   }
 
@@ -173,10 +161,15 @@ export class ListComponent implements OnInit {
     let files =event.target.files;
     let length =event.target.files.length;
     if (files && length) {
+      if(event.target.files[0].type != 'image/png' && event.target.files[0].type != 'image/jpeg') {
+        this.toastr.warning(`${event.target.files[0].type} is not supported Upload Image/png`, 'Warning',environment.TROASTR_STYLE);
+      }
       if (event.target.files[0].size < 4000000) {
+        this.formdata.delete('driverProfile');
         this.formdata.append('driverProfile', event.target.files[0]);
       } else {
-        return;
+        this.toastr.warning('Upload file size is too large', 'Warning',environment.TROASTR_STYLE);
+        this.driverForm.get('driverProfile')?.setValue(null);
       }
     }
   }
@@ -210,10 +203,7 @@ export class ListComponent implements OnInit {
           this.formdata = new FormData();
           this.driverForm.reset();
         }
-      },
-      error: (err) => {
-        this.commonErrorHandler(err);
-      },
+      }
     });
   }
   // to update user
@@ -251,10 +241,7 @@ export class ListComponent implements OnInit {
               environment.TROASTR_STYLE
             );
           }
-        },
-        error: (err) => {
-          this.commonErrorHandler(err);
-        },
+        }
       });
     } else {
       this.toastr.info(
@@ -275,10 +262,7 @@ export class ListComponent implements OnInit {
           if (data.message) {
             this.driversList[i]['approved'] = temp_status;
           }
-        },
-        error: (err) => {
-          this.commonErrorHandler(err);
-        },
+        }
       });
   }
   // when user selects action like edit / delete
@@ -334,10 +318,7 @@ export class ListComponent implements OnInit {
             if (data.zones) {
               this.cityList = data.zones;
             }
-          },
-          error: (err) => {
-            this.commonErrorHandler(err);
-          },
+          }
         });
         break;
       } else {
@@ -377,10 +358,7 @@ export class ListComponent implements OnInit {
             let index = this.driversList.indexOf(driver);
             this.driversList.splice(index, 1);
           }
-        },
-        error: (err) => {
-          this.commonErrorHandler(err);
-        },
+        }
       });
     }
   }
@@ -440,10 +418,7 @@ export class ListComponent implements OnInit {
             );
             this.getDrivers();
           }
-        },
-        error: (err) => {
-          this.commonErrorHandler(err);
-        },
+        }
       });
   }
 }

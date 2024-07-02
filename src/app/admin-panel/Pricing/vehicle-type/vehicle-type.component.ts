@@ -27,7 +27,6 @@ export class VehicleTypeComponent implements OnInit {
   formdata: FormData = new FormData();
   isEdit: boolean = false;
   selectedImg: string = '';
-  sizeValidation: boolean = false;
   vehicleTypes: string[] = ['SEDAN', 'SUV', 'MINI VAN', 'PICK UP'];
   previousImage: string = '';
   toastr = inject(ToastrService);
@@ -46,28 +45,6 @@ export class VehicleTypeComponent implements OnInit {
     this.getVehiclesData();
   }
 
-  commonErrorHandler(err: any) {
-    if (!err.error.status) {
-      this.toastr.error(
-        `Error while sending request to server`,
-        `Error :- ${err.status}`,
-        environment.TROASTR_STYLE
-      );
-    } else if (err.error.status == 'Failure') {
-      if (err.status == 401) {
-        this.authService.userLogOut();
-      } else {
-        this.toastr.error(
-          `${err.error.message}`,
-          `Error :- ${err.status}`,
-          environment.TROASTR_STYLE
-        );
-      }
-    } else {
-      this.toastr.error(`Unknown Error`, `Error :- ${err.status}`, environment.TROASTR_STYLE);
-    }
-  }
-
   onSubmit() {
     this.formdata.append('type', this.vehicleForm.value.type);
     console.log(this.formdata);
@@ -83,9 +60,6 @@ export class VehicleTypeComponent implements OnInit {
           this.vehiclesList = data.vehicles;
         }
       },
-      error: (err) => {
-        this.commonErrorHandler(err);
-      },
     });
     this.vehicleForm.reset();
     this.formdata = new FormData();
@@ -97,9 +71,6 @@ export class VehicleTypeComponent implements OnInit {
         if (data.vehicle) {
           this.vehiclesList = data.vehicle;
         }
-      },
-      error: (err) => {
-        this.commonErrorHandler(err);
       },
     });
   }
@@ -118,9 +89,6 @@ export class VehicleTypeComponent implements OnInit {
             this.vehiclesList = res.vehicles;
           }
         },
-        error: (err) => {
-          this.commonErrorHandler(err);
-        },
       });
     } else {
       this.toastr.info('No changes made', 'Info', environment.TROASTR_STYLE);
@@ -129,18 +97,26 @@ export class VehicleTypeComponent implements OnInit {
   }
   onFileChange(event: any) {
     if (event.target.files && event.target.files.length) {
-      if (event.target.files[0].size < 4000000) {
-        this.sizeValidation = false;
-        // this.formdata= new FormData();
-        this.formdata.append('vehicleImage', event.target.files[0]);
-      } else {
+      if (event.target.files[0].type != 'image/png' && event.target.files[0].type != 'image/jpeg') {
         this.toastr.warning(
-          'file is too large try to upload smaller file',
+          `${event.target.files[0].type} is not supported Upload Image/png/jpeg`,
           'Warning',
           environment.TROASTR_STYLE
         );
-        this.sizeValidation = true;
         this.vehicleForm.reset();
+
+      } else {
+        this.formdata.delete('vehicleImage');
+        if (event.target.files[0].size < 4000000) {
+          this.formdata.append('vehicleImage', event.target.files[0]);
+        } else {
+          this.toastr.warning(
+            'file is too large try to upload smaller file',
+            'Warning',
+            environment.TROASTR_STYLE
+          );
+          this.vehicleForm.reset();
+        }
       }
     }
   }
@@ -169,9 +145,6 @@ export class VehicleTypeComponent implements OnInit {
               );
               this.vehiclesList = res.vehicles;
             }
-          },
-          error: (err) => {
-            this.commonErrorHandler(err);
           },
         });
     }

@@ -1,37 +1,54 @@
-hr{
-    border: 2px solid gray;
+hr {
+  border: 2px solid gray;
 }
-input,select{
-    border: 1px solid gray;
+input,
+select {
+  border: 1px solid gray;
 }
-.label{
-    font-weight: 700;
-    font-size: large;
-    align-self: center;
+.label {
+  font-weight: 700;
+  font-size: large;
+  align-self: center;
 }
-.samllLabel{
-    font-size: medium;
-    font-weight: 500;
+.samllLabel {
+  font-size: medium;
+  font-weight: 500;
 }
-.button-color{
-    background-color: rgba(255, 130, 4, 0.313);
-    color: antiquewhite;
+.button-color {
+  background-color: rgba(255, 130, 4, 0.313);
+  color: antiquewhite;
 }
-#map{
-    margin: 1rem;
-    margin-top: 1rem;
-    width: 97%;
-    height: 65vh;
+#map {
+  margin: 1rem;
+  margin-top: 1rem;
+  width: 97%;
+  height: 65vh;
 }
 #currentLocationSelector {
-    color: rgb(2, 2, 7);
-    font-size: large;
+  color: rgb(2, 2, 7);
+  font-size: large;
 }
-#currentLocationSelector :hover{
-    color: rgb(242, 238, 14);
-    font-size: larger;
+#currentLocationSelector :hover {
+  color: rgb(242, 238, 14);
+  font-size: larger;
 }
-input[type="radio"]{
-    width: 1.5rem;
-    height: 1.5rem;
+input[type="radio"] {
+  width: 1.5rem;
+  height: 1.5rem;
+}
+.box {
+  padding: 0.5rem;
+  margin-left: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 15px;
+  background: radial-gradient(circle, #ff7e5f, #feb47b);
+  width: max-content;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.userDetails{
+  font-size: larger;
+  font-weight: 500;
+  margin-top: 3%;
 }

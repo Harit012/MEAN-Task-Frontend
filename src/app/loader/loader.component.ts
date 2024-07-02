@@ -24,7 +24,7 @@ export class LoaderComponent implements OnInit, OnDestroy {
     this.spinner.show();
     setTimeout(() => {
       this.spinner.hide();
-    }, 10000);
+    }, 3000);
   }
   ngOnDestroy(): void {
     this.spinner.hide();

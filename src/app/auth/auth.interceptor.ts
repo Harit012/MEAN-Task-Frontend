@@ -1,9 +1,16 @@
 import { HttpInterceptorFn } from '@angular/common/http';
+import { inject } from '@angular/core';
+import { LoaderService } from '../admin-panel/loader.service';
+import { environment } from '../../environments/environment';
 
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
+  const loaderService = inject(LoaderService);
+  // loaderService.subject.next(true);
+  // console.log(loaderService.subject.observed.valueOf())
+  // console.log(loaderService.subject.forEach(data => console.log(data)))
   if (
     req.headers.has('Authorization') ||
-    req.url == 'http://localhost:3000/user/login'
+    req.url == `${environment.BASE_URL}/user/login`
   ) {
     return next(req);
   }

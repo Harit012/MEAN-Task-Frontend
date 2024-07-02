@@ -2,14 +2,13 @@ import { Injectable, NgZone } from '@angular/core';
 import { Subject } from 'rxjs';
 import { debounceTime } from 'rxjs/operators';
 import { AuthService } from '../auth/auth.service';
-import { environment } from '../../environments/environment';
 
 @Injectable({
   providedIn: 'root',
 })
 export class InactivityService {
   private userActivity: Subject<any> = new Subject();
-  private inactivityTime: number = environment.INACTIVE_TIME; // 20 minutes
+  private inactivityTime: number = 3000000; // 20 minutes
   private userInactive: Subject<any> = new Subject();
 
   constructor(private ngZone: NgZone,private authService: AuthService) {

@@ -6,7 +6,6 @@ import { Country } from '../country/country.interface';
 import { Zone, ZoneCountries } from './zone.interface';
 import { CityService } from './city.service';
 import { RecivingZone } from './recivingZone.interface';
-import { AuthService } from '../../../auth/auth.service';
 import { ToastrService } from 'ngx-toastr';
 import { environment } from '../../../../environments/environment';
 
@@ -359,29 +358,7 @@ export class CityComponent implements OnInit {
   constructor(
     private countryService: CountriesService,
     private cityService: CityService,
-    private authService: AuthService
   ) {}
-  commonErrorHandler(err: any) {
-    if (!err.error.status) {
-      this.toastr.error(
-        `Error while sending request to server`,
-        `Error :- ${err.status}`,
-        environment.TROASTR_STYLE
-      );
-    } else if (err.error.status == 'Failure') {
-      if (err.status == 401) {
-        this.authService.userLogOut();
-      } else {
-        this.toastr.error(
-          `${err.error.message}`,
-          `Error :- ${err.status}`,
-          environment.TROASTR_STYLE
-        );
-      }
-    } else {
-      this.toastr.error(`Unknown Error`, `Error :- ${err.status}`, environment.TROASTR_STYLE);
-    }
-  }
   ngOnInit(): void {
     this.countryService.getCountries().subscribe({
       next:(data) => {
@@ -396,9 +373,6 @@ export class CityComponent implements OnInit {
             });
           });
         } 
-      },
-      error: (err) => {
-        this.commonErrorHandler(err);
       }
     });
     this.initMap();
@@ -584,10 +558,7 @@ export class CityComponent implements OnInit {
                 environment.TROASTR_STYLE
               );
             }
-          },
-          error: (err) => {
-            this.commonErrorHandler(err);
-          },
+          }
         });
       this.updatedPolyCoordinates = [];
       this.editMode = false;
@@ -632,10 +603,7 @@ export class CityComponent implements OnInit {
             this.map.setZoom(6);
             citybox.value = '';
           }
-        },
-        error: (err) => {
-          this.commonErrorHandler(err);
-        },
+        }
       });
     } else {
       this.toastr.warning(
@@ -651,10 +619,7 @@ export class CityComponent implements OnInit {
         if (data.zones) {
           this.filteredZones = data.zones;
         } 
-      },
-      error: (err) => {
-        this.commonErrorHandler(err);
-      },
+      }
     });
   }
 }

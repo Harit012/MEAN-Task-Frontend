@@ -43,7 +43,7 @@ import { LoaderComponent } from '../../loader/loader.component';
     StripeElementsDirective,
     StripeCardComponent,
     NgxStripeModule,
-    LoaderComponent
+    LoaderComponent,
   ],
   templateUrl: './users.component.html',
   styleUrl: './users.component.css',
@@ -105,39 +105,15 @@ export class UsersComponent implements OnInit, AfterViewChecked {
         Validators.minLength(10),
       ]),
       userProfile: new FormControl(null, [Validators.required]),
-      country: new FormControl(null ,[Validators.required] ),
+      country: new FormControl(null, [Validators.required]),
     });
-  }
-  commonErrorHandler(err: any) {
-    if (!err.error.status) {
-      this.toastr.error(
-        `Error while sending request to server`,
-        `Error :- ${err.status}`,
-        environment.TROASTR_STYLE
-      );
-    } else if (err.error.status == 'Failure') {
-      if (err.status == 401) {
-        this.authService.userLogOut();
-      } else {
-        this.toastr.error(
-          `${err.error.message}`,
-          `Error :- ${err.status}`,
-          environment.TROASTR_STYLE
-        );
-      }
-    } else {
-      this.toastr.error(`Unknown Error`, `Error :- ${err.status}`, environment.TROASTR_STYLE);
-    }
   }
   ngOnInit() {
     this.countryService.getCountries().subscribe({
       next: (res) => {
         if (res.countries) {
           this.countryList = res.countries;
-        } 
-      },
-      error: (err) => {
-        this.commonErrorHandler(err);
+        }
       },
     });
     this.onSearch();
@@ -150,11 +126,9 @@ export class UsersComponent implements OnInit, AfterViewChecked {
       temp_countrycode.value = this.countryCode;
     }
   }
-  preOnCountryChange(event:any) {
+  preOnCountryChange(event: any) {
     console.log(event.target.value);
-    let index = this.countryList.findIndex(
-      (X) => X._id == event.target.value
-    );
+    let index = this.countryList.findIndex((X) => X._id == event.target.value);
     if (index != -1) {
       this.onCountryChange(this.countryList[index]);
     }
@@ -168,13 +142,33 @@ export class UsersComponent implements OnInit, AfterViewChecked {
     this.onSearch();
   }
   onFileChange(event: any) {
-    let files=event.target.files;
+    this.formdata.append('userProfile', 'sifiv');
+    let files = event.target.files;
     let length = files.length;
     if (files && length) {
-      if (event.target.files[0].size < 4000000) {
-        this.formdata.append('userProfile', event.target.files[0]);
+      if (
+        event.target.files[0].type != 'image/png' &&
+        event.target.files[0].type != 'image/jpeg'
+      ) {
+        this.toastr.warning(
+          `${event.target.files[0].type} is not supported Upload Image/png`,
+          'Warning',
+          environment.TROASTR_STYLE
+        );
       } else {
-        this.toastr.warning('Upload file size is too large', 'Warning',environment.TROASTR_STYLE);
+        if (
+          event.target.files[0].size < 4000000 &&
+          event.target.files[0].type == 'image/png'
+        ) {
+          this.formdata.delete('userProfile');
+          this.formdata.set('userProfile', event.target.files[0]);
+        } else {
+          this.toastr.warning(
+            'Upload file size is too large',
+            'Warning',
+            environment.TROASTR_STYLE
+          );
+        }
       }
     }
   }
@@ -188,17 +182,17 @@ export class UsersComponent implements OnInit, AfterViewChecked {
     this.userService.postUser(this.formdata).subscribe({
       next: (res) => {
         if (res.user) {
-          this.toastr.success(`User Added Successfully`, 'Success',environment.TROASTR_STYLE);
+          this.toastr.success(
+            `User Added Successfully`,
+            'Success',
+            environment.TROASTR_STYLE
+          );
           this.userForm.reset();
           this.formdata = new FormData();
           this.userForm.reset();
           this.onSearch();
-          this.isLoader= false;
-        } 
-      },
-      error: (err) => {
-        this.isLoader = false;
-        this.commonErrorHandler(err);
+          this.isLoader = false;
+        }
       },
     });
   }
@@ -217,26 +211,29 @@ export class UsersComponent implements OnInit, AfterViewChecked {
         this.formdata.append('country', element._id!);
       }
     });
-    if(this.userForm.dirty){
+    if (this.userForm.dirty) {
       this.userService.updateUser(this.formdata).subscribe({
         next: (res) => {
           if (res.message) {
-            this.toastr.success(`User Updated`, 'Success',environment.TROASTR_STYLE);
+            this.toastr.success(
+              `User Updated`,
+              'Success',
+              environment.TROASTR_STYLE
+            );
             this.onSearch();
             this.editMode = false;
             this.userForm.reset();
             this.formdata = new FormData();
-          } 
-        },
-        error: (err) => {
-          this.commonErrorHandler(err)
+          }
         },
       });
+    } else {
+      this.toastr.info(
+        'No Changes Has Been Made',
+        'Info',
+        environment.TROASTR_STYLE
+      );
     }
-    else{
-      this.toastr.info("No Changes Has Been Made", 'Info',environment.TROASTR_STYLE);
-    }
-    
   }
   onSearchInputChange(event: any) {
     this.searchInput = event.target.value;
@@ -249,10 +246,7 @@ export class UsersComponent implements OnInit, AfterViewChecked {
         next: (res) => {
           if (res.users) {
             this.usersList = res.users;
-          } 
-        },
-        error: (err) => {
-          this.commonErrorHandler(err)
+          }
         },
       });
   }
@@ -270,7 +264,11 @@ export class UsersComponent implements OnInit, AfterViewChecked {
       },
       error: (err) => {
         this.isLoader = false;
-        this.toastr.error(`Unable to Fetch data:- ${err.message}`, 'Error',environment.TROASTR_STYLE);
+        this.toastr.error(
+          `Unable to Fetch data:- ${err.message}`,
+          'Error',
+          environment.TROASTR_STYLE
+        );
       },
     });
     this.customerId = user.customerId;
@@ -317,13 +315,13 @@ export class UsersComponent implements OnInit, AfterViewChecked {
         next: (res) => {
           if (res.message) {
             this.onSearch();
-            this.toastr.success('User Deleted Successfully', 'Success',environment.TROASTR_STYLE);
+            this.toastr.success(
+              'User Deleted Successfully',
+              'Success',
+              environment.TROASTR_STYLE
+            );
             this.isLoader = false;
-          } 
-        },
-        error: (err) => {
-          this.isLoader = false;
-          this.commonErrorHandler(err);
+          }
         },
       });
     } else {
@@ -332,7 +330,11 @@ export class UsersComponent implements OnInit, AfterViewChecked {
   }
   onNextPage() {
     if (this.usersList.length < 10) {
-      this.toastr.warning(`Already on last page`, 'Warning',environment.TROASTR_STYLE);
+      this.toastr.warning(
+        `Already on last page`,
+        'Warning',
+        environment.TROASTR_STYLE
+      );
     } else {
       this.currentPage = this.currentPage + 1;
       this.onSearch();
@@ -343,7 +345,11 @@ export class UsersComponent implements OnInit, AfterViewChecked {
       this.currentPage = this.currentPage - 1;
       this.onSearch();
     } else {
-      this.toastr.warning(`Already on first page`, 'Warning',environment.TROASTR_STYLE);
+      this.toastr.warning(
+        `Already on first page`,
+        'Warning',
+        environment.TROASTR_STYLE
+      );
     }
   }
   onClickAddUser() {
@@ -354,8 +360,8 @@ export class UsersComponent implements OnInit, AfterViewChecked {
     );
     modal.show();
   }
-  onActionSelect(event: any,user:UserGet) {
-    switch(event.target.value) {
+  onActionSelect(event: any, user: UserGet) {
+    switch (event.target.value) {
       case 'CardDetails':
         this.cardDetails(user);
         break;
@@ -372,75 +378,89 @@ export class UsersComponent implements OnInit, AfterViewChecked {
     this.isLoader = true;
     const postCard: any = { customerId: this.customerId, token };
     this.cardService.postCard(postCard).subscribe({
-      next:(res) => {
+      next: (res) => {
         if (res.card) {
-          this.toastr.success('Card Added Successfully', 'Success',environment.TROASTR_STYLE);
+          this.toastr.success(
+            'Card Added Successfully',
+            'Success',
+            environment.TROASTR_STYLE
+          );
           this.cardList.push(res.card);
           this.isLoader = false;
         }
       },
-      error:(err)=>{
-        this.isLoader = false;
-        this.commonErrorHandler(err);
-      }
     });
   }
   deleteCard(index: number) {
     this.isLoader = true;
     let cardId = this.cardList[index].id;
     this.cardService.deleteCard(cardId, this.customerId).subscribe({
-      next:(res) => {
+      next: (res) => {
         if (res.message) {
-          this.toastr.success('Card Deleted Successfully', 'Success',environment.TROASTR_STYLE);
+          this.toastr.success(
+            'Card Deleted Successfully',
+            'Success',
+            environment.TROASTR_STYLE
+          );
           this.cardList = this.cardList
             .slice(0, index)
             .concat(this.cardList.slice(index + 1));
           this.isLoader = false;
-        } 
+        }
       },
-      error:(err)=>{
-        this.isLoader = false;
-        this.commonErrorHandler(err);
-      }
     });
   }
   setCardAsDefault(index: number) {
     this.isLoader = true;
     let cardId = this.cardList[index].id;
     let card = this.cardList[index];
-    this.cardService
-      .setCardAsDefault(cardId, this.customerId)
-      .subscribe({
-        next:(res) => {
-          this.toastr.info(`new Default card is:- XXXX XXXX XXXX ${card.last4}`, 'Info',environment.TROASTR_STYLE);
-            this.cardList = this.cardList
-              .slice(0, index)
-              .concat(this.cardList.slice(index + 1));
-            this.cardList = [card, ...this.cardList];
-            this.isLoader = false;
-          },
-          error:(err)=>{
-            this.isLoader = false;
-            this.toastr.error(`Unable to Fetch data:- ${err.message}`, 'Error',environment.TROASTR_STYLE);
-          }
-      });
+    this.cardService.setCardAsDefault(cardId, this.customerId).subscribe({
+      next: (res) => {
+        this.toastr.info(
+          `new Default card is:- XXXX XXXX XXXX ${card.last4}`,
+          'Info',
+          environment.TROASTR_STYLE
+        );
+        this.cardList = this.cardList
+          .slice(0, index)
+          .concat(this.cardList.slice(index + 1));
+        this.cardList = [card, ...this.cardList];
+        this.isLoader = false;
+      },
+      error: (err) => {
+        this.isLoader = false;
+        this.toastr.error(
+          `Unable to Fetch data:- ${err.message}`,
+          'Error',
+          environment.TROASTR_STYLE
+        );
+      },
+    });
   }
   OnChangeWantToAddCard() {
     this.wantToAddCard = !this.wantToAddCard;
   }
   createToken(): void {
     this.stripeService.createToken(this.card.element).subscribe({
-      next:(result) => {
+      next: (result) => {
         if (result.token) {
           this.OnAddCard(result.token);
         } else if (result.error) {
-          this.toastr.error(result.error.message, 'Error',environment.TROASTR_STYLE);
+          this.toastr.error(
+            result.error.message,
+            'Error',
+            environment.TROASTR_STYLE
+          );
         }
         this.wantToAddCard = false;
       },
-      error:(err)=>{
-        this.toastr.error(`Unable to Fetch data:- ${err.message}`, 'Error',environment.TROASTR_STYLE);
-      }
+      error: (err) => {
+        this.toastr.error(
+          `Unable to Fetch data:- ${err.message}`,
+          'Error',
+          environment.TROASTR_STYLE
+        );
+      },
     });
   }
 }

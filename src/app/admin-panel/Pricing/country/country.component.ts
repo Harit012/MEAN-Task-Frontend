@@ -39,28 +39,7 @@ export class CountryComponent implements OnInit {
       countryCallCode: new FormControl(null, [Validators.required]),
     });
   }
-  commonErrorHandler(err: any) {
-    if (!err.error.status) {
-      this.toastr.error(
-        `Error while sending request to server`,
-        `Error :- ${err.status}`,
-        environment.TROASTR_STYLE
-      );
-    } else if (err.error.status == 'Failure') {
-      if (err.status == 401) {
-        this.authService.userLogOut();
-      } else {
-        this.toastr.error(
-          `${err.error.message}`,
-          `Error :- ${err.status}`,
-          environment.TROASTR_STYLE
-        );
-      }
-    } else {
-      this.toastr.error(`Unknown Error`, `Error :- ${err.status}`, environment.TROASTR_STYLE);
-    }
-  }
-
+ 
   ngOnInit(): void {
     this.getCountries();
   }
@@ -120,10 +99,7 @@ export class CountryComponent implements OnInit {
               this.countryForm.reset();
               this.toBeAddedCountry = null;
             } 
-          },
-          error: (err) => {
-            this.commonErrorHandler(err)
-          },
+          }
         });
     } 
   }
@@ -145,10 +121,7 @@ export class CountryComponent implements OnInit {
           this.AddedCountry = res.countries;
           this.filteredCountry = res.countries;
         }
-      },
-      error: (err) => {
-        this.commonErrorHandler(err);
-      },
+      }
     });
   }
 }

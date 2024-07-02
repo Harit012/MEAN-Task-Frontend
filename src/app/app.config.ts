@@ -9,15 +9,18 @@ import { provideNgxStripe } from 'ngx-stripe';
 import { environment } from '../environments/environment';
 import { authInterceptor } from './auth/auth.interceptor';
 import { provideToastr } from 'ngx-toastr';
+import { auth2Interceptor } from './auth/auth2.interceptor';
+import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 
 export const appConfig: ApplicationConfig = {
   providers: [
     provideRouter(routes),
-    provideHttpClient(withInterceptors([authInterceptor])),
+    provideHttpClient(withInterceptors([authInterceptor, auth2Interceptor])),
     Router,
     GoogleMapsModule,
     provideNgxStripe(environment.STRIPE_PUBLISHABLE_KEY),
     provideAnimations(),
+    provideAnimationsAsync(),
     provideToastr(),
   ],
 };
