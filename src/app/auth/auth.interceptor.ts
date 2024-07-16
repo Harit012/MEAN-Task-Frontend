@@ -5,7 +5,7 @@ import { environment } from '../../environments/environment';
 
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
   const loaderService = inject(LoaderService);
-  // loaderService.subject.next(true);
+  loaderService.subject.next(true);
   // console.log(loaderService.subject.observed.valueOf())
   // console.log(loaderService.subject.forEach(data => console.log(data)))
   if (

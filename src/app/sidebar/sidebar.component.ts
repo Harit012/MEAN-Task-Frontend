@@ -1,21 +1,30 @@
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { AuthService } from '../auth/auth.service';
 import { RouterLink } from '@angular/router';
+import { LoaderComponent } from '../loader/loader.component';
+import { LoaderService } from '../admin-panel/loader.service';
 
 @Component({
   selector: 'app-sidebar',
   standalone: true,
-  imports: [CommonModule,RouterLink],
+  imports: [CommonModule,RouterLink,LoaderComponent],
   templateUrl: './sidebar.component.html',
   styleUrl: './sidebar.component.css'
 })
-export class SidebarComponent {
+export class SidebarComponent implements OnInit {
   isRidesDropdownOpen: boolean = false;
   isDriverDropdownOpen: boolean = false;
   isPricingDropdownOpen: boolean = false;
+  isLoader:boolean= false;
 
-  constructor(private authservice: AuthService){}
+  constructor(private authservice: AuthService,private loaderService:LoaderService){}
+
+  ngOnInit(): void {
+    this.loaderService.subject.subscribe((data:boolean)=>{
+      this.isLoader = data;
+    })
+  }
   toggleDropdown(dropdownName: string) {
     if (dropdownName === 'rides') {
       this.isRidesDropdownOpen = !this.isRidesDropdownOpen;

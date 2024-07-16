@@ -1,1 +1,424 @@
-<p>confirmed-rides works!</p>
+<div class="container p-0" style="width: calc(100dvw - 262px)">
+  <div class="row p-2 d-flex justify-content-between bg-dark text-white">
+    <h1 class="col-4">Confirmed Rides</h1>
+    <div class="col-4 align-self-center">
+      <input
+        type="search"
+        name=""
+        id="searchRide"
+        placeholder="Search"
+        class="form-control"
+        (input)="onSearchInputChange($event)"
+      />
+    </div>
+  </div>
+  <form [formGroup]="filterForm">
+    <div class="row mt-2 p-2">
+      <div class="col-5 d-flex">
+        <label for="status" class="label-2 me-3"
+          ><i class="fa fa-filter me-1"></i>Status</label
+        >
+        <div class="col-8">
+          <select
+            name="status"
+            id="status"
+            class="form-select"
+            formControlName="status"
+          >
+            <option value="all">All</option>
+            <option value="available">Available</option>
+            <option value="accepted">Accepted</option>
+            <option value="arrived">Arrived</option>
+            <option value="picked">Picked</option>
+            <option value="started">Started</option>
+            <option value="completed">Completed</option>
+          </select>
+        </div>
+      </div>
+      <div class="col-5 d-flex">
+        <label for="servicetype" class="label-2 me-3"
+          ><i class="fa fa-filter me-1"></i> Service Type</label
+        >
+        <div class="col-8">
+          <select
+            name="servicetype"
+            id="servicetype"
+            class="form-select"
+            formControlName="serviceType"
+          >
+            <option value="all">All</option>
+            @for(serviceType of serviceTypes;track $index){
+            <option value="{{ serviceType }}">{{ serviceType }}</option>
+            }
+          </select>
+        </div>
+      </div>
+      <button class="col-2 btn btn-dark" (click)="onFilterRides()">
+        Filter results
+      </button>
+    </div>
+  </form>
+  <hr />
+  <div class="scrollable-section">
+    @for(ride of availableRides;track $index){
+    <div class="row ride-details justify-content-between border-3 corners">
+      <div class="col-md-4 col-sm-6 price-source">
+        <p class="price fs-4">
+          ₹ <span id="ridePrice">{{ ride.price }}</span>
+        </p>
+        <p class="source-destination">
+          <span id="rideSource " class="fs-5">{{ ride.source }}</span>
+          <i class="fas fa-arrow-right ms-2 me-2"></i>
+          <span id="rideDestination" class="fs-5">{{ ride.destination }}</span>
+        </p>
+      </div>
+      <div class="col-md-3 col-sm-6 estimated-time d-none d-md-block">
+        <p>
+          <i class="fas fa-clock"></i>
+          <span id="estimatedTime" class="rideInfo">{{ ride.time }}</span>
+        </p>
+        <p>
+          <i class="fas fa-road"></i>
+          <span id="distance" class="rideInfo">{{ ride.distance }}</span>
+        </p>
+        <p>
+          <i class="fas fa-calendar-alt"></i>
+          <span id="rideTime" class="rideInfo"
+            >{{ ride.rideTime | date : "medium" }}({{ ride.rideType }})</span
+          >
+        </p>
+      </div>
+      @if(ride.status == "available"){
+      <div class="col-md-2 col-sm-6 d-none d-md-block">
+        <button
+          type="button"
+          class="btn btn-info w-100 mt-2"
+          (click)="onClickRide($index)"
+        >
+          More Details
+        </button>
+        <button
+          type="button"
+          class="btn btn-success w-100 mt-2"
+          id="rideButton"
+          (click)="onAssignRide($index)"
+        >
+          Assign
+        </button>
+        <button
+          type="button"
+          class="btn btn-danger w-100 mt-2"
+          id="rideButton"
+          (click)="onRejectRide(ride._id)"
+        >
+          Reject
+        </button>
+      </div>
+
+      }@else{
+      <div class="col-md-2 col-sm-6 d-none d-md-block">
+        <h5>{{ ride.status }}</h5>
+      </div>
+
+      }
+    </div>
+    }
+  </div>
+</div>
+
+<!-- Modal  to show ride details -->
+<div
+  class="modal fade"
+  id="confirmedRideModal"
+  tabindex="-1"
+  aria-labelledby="exampleModalLabel"
+  aria-hidden="true"
+>
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h1 class="modal-title fs-5" id="exampleModalLabel">About Ride</h1>
+        <button
+          type="button"
+          class="btn-close"
+          data-bs-dismiss="modal"
+          aria-label="Close"
+        ></button>
+      </div>
+      <div class="modal-body">
+        <div class="container">
+          <form [formGroup]="confirmedRideForm">
+            <!-- user profile -->
+            <div class="row mt-2">
+              <label for="userProfile" class="col-4 label">User Profile</label>
+              <div class="col-8">
+                <img [src]="userProfile" alt="" height="100" width="150" />
+              </div>
+            </div>
+            <!-- username -->
+            <div class="row mt-2">
+              <label for="username" class="col-4 align-self-center label"
+                >Cust. Name
+              </label>
+              <div class="col-8">
+                <input
+                  type="text"
+                  id="username"
+                  class="form-control"
+                  value="blank"
+                  formControlName="username"
+                />
+              </div>
+            </div>
+            <!-- userphone -->
+            <div class="row mt-2">
+              <label for="userphone" class="col-4 align-self-center label"
+                >Cust. Phone
+              </label>
+              <div class="col-8">
+                <input
+                  type="text"
+                  id="userphone"
+                  class="form-control"
+                  value="blank"
+                  formControlName="userphone"
+                />
+              </div>
+            </div>
+            <!-- source -->
+            <div class="row mt-2">
+              <label for="source" class="col-4 align-self-center label"
+                >Source
+              </label>
+              <div class="col-8">
+                <input
+                  type="text"
+                  id="source"
+                  class="form-control"
+                  value="blank"
+                  formControlName="source"
+                />
+              </div>
+            </div>
+            <!-- destination -->
+            <div class="row mt-2">
+              <label for="destination" class="col-4 align-self-center label"
+                >Destination
+              </label>
+              <div class="col-8">
+                <input
+                  type="text"
+                  id="destination"
+                  class="form-control"
+                  value="blank"
+                  formControlName="destination"
+                />
+              </div>
+            </div>
+            <!-- price -->
+            <div class="row mt-2">
+              <label for="price" class="col-4 align-self-center label"
+                >Price
+              </label>
+              <div class="col-8">
+                <input
+                  type="text"
+                  id="price"
+                  class="form-control"
+                  value="blank"
+                  formControlName="price"
+                />
+              </div>
+            </div>
+            <!-- distance -->
+            <div class="row mt-2">
+              <label for="distance" class="col-4 align-self-center label"
+                >Distance
+              </label>
+              <div class="col-8">
+                <input
+                  type="text"
+                  id="distance"
+                  class="form-control"
+                  value="blank"
+                  formControlName="distance"
+                />
+              </div>
+            </div>
+            <!-- time -->
+            <div class="row mt-2">
+              <label for="time" class="col-4 align-self-center label"
+                >Time
+              </label>
+              <div class="col-8">
+                <input
+                  type="text"
+                  id="time"
+                  class="form-control"
+                  value="blank"
+                  formControlName="time"
+                />
+              </div>
+            </div>
+
+            <!-- ridetime -->
+            <div class="row mt-2">
+              <label for="ridetime" class="col-4 align-self-center label"
+                >Ride Time
+              </label>
+              <div class="col-8">
+                <input
+                  type="text"
+                  id="ridetime"
+                  class="form-control"
+                  value="blank"
+                  formControlName="ridetime"
+                />
+              </div>
+            </div>
+            <!-- service Type -->
+            <div class="row mt-2">
+              <label
+                for="riservicetypedetime"
+                class="col-4 align-self-center label"
+                >Service Type
+              </label>
+              <div class="col-8">
+                <input
+                  type="text"
+                  id="servicetype"
+                  class="form-control"
+                  value="blank"
+                  formControlName="servicetype"
+                />
+              </div>
+            </div>
+            <!-- service Type -->
+            <div class="row mt-2">
+              <label for="paymentmethod" class="col-4 align-self-center label"
+                >Payment method
+              </label>
+              <div class="col-8">
+                <input
+                  type="text"
+                  id="paymentmethod"
+                  class="form-control"
+                  value="blank"
+                  formControlName="paymentmethod"
+                />
+              </div>
+            </div>
+            <!-- rideid -->
+            <div class="row mt-2">
+              <label for="rideid" class="col-4 align-self-center label"
+                >Ride ID
+              </label>
+              <div class="col-8">
+                <input
+                  type="text"
+                  id="rideid"
+                  class="form-control"
+                  value="blank"
+                  formControlName="rideid"
+                />
+              </div>
+            </div>
+            <div class="row mt-3">
+              <div id="map"></div>
+            </div>
+          </form>
+        </div>
+      </div>
+      <div class="modal-footer d-flex justify-content-center">
+        <button type="button" class="btn btn-danger" data-bs-dismiss="modal">
+          Close
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modalfor assign Driver -->
+
+<div
+  class="modal fade modal-xl"
+  id="AssignModal"
+  data-bs-backdrop="static"
+  data-bs-keyboard="false"
+  tabindex="-1"
+  aria-labelledby="staticBackdropLabel"
+  aria-hidden="true"
+>
+  <div class="modal-dialog">
+    <div class="modal-content" style="background-color: rgb(219, 236, 233)">
+      <div class="modal-header d-flex justify-content-center">
+        <h1 class="modal-title fs-5" id="staticBackdropLabel">Assign Driver</h1>
+        <button
+          type="button"
+          class="btn-close"
+          data-bs-dismiss="modal"
+          aria-label="Close"
+        ></button>
+      </div>
+      <div class="modal-body">
+        <div class="container">
+          <div class="row border-bottom">
+            <div class="col-2 label-2"><p>Name</p></div>
+            <div class="col-2 label-2"><p>ServiceType</p></div>
+            <div class="col-2 label-2"><p>Phone</p></div>
+            <div class="col-2 label-2"><p>Assign</p></div>
+            <div class="col-2 label-2"><p>----</p></div>
+            <div class="col-2 label-2"><p>Status</p></div>
+          </div>
+          @for(driver of driversList;track $index){ @if(driver.serviceType ==
+          selectedRideForAssign.serviceType){
+          <div class="row mt-2">
+            <div class="col-2">
+              <p>{{ driver.driverName }}</p>
+            </div>
+            <div class="col-2">
+              <p>{{ driver.serviceType }}</p>
+            </div>
+            <div class="col-2">
+              <p>{{ driver.phone }}</p>
+            </div>
+            <div class="col-2">
+              <button
+                [ngClass]="{ btn: true, 'btn-secondary': true }"
+                (click)="onAssignDriver($index)"
+              >
+                Assign ride
+              </button>
+            </div>
+            <div class="col-2">
+              <button [ngClass]="{ btn: true, 'btn-secondary': true }">
+                Assigned to
+              </button>
+            </div>
+            <div class="col-2">
+              @if(selectedRideForAssign != undefined){
+              <p>{{ selectedRideForAssign.status }}</p>
+              }@else {
+              <p>not yet defiend</p>
+              }
+            </div>
+          </div>
+          } }
+        </div>
+        <hr />
+        <!-- Details of ride to be assigned -->
+        <div class="row mt-2 mb-2">
+          <button type="button" class="col-2 offset-5 btn btn-success">
+            Assign to any available
+          </button>
+        </div>
+      </div>
+
+      <div class="modal-footer justify-content-center">
+        <button type="button" class="btn btn-danger" data-bs-dismiss="modal">
+          Close
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

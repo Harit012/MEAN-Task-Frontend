@@ -7,7 +7,7 @@ import { Subject } from "rxjs";
 export class LoaderService {
 
     subject = new Subject<boolean>();
-    loaderSignal =  signal<boolean>(false);
+    // loaderSignal =  signal<boolean>(false);
 
     constructor() { }
 

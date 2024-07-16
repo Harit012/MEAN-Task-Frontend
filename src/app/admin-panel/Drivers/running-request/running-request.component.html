@@ -1,1 +1,113 @@
-<p>running-request works!</p>
+<div class="container" style="width: 84dvw">
+  <div class="row p-2 d-flex justify-content-between bg-dark text-white">
+    <h1 class="col-4">Running Requests</h1>
+  </div>
+  <!-- for new rides -->
+  <div class="mb-1">
+    <h3 class="w-100 ms-5 mt-1" >New Rides</h3>
+    <hr>
+    <div class="scrollable-section">
+      <div>
+        {{temp}}
+      </div>
+      @for(ride of newRides;track $index){
+      <div class="row ride-details justify-content-between border-3 corners">
+        <div class="col-md-4 col-sm-6 price-source">
+          <p class="price fs-4">
+            ₹ <span id="ridePrice">{{ ride.price }}</span>
+          </p>
+          <p class="source-destination">
+            <span id="rideSource " class="fs-5">{{ ride.source }}</span>
+            <i class="fas fa-arrow-right ms-2 me-2"></i>
+            <span id="rideDestination" class="fs-5">{{ ride.destination }}</span>
+          </p>
+        </div>
+        <div class="col-md-3 col-sm-6 estimated-time d-none d-md-block">
+          <p>
+            <i class="fas fa-clock"></i>
+            <span id="estimatedTime" class="rideInfo">{{ ride.time }}</span>
+          </p>
+          <p>
+            <i class="fas fa-road"></i>
+            <span id="distance" class="rideInfo">{{ ride.distance }}</span>
+          </p>
+          <p>
+            <i class="fas fa-calendar-alt"></i>
+            <span id="rideTime" class="rideInfo"
+              >{{ ride.rideTime | date : "medium" }}({{ ride.rideType }})</span
+            >
+          </p>
+        </div>
+        <div class="col-md-2 col-sm-6 d-none d-md-block">
+          <button type="button" class="btn btn-info w-100 mt-2">
+            More Details
+          </button>
+          <button
+            type="button"
+            class="btn btn-success w-100 mt-2"
+            id="rideButton"
+            (click)="onAcceptRequest($index)"
+          >
+            Accept
+          </button>
+          <button type="button" class="btn btn-danger w-100 mt-2" id="rideButton" (click)="onRejectRequest($index)">
+            Reject
+          </button>
+          
+        </div>
+      </div>
+      }
+    </div>
+  </div>
+<hr>
+  <!-- For rides in progress -->
+  <div class="mb-1 ">
+    <h3 class="w-100 ms-5">Accepted Rides</h3>
+    <hr>
+    <div class="scrollable-section-2">
+      @for(ride of acceptedRides;track $index){
+        <div class="row ride-details2 justify-content-between border-3 corners">
+          <div class="col-md-4 col-sm-6 price-source">
+            <p class="price fs-4">
+              ₹ <span id="ridePrice">{{ ride.price }}</span>
+            </p>
+            <p class="source-destination">
+              <span id="rideSource " class="fs-5">{{ ride.source }}</span>
+              <i class="fas fa-arrow-right ms-2 me-2"></i>
+              <span id="rideDestination" class="fs-5">{{ ride.destination }}</span>
+            </p>
+          </div>
+          <div class="col-md-3 col-sm-6 estimated-time d-none d-md-block">
+            <p>
+              <i class="fas fa-clock"></i>
+              <span id="estimatedTime" class="rideInfo">{{ ride.time }}</span>
+            </p>
+            <p>
+              <i class="fas fa-road"></i>
+              <span id="distance" class="rideInfo">{{ ride.distance }}</span>
+            </p>
+            <p>
+              <i class="fas fa-calendar-alt"></i>
+              <span id="rideTime" class="rideInfo"
+                >{{ ride.rideTime | date : "medium" }}({{ ride.rideType }})</span
+              >
+            </p>
+          </div>
+          <div class="col-md-2 col-sm-6 d-none d-md-block">
+            <select name="action-selector" [id]="$index" class="form-select">
+              <option value="{{ride.status}}" [defaultSelected]="true" [disabled]="true">{{ride.status}}</option>
+              <option value="accepted">Accepted</option>
+              <option value="arrived">Arrived</option>
+              <option value="picked">Picked</option>
+              <option value="started">Started</option>
+              <option value="completed">Completed</option>
+            </select>
+            <button type="button" class="btn btn-success w-80 mt-2" id="Statuschange" (click)="onStatusChange($index)">Update status</button>
+          </div>
+        </div>
+      }
+
+    </div>
+  </div>
+  <hr>
+</div>

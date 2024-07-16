@@ -1,4 +1,6 @@
 #adminDiv {
   background-color: rgb(229, 235, 239);
+  display: flex;
+  min-height: 100dvh;
+  min-width: 100dvw;
 }
-

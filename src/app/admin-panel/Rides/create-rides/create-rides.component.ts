@@ -1,6 +1,5 @@
 import {
   AfterViewInit,
-  ChangeDetectorRef,
   Component,
   OnInit,
   inject,
@@ -19,7 +18,6 @@ import { CreateRidesService } from './create-rides.service';
 import { SettingsService } from '../../settings/settings.service';
 import { Settings } from '../../settings/settings.interface';
 import { VerifiedUser } from '../../users/userGet.inerface';
-import { VehicleTypeService } from '../../Pricing/vehicle-type/vehicle-type.service';
 import { CityService } from '../../Pricing/city/city.service';
 import { RecivingZone } from '../../Pricing/city/recivingZone.interface';
 import { BoxPricingContent } from './all.interface';
@@ -46,6 +44,21 @@ export class CreateRidesComponent implements OnInit, AfterViewInit {
   vehiclePricings: BoxPricingContent[] = [];
   estimatedDistance!: string;
   estimatedTime!: string;
+  stopsArray: string[] = [];
+  stopDetails: any;
+
+  // for form
+  calculated_source!: string;
+  calculated_destination!: string;
+  calculated_stops: string[] = [];
+  calculated_serviceType!: string;
+  calculated_paymentMethod!: string;
+  calculated_rideTime!: string;
+  calculated_ride!: any;
+  calculated_distance!: string;
+  calculated_time!: string;
+  calculated_stopPoints: google.maps.LatLngLiteral[]= [];
+  calculated_startEndLatLng: google.maps.LatLngLiteral[]= [];
 
   // For Map
   map!: google.maps.Map;
@@ -74,9 +87,7 @@ export class CreateRidesComponent implements OnInit, AfterViewInit {
   constructor(
     private createRideService: CreateRidesService,
     private settingsService: SettingsService,
-    private vehicleTypeService: VehicleTypeService,
     private cityService: CityService,
-    private cdRef: ChangeDetectorRef
   ) {
     this.rideForm = new FormGroup({
       phone: new FormControl(null, [
@@ -89,10 +100,11 @@ export class CreateRidesComponent implements OnInit, AfterViewInit {
       userEmail: new FormControl(null, [Validators.required, Validators.email]),
       source: new FormControl(null, [Validators.required]),
       destination: new FormControl(null, [Validators.required]),
-      stops: new FormArray([]),
+      stops: new FormControl([]),
       serviceType: new FormControl(null, [Validators.required]),
       paymentMethod: new FormControl(null, [Validators.required]),
       rideTime: new FormControl(null, [Validators.required]),
+      rideType: new FormControl(null, [Validators.required]),
     });
   }
   get stops(): FormArray {
@@ -178,42 +190,32 @@ export class CreateRidesComponent implements OnInit, AfterViewInit {
   }
   // to add a stop in formArray
   onAddStop() {
-    if (this.stops.controls.length < this.settings.stops) {
-      this.stops.push(new FormControl(null, [Validators.required]));
-      this.cdRef.detectChanges();
-      let temp_stop = document.getElementById(
-        `${this.stops.controls.length - 1}`
-      );
-      let autocomplete = new google.maps.places.Autocomplete(
-        temp_stop as HTMLInputElement,
-        this.autocompleteOptions
-      );
-      autocomplete.addListener('place_changed', () => {
-        this.stopsPin = new google.maps.marker.PinElement({
-          scale: 1.2,
-          borderColor: 'blue',
-          background: 'red',
-          // glyph: '🚗',
-          glyphColor: 'blue',
-        });
-        let marker = new google.maps.marker.AdvancedMarkerElement;
-        let stopGeo : google.maps.LatLngLiteral;
-        let stop = autocomplete.getPlace();
-        stopGeo= {
-          lat : stop.geometry?.location?.lat()!,
-          lng : stop.geometry?.location?.lng()!
-        };
-        marker = new google.maps.marker.AdvancedMarkerElement({
-          position: stopGeo,
-          title: stop.name,
-          gmpDraggable: true,
+    if (this.stopsArray.length < this.settings.stops) {
+      if (this.stopDetails != undefined) {
+        let marker = new google.maps.marker.AdvancedMarkerElement({
+          position: this.stopDetails.placeLatLng,
+          title: this.stopDetails.place.name,
+          // gmpDraggable: true,
           content: this.stopsPin.element,
-        })
-        this.stopMarkers[this.stops.controls.length - 1] = marker;
-        this.stopLatLngs[this.stops.controls.length - 1] = stopGeo;
-        console.log(this.stopMarkers)
-        console.log(this.stopLatLngs)
-      })
+        });
+        marker.map = this.map;
+
+        this.stopMarkers[this.stopsArray.length] = marker;
+        this.stopLatLngs[this.stopsArray.length] = this.stopDetails.placeLatLng;
+        this.stopsArray[this.stopsArray.length] = this.stopDetails.place.name;
+
+        this.stopDetails = undefined;
+        let temp_stops = document.getElementById(
+          'stopAutocomplete'
+        ) as HTMLInputElement;
+        temp_stops.value = '';
+      } else {
+        this.toastr.warning(
+          'Please select a stop',
+          'warning',
+          environment.TROASTR_STYLE
+        );
+      }
     } else {
       this.toastr.warning(
         `You can't add more than ${this.settings.stops} stops`,
@@ -224,11 +226,18 @@ export class CreateRidesComponent implements OnInit, AfterViewInit {
   }
   // to remove a stop from formArray
   onRemoveStop(i: number) {
-    this.stops.removeAt(i);
+    this.stopMarkers = this.stopMarkers
+      .slice(0, i)
+      .concat(this.stopMarkers.slice(i + 1, this.stopMarkers.length));
+    this.stopsArray = this.stopsArray
+      .slice(0, i)
+      .concat(this.stopsArray.slice(i + 1, this.stopsArray.length));
+    this.stopLatLngs = this.stopLatLngs
+      .slice(0, i)
+      .concat(this.stopLatLngs.slice(i + 1, this.stopLatLngs.length));
   }
   // to get current location
   getCurrentLocation() {
-    console.log(navigator.geolocation);
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition((position) => {
         this.center = {
@@ -294,8 +303,47 @@ export class CreateRidesComponent implements OnInit, AfterViewInit {
   // on submit the form
   onCreateRide() {
     let invalidFields = [];
+    let price: number = 0;
     if (this.rideForm.valid) {
       console.log(this.rideForm.value);
+      for (let pricing of this.vehiclePricings) {
+        if (pricing.vehicleType == this.rideForm.value.serviceType) {
+          price = Number(pricing.price.toFixed(2));
+        } else {
+          continue;
+        }
+      }
+      let RideObject = {
+        userId: this.verifiedUser._id,
+        username: this.rideForm.value.userName,
+        useremail: this.rideForm.value.userEmail,
+        userphone: this.rideForm.value.phone,
+        source: this.calculated_source,
+        destination: this.calculated_destination,
+        stops: this.calculated_stops,
+        serviceType: this.rideForm.value.serviceType,
+        paymentmethod: this.rideForm.value.paymentMethod,
+        ridetime: this.rideForm.value.rideTime,
+        distance: this.calculated_distance,
+        time: this.calculated_time,
+        price: price,
+        rideType: this.rideForm.value.rideType,
+        endPoints: this.calculated_startEndLatLng,
+        stopPoints: this.calculated_stopPoints,
+      };
+      this.createRideService.postRide(RideObject).subscribe({
+        next: (data) => {
+          this.toastr.success(
+            `Ride Has Been Created`,
+            'Success',
+            environment.TROASTR_STYLE
+          );
+        },
+      });
+      this.rideForm.reset();
+      this.isCalulated = false;
+      this.isVerified = false;
+      this.initMap();
     } else {
       let controls = this.rideForm.controls;
       this.rideForm.markAsDirty();
@@ -318,10 +366,11 @@ export class CreateRidesComponent implements OnInit, AfterViewInit {
   autocomplete() {
     this.autocompleteOptions = {
       componentRestrictions: { country: this.autocompleteCountry },
-      types: ['address'],
+      types: ['establishment'],
 
       fields: ['address_components', 'geometry', 'name', 'place_id'],
     };
+    // let sessionsToken =new google.maps.places.AutocompleteSessionToken()
     this.sourcePin = new google.maps.marker.PinElement({
       scale: 1.2,
       borderColor: 'blue',
@@ -336,6 +385,13 @@ export class CreateRidesComponent implements OnInit, AfterViewInit {
       // glyph: '🚗',
       glyphColor: 'yellow',
     });
+    this.stopsPin = new google.maps.marker.PinElement({
+      scale: 1.2,
+      borderColor: 'blue',
+      background: 'red',
+      // glyph: '🚗',
+      glyphColor: 'pink',
+    });
     this.autoComplete1 = new google.maps.places.Autocomplete(
       document.getElementById('source') as HTMLInputElement,
       this.autocompleteOptions
@@ -344,6 +400,18 @@ export class CreateRidesComponent implements OnInit, AfterViewInit {
       document.getElementById('destination') as HTMLInputElement,
       this.autocompleteOptions
     );
+    this.autoComplete3 = new google.maps.places.Autocomplete(
+      document.getElementById('stopAutocomplete') as HTMLInputElement,
+      this.autocompleteOptions
+    );
+
+    // this.autoComplete3 = new google.maps.places.AutocompleteService()
+    // this.autoComplete3.getPlacePredictions({
+    //   input: 'tajmahal',
+    //   sessionToken: sessionsToken
+    // },(data, status) => {
+    //   console.log(data)
+    // })
 
     // onSourceChange
     this.onSourceChange();
@@ -352,6 +420,7 @@ export class CreateRidesComponent implements OnInit, AfterViewInit {
     this.onDestinationChange();
 
     // onStopChange
+    this.onStopchange();
   }
 
   // triggered when Source is Changed
@@ -361,6 +430,7 @@ export class CreateRidesComponent implements OnInit, AfterViewInit {
       let marker: google.maps.marker.AdvancedMarkerElement;
       const place = this.autoComplete1.getPlace();
       let bounds = new google.maps.LatLngBounds();
+      let temp_source = document.getElementById('source') as HTMLInputElement;
 
       const placeGeo: google.maps.LatLngLiteral = {
         lat: place.geometry?.location?.lat()!,
@@ -389,7 +459,10 @@ export class CreateRidesComponent implements OnInit, AfterViewInit {
           gmpDraggable: true,
           content: this.sourcePin.element,
         });
-        this.rideForm.patchValue({ source: place.name });
+        this.rideForm.patchValue({
+          source: place.name,
+        });
+        // temp_source.value = place.name!;
         this.markers[0] = marker;
         this.map.panTo(placeGeo);
         this.sourceLatLng = placeGeo;
@@ -403,7 +476,7 @@ export class CreateRidesComponent implements OnInit, AfterViewInit {
           'Info',
           environment.TROASTR_STYLE
         );
-        let temp_source = document.getElementById('source') as HTMLInputElement;
+
         temp_source.value = '';
       }
     });
@@ -439,14 +512,43 @@ export class CreateRidesComponent implements OnInit, AfterViewInit {
       this.map.fitBounds(bounds);
     });
   }
+
+  onStopchange() {
+    this.autoComplete3.addListener('place_changed', () => {
+      const place3 = this.autoComplete3.getPlace();
+      const place3Geo: google.maps.LatLngLiteral = {
+        lat: place3.geometry?.location?.lat()!,
+        lng: place3.geometry?.location?.lng()!,
+      };
+      this.stopDetails = {
+        place: place3,
+        placeLatLng: place3Geo,
+      };
+    });
+  }
   // calculate Distance, time and priceing Of Vehicle Types
   onClickCalculatePricing() {
+    if (
+      this.rideForm.value.source == null ||
+      this.rideForm.value.destination == null
+    ) {
+      this.toastr.warning(
+        'Source and Destination is not correct',
+        'Error',
+        environment.TROASTR_STYLE
+      );
+      return;
+    }
     this.vehiclePricings = [];
     const directionServices = new google.maps.DirectionsService();
     const request = {
       origin: this.sourceLatLng,
       destination: this.destinationLatLng,
       travelMode: google.maps.TravelMode.DRIVING,
+      waypoints: this.stopLatLngs.map((stop) => ({
+        location: stop,
+        stopover: true,
+      })),
       optimizeWaypoints: true,
     };
 
@@ -454,18 +556,23 @@ export class CreateRidesComponent implements OnInit, AfterViewInit {
       this.directionsRenderer.setMap(null);
       this.directionsRenderer.setMap(this.map);
       this.directionsRenderer.setDirections(result);
-      let estimatedDistance: number;
+      let estimatedDistance = 0;
+      let totalminutes = 0;
       const route = result!.routes[0];
-
-      estimatedDistance = Number(
-        (route.legs[0].distance.value / 1000).toFixed(2)
-      );
-      this.estimatedDistance = `${estimatedDistance} Km.`;
-      let totalminutes = Number(route.legs[0].duration.value / 60);
+      // to calculate total distance & time
+      route.legs.forEach((leg:{distance:{value:number},duration:{value:number}}) => {
+        estimatedDistance += leg.distance.value;
+        totalminutes += leg.duration.value
+      });
+      estimatedDistance = Number((estimatedDistance/1000).toFixed(2));
+      
+      this.calculated_distance = `${estimatedDistance} Km.`;
+      
+      totalminutes = totalminutes/60;
       let minutes = Math.ceil(totalminutes % 60);
       let hours = Math.floor(totalminutes / 60);
       let day = Math.floor(hours / 24);
-      let time = `empty`;
+      let time;
       if (hours == 0) {
         time = `${minutes} Minutes`;
       } else if (hours > 0 && hours < 24) {
@@ -473,37 +580,39 @@ export class CreateRidesComponent implements OnInit, AfterViewInit {
       } else {
         time = `${day} Days , ${hours % 24} Hours , ${minutes} Minutes`;
       }
-      this.estimatedTime = time;
-      this.createRideService.getVehiclePricings(this.sourceZoneId).subscribe({
-        next: (data) => {
-          data.pricings.forEach((element) => {
-            this.vehiclePricings.push({
-              _id: element._id,
-              totalPrice:
-                element.basePrice +
-                (estimatedDistance - element.distanceForBasePrice) *
-                  element.pricePerUnitDistance +
-                totalminutes * element.pricePerUnitTime,
-              vehicleType: element.vehicleType,
-              totalDistance: estimatedDistance,
-              totalTime: time,
-            });
-          });
-        },
-      });
+      this.calculated_time = time;
+      this.createRideService
+        .postCalculatPricing(this.sourceZoneId, totalminutes, estimatedDistance)
+        .subscribe({
+          next: (data) => {
+            this.vehiclePricings = data.prices;
+          },
+        });
     });
     this.isCalulated = true;
+    this.calculated_source = this.rideForm.get('source')?.value;
+    this.calculated_destination = this.rideForm.get('destination')?.value;
+    this.calculated_stopPoints = this.stopLatLngs;
+    this.calculated_startEndLatLng.push(this.sourceLatLng);
+    this.calculated_startEndLatLng.push(this.destinationLatLng);
+    this.rideForm.patchValue({
+      stops: this.stopsArray,
+    });
+    this.calculated_stops = this.rideForm.get('stops')?.value;
   }
   // set current date & time
   onClickNow() {
     let currentDateAndTime = new Date();
     this.rideForm.patchValue({
       rideTime: currentDateAndTime,
+      rideType: 'Now'
     });
   }
   // Opens Date & Time Modal
   onSelectSchedule() {
-    console.log('on select called');
+    this.rideForm.patchValue({
+      rideTime: null,
+    });
     let temp_schedule = document.getElementById(
       'schedule'
     ) as HTMLOptionElement;
@@ -536,6 +645,7 @@ export class CreateRidesComponent implements OnInit, AfterViewInit {
     if (scaduledDate > now) {
       this.rideForm.patchValue({
         rideTime: scaduledDate,
+        rideType: 'Scheduled',
       });
       modal.toggle();
     } else {
@@ -544,6 +654,19 @@ export class CreateRidesComponent implements OnInit, AfterViewInit {
         'Invalid Date and Time',
         environment.TROASTR_STYLE
       );
+    }
+  }
+  // on reset form
+  onReset() {
+    if (confirm('Are you sure want to reset?')) {
+      this.initMap();
+      this.rideForm.reset();
+      this.isCalulated = false;
+      this.isVerified = false;
+      this.stopLatLngs = [];
+      this.stopDetails = [];
+      this.stopMarkers = [];
+      this.stopsArray =[];
     }
   }
 }

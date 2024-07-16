@@ -2,11 +2,12 @@ import {
   HttpHandlerFn,
   HttpRequest,
 } from '@angular/common/http';
-import {  catchError, throwError } from 'rxjs';
+import {  catchError, tap, throwError } from 'rxjs';
 import { inject } from '@angular/core';
 import { ToastrService } from 'ngx-toastr';
 import { AuthService } from './auth.service';
 import { environment } from '../../environments/environment';
+import { LoaderService } from '../admin-panel/loader.service';
 
 export const auth2Interceptor = (
   req: HttpRequest<any>,
@@ -14,8 +15,10 @@ export const auth2Interceptor = (
 ) => {
   let toastr = inject(ToastrService);
   let authService = inject(AuthService);
+  let loaderService = inject(LoaderService);
   // console.log("Auth 2 called")
   return next(req).pipe(
+        tap(() => loaderService.subject.next(false)),
     catchError((err) => {
         if (!err.error.status) {
           toastr.error(
@@ -43,6 +46,5 @@ export const auth2Interceptor = (
         // loaderService.subject.next(false)
         return throwError(() => new Error('Something went wrong'));
     }),
-    // tap(() => loaderService.subject.next(false)),
   );
 };

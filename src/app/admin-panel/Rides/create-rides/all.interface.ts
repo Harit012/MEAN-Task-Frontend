@@ -11,9 +11,7 @@ export interface VehiclePricingInterface {
 }
 
 export interface BoxPricingContent {
-  _id: string;
-  totalPrice: number;
+  vehicleImage: string;
+  price: number;
   vehicleType: number;
-  totalDistance: number;
-  totalTime: string;
 }
