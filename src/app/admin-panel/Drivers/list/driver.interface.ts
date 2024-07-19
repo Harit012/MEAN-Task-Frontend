@@ -9,4 +9,5 @@ export interface Driver {
     countryName: string;
     approved?: boolean;
     serviceType:string;
+    isAvailable?:boolean
 }

@@ -8,7 +8,7 @@ export class RunningRequestService {
   constructor(private http: HttpClient) {}
 
   getRidesForRunningRequest() {
-    return this.http.get<{ status: string; rides: ConfirmedRide[] }>(
+    return this.http.get<{ status: string; acceptedRides: ConfirmedRide[] , newRides: ConfirmedRide[] }>(
       `${environment.BASE_URL}/admin/drivers/running-request/getRidesForRunningRequest`
     );
   }

@@ -44,3 +44,8 @@
     width: 100%;
     background-color: brown;
   }
+
+  .driver-details{
+    font-size: large;
+    color: rgba(62, 60, 60, 0.808);
+  }

@@ -4,12 +4,9 @@
   </div>
   <!-- for new rides -->
   <div class="mb-1">
-    <h3 class="w-100 ms-5 mt-1" >New Rides</h3>
+    <h5 class="w-100 ms-5 mt-1" >New Rides</h5>
     <hr>
     <div class="scrollable-section">
-      <div>
-        {{temp}}
-      </div>
       @for(ride of newRides;track $index){
       <div class="row ride-details justify-content-between border-3 corners">
         <div class="col-md-4 col-sm-6 price-source">
@@ -39,7 +36,7 @@
           </p>
         </div>
         <div class="col-md-2 col-sm-6 d-none d-md-block">
-          <button type="button" class="btn btn-info w-100 mt-2">
+          <button type="button" class="btn btn-info w-100 mt-2" (click)="onClickShowDetails($index)">
             More Details
           </button>
           <button
@@ -62,7 +59,7 @@
 <hr>
   <!-- For rides in progress -->
   <div class="mb-1 ">
-    <h3 class="w-100 ms-5">Accepted Rides</h3>
+    <h5 class="w-100 ms-5">Accepted Rides</h5>
     <hr>
     <div class="scrollable-section-2">
       @for(ride of acceptedRides;track $index){
@@ -102,12 +99,226 @@
               <option value="started">Started</option>
               <option value="completed">Completed</option>
             </select>
-            <button type="button" class="btn btn-success w-80 mt-2" id="Statuschange" (click)="onStatusChange($index)">Update status</button>
+            <button type="button" class="btn btn-success w-100 mt-2" id="Statuschange" (click)="onStatusChange($index)">Update status</button>
           </div>
         </div>
       }
-
     </div>
   </div>
   <hr>
+</div>
+
+
+
+
+
+<div
+  class="modal fade"
+  id="confirmedRideModal"
+  tabindex="-1"
+  aria-labelledby="exampleModalLabel"
+  aria-hidden="true"
+>
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h1 class="modal-title fs-5" id="exampleModalLabel">About Ride</h1>
+        <button
+          type="button"
+          class="btn-close"
+          data-bs-dismiss="modal"
+          aria-label="Close"
+        ></button>
+      </div>
+      <div class="modal-body">
+        <div class="container">
+          <form [formGroup]="confirmedRideForm">
+            <!-- user profile -->
+            <div class="row mt-2">
+              <label for="userProfile" class="col-4 label">User Profile</label>
+              <div class="col-8">
+                <img [src]="userProfile" alt="" height="100" width="150" />
+              </div>
+            </div>
+            <!-- username -->
+            <div class="row mt-2">
+              <label for="username" class="col-4 align-self-center label"
+                >Cust. Name
+              </label>
+              <div class="col-8">
+                <input
+                  type="text"
+                  id="username"
+                  class="form-control"
+                  value="blank"
+                  formControlName="username"
+                />
+              </div>
+            </div>
+            <!-- userphone -->
+            <div class="row mt-2">
+              <label for="userphone" class="col-4 align-self-center label"
+                >Cust. Phone
+              </label>
+              <div class="col-8">
+                <input
+                  type="text"
+                  id="userphone"
+                  class="form-control"
+                  value="blank"
+                  formControlName="userphone"
+                />
+              </div>
+            </div>
+            <!-- source -->
+            <div class="row mt-2">
+              <label for="source" class="col-4 align-self-center label"
+                >Source
+              </label>
+              <div class="col-8">
+                <input
+                  type="text"
+                  id="source"
+                  class="form-control"
+                  value="blank"
+                  formControlName="source"
+                />
+              </div>
+            </div>
+            <!-- destination -->
+            <div class="row mt-2">
+              <label for="destination" class="col-4 align-self-center label"
+                >Destination
+              </label>
+              <div class="col-8">
+                <input
+                  type="text"
+                  id="destination"
+                  class="form-control"
+                  value="blank"
+                  formControlName="destination"
+                />
+              </div>
+            </div>
+            <!-- price -->
+            <div class="row mt-2">
+              <label for="price" class="col-4 align-self-center label"
+                >Price
+              </label>
+              <div class="col-8">
+                <input
+                  type="text"
+                  id="price"
+                  class="form-control"
+                  value="blank"
+                  formControlName="price"
+                />
+              </div>
+            </div>
+            <!-- distance -->
+            <div class="row mt-2">
+              <label for="distance" class="col-4 align-self-center label"
+                >Distance
+              </label>
+              <div class="col-8">
+                <input
+                  type="text"
+                  id="distance"
+                  class="form-control"
+                  value="blank"
+                  formControlName="distance"
+                />
+              </div>
+            </div>
+            <!-- time -->
+            <div class="row mt-2">
+              <label for="time" class="col-4 align-self-center label"
+                >Time
+              </label>
+              <div class="col-8">
+                <input
+                  type="text"
+                  id="time"
+                  class="form-control"
+                  value="blank"
+                  formControlName="time"
+                />
+              </div>
+            </div>
+
+            <!-- ridetime -->
+            <div class="row mt-2">
+              <label for="ridetime" class="col-4 align-self-center label"
+                >Ride Time
+              </label>
+              <div class="col-8">
+                <input
+                  type="text"
+                  id="ridetime"
+                  class="form-control"
+                  value="blank"
+                  formControlName="ridetime"
+                />
+              </div>
+            </div>
+            <!-- service Type -->
+            <div class="row mt-2">
+              <label
+                for="riservicetypedetime"
+                class="col-4 align-self-center label"
+                >Service Type
+              </label>
+              <div class="col-8">
+                <input
+                  type="text"
+                  id="servicetype"
+                  class="form-control"
+                  value="blank"
+                  formControlName="servicetype"
+                />
+              </div>
+            </div>
+            <!-- service Type -->
+            <div class="row mt-2">
+              <label for="paymentmethod" class="col-4 align-self-center label"
+                >Payment method
+              </label>
+              <div class="col-8">
+                <input
+                  type="text"
+                  id="paymentmethod"
+                  class="form-control"
+                  value="blank"
+                  formControlName="paymentmethod"
+                />
+              </div>
+            </div>
+            <!-- rideid -->
+            <div class="row mt-2">
+              <label for="rideid" class="col-4 align-self-center label"
+                >Ride ID
+              </label>
+              <div class="col-8">
+                <input
+                  type="text"
+                  id="rideid"
+                  class="form-control"
+                  value="blank"
+                  formControlName="rideid"
+                />
+              </div>
+            </div>
+            <div class="row mt-3">
+              <div id="map"></div>
+            </div>
+          </form>
+        </div>
+      </div>
+      <div class="modal-footer d-flex justify-content-center">
+        <button type="button" class="btn btn-danger" data-bs-dismiss="modal">
+          Close
+        </button>
+      </div>
+    </div>
+  </div>
 </div>

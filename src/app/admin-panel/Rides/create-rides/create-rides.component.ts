@@ -1,9 +1,4 @@
-import {
-  AfterViewInit,
-  Component,
-  OnInit,
-  inject,
-} from '@angular/core';
+import { AfterViewInit, Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import {
   FormArray,
@@ -57,13 +52,13 @@ export class CreateRidesComponent implements OnInit, AfterViewInit {
   calculated_ride!: any;
   calculated_distance!: string;
   calculated_time!: string;
-  calculated_stopPoints: google.maps.LatLngLiteral[]= [];
-  calculated_startEndLatLng: google.maps.LatLngLiteral[]= [];
+  calculated_stopPoints: google.maps.LatLngLiteral[] = [];
+  calculated_startEndLatLng: google.maps.LatLngLiteral[] = [];
 
   // For Map
   map!: google.maps.Map;
-  sourceLatLng!: google.maps.LatLngLiteral;
-  destinationLatLng!: google.maps.LatLngLiteral;
+  sourceLatLng!: google.maps.LatLngLiteral | undefined;
+  destinationLatLng!: google.maps.LatLngLiteral | undefined; 
   center!: google.maps.LatLngLiteral;
   markers: google.maps.marker.AdvancedMarkerElement[] = [];
   stopMarkers: google.maps.marker.AdvancedMarkerElement[] = [];
@@ -75,6 +70,7 @@ export class CreateRidesComponent implements OnInit, AfterViewInit {
   sourcePin!: google.maps.marker.PinElement;
   destinationPin!: google.maps.marker.PinElement;
   stopsPin!: google.maps.marker.PinElement;
+  // directionsRenderer! : google.maps.DirectionsRenderer;
   directionsRenderer = new google.maps.DirectionsRenderer({
     hideRouteList: true,
     polylineOptions: {
@@ -87,7 +83,7 @@ export class CreateRidesComponent implements OnInit, AfterViewInit {
   constructor(
     private createRideService: CreateRidesService,
     private settingsService: SettingsService,
-    private cityService: CityService,
+    private cityService: CityService
   ) {
     this.rideForm = new FormGroup({
       phone: new FormControl(null, [
@@ -135,7 +131,11 @@ export class CreateRidesComponent implements OnInit, AfterViewInit {
   }
   // to Verify user from phone number
   onVerifyPhoneNumber() {
-    if (this.rideForm.get('phone')?.valid) {
+    if (this.rideForm.get('phone')?.valid ) {
+      if(this.isVerified && this.verifiedUser.phone == this.rideForm.get('phone')?.value) {
+        this.toastr.info('Phone number already verified', '', environment.TROASTR_STYLE)
+        return;
+      }
       let phone = this.rideForm.get('phone')?.value;
       this.createRideService.verifyPhoneNumber(phone).subscribe({
         next: (data) => {
@@ -190,6 +190,11 @@ export class CreateRidesComponent implements OnInit, AfterViewInit {
   }
   // to add a stop in formArray
   onAddStop() {
+    const customPinElement = document.createElement('div');
+      customPinElement.style.backgroundImage = 'url("https://www.google.com/url?sa=i&url=https%3A%2F%2Fwww.pngegg.com%2Fen%2Fsearch%3Fq%3Dmap%2Bpin&psig=AOvVaw3JT44dx-r4JDeRfspEjQc2&ust=1721469325472000&source=images&cd=vfe&opi=89978449&ved=0CBEQjRxqFwoTCNCw0pDrsocDFQAAAAAdAAAAABAE")';
+      customPinElement.style.backgroundSize = 'contain';
+      customPinElement.style.width = '50px';
+      customPinElement.style.height = '50px';
     if (this.stopsArray.length < this.settings.stops) {
       if (this.stopDetails != undefined) {
         let marker = new google.maps.marker.AdvancedMarkerElement({
@@ -199,6 +204,7 @@ export class CreateRidesComponent implements OnInit, AfterViewInit {
           content: this.stopsPin.element,
         });
         marker.map = this.map;
+        
 
         this.stopMarkers[this.stopsArray.length] = marker;
         this.stopLatLngs[this.stopsArray.length] = this.stopDetails.placeLatLng;
@@ -385,12 +391,9 @@ export class CreateRidesComponent implements OnInit, AfterViewInit {
       // glyph: '🚗',
       glyphColor: 'yellow',
     });
+    
     this.stopsPin = new google.maps.marker.PinElement({
-      scale: 1.2,
-      borderColor: 'blue',
-      background: 'red',
-      // glyph: '🚗',
-      glyphColor: 'pink',
+      glyph:"",
     });
     this.autoComplete1 = new google.maps.places.Autocomplete(
       document.getElementById('source') as HTMLInputElement,
@@ -479,11 +482,21 @@ export class CreateRidesComponent implements OnInit, AfterViewInit {
 
         temp_source.value = '';
       }
+      if(this.destinationLatLng?.lat === this.sourceLatLng?.lat && this.destinationLatLng?.lng === this.sourceLatLng?.lng){
+        this.toastr.warning(
+          `Source and Destination cannot be same`,
+          'Info',
+          environment.TROASTR_STYLE
+        );
+
+        temp_source.value = '';
+        this.sourceLatLng = undefined;
+      }
     });
   }
   // triggers when Destination is changed
   onDestinationChange() {
-    // let temp_destination = document.getElementById('destination') as HTMLInputElement;
+    let temp_destination = document.getElementById('destination') as HTMLInputElement;
     this.autoComplete2.addListener('place_changed', () => {
       let marker: google.maps.marker.AdvancedMarkerElement;
       const place2 = this.autoComplete2.getPlace();
@@ -503,12 +516,21 @@ export class CreateRidesComponent implements OnInit, AfterViewInit {
       this.rideForm.patchValue({
         destination: place2.name,
       });
+      this.destinationLatLng = place2Geo;
+      if(this.destinationLatLng.lat === this.sourceLatLng?.lat && this.destinationLatLng.lng === this.sourceLatLng?.lng){
+        this.toastr.warning(
+          `Source and Destination cannot be same`,
+          'Info',
+          environment.TROASTR_STYLE
+        );
+
+        temp_destination.value = '';
+      }
       this.map.panTo(place2Geo);
       this.markers[1] = marker;
       this.markers.forEach((marker) => {
         bounds.extend(marker.position!);
       });
-      this.destinationLatLng = place2Geo;
       this.map.fitBounds(bounds);
     });
   }
@@ -530,7 +552,9 @@ export class CreateRidesComponent implements OnInit, AfterViewInit {
   onClickCalculatePricing() {
     if (
       this.rideForm.value.source == null ||
-      this.rideForm.value.destination == null
+      this.rideForm.value.destination == null||
+      this.sourceLatLng == undefined ||
+      this.destinationLatLng == undefined
     ) {
       this.toastr.warning(
         'Source and Destination is not correct',
@@ -540,6 +564,7 @@ export class CreateRidesComponent implements OnInit, AfterViewInit {
       return;
     }
     this.vehiclePricings = [];
+    
     const directionServices = new google.maps.DirectionsService();
     const request = {
       origin: this.sourceLatLng,
@@ -551,24 +576,27 @@ export class CreateRidesComponent implements OnInit, AfterViewInit {
       })),
       optimizeWaypoints: true,
     };
-
     directionServices.route(request, (result: any, status) => {
       this.directionsRenderer.setMap(null);
       this.directionsRenderer.setMap(this.map);
       this.directionsRenderer.setDirections(result);
+      // if(this.stopLatLngs.length == 0){
+      // }
       let estimatedDistance = 0;
       let totalminutes = 0;
       const route = result!.routes[0];
       // to calculate total distance & time
-      route.legs.forEach((leg:{distance:{value:number},duration:{value:number}}) => {
-        estimatedDistance += leg.distance.value;
-        totalminutes += leg.duration.value
-      });
-      estimatedDistance = Number((estimatedDistance/1000).toFixed(2));
-      
+      route.legs.forEach(
+        (leg: { distance: { value: number }; duration: { value: number } }) => {
+          estimatedDistance += leg.distance.value;
+          totalminutes += leg.duration.value;
+        }
+      );
+      estimatedDistance = Number((estimatedDistance / 1000).toFixed(2));
+
       this.calculated_distance = `${estimatedDistance} Km.`;
-      
-      totalminutes = totalminutes/60;
+
+      totalminutes = totalminutes / 60;
       let minutes = Math.ceil(totalminutes % 60);
       let hours = Math.floor(totalminutes / 60);
       let day = Math.floor(hours / 24);
@@ -585,6 +613,7 @@ export class CreateRidesComponent implements OnInit, AfterViewInit {
         .postCalculatPricing(this.sourceZoneId, totalminutes, estimatedDistance)
         .subscribe({
           next: (data) => {
+            console.log(data);
             this.vehiclePricings = data.prices;
           },
         });
@@ -605,7 +634,7 @@ export class CreateRidesComponent implements OnInit, AfterViewInit {
     let currentDateAndTime = new Date();
     this.rideForm.patchValue({
       rideTime: currentDateAndTime,
-      rideType: 'Now'
+      rideType: 'Now',
     });
   }
   // Opens Date & Time Modal
@@ -666,7 +695,7 @@ export class CreateRidesComponent implements OnInit, AfterViewInit {
       this.stopLatLngs = [];
       this.stopDetails = [];
       this.stopMarkers = [];
-      this.stopsArray =[];
+      this.stopsArray = [];
     }
   }
 }

@@ -23,6 +23,7 @@ export class SidebarComponent implements OnInit {
   ngOnInit(): void {
     this.loaderService.subject.subscribe((data:boolean)=>{
       this.isLoader = data;
+      console.log(this.isLoader);
     })
   }
   toggleDropdown(dropdownName: string) {

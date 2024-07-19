@@ -15,10 +15,14 @@ export const auth2Interceptor = (
 ) => {
   let toastr = inject(ToastrService);
   let authService = inject(AuthService);
-  let loaderService = inject(LoaderService);
-  // console.log("Auth 2 called")
+  // let loaderService = inject(LoaderService);
+  // loaderService.subject.next(true);
+  // console.log(req)
+  // console.log(loaderService.subject);
   return next(req).pipe(
-        tap(() => loaderService.subject.next(false)),
+
+    // tap(() => loaderService.subject.next(false)),
+    // tap(() => console.log(`==========================================================================`)),
     catchError((err) => {
         if (!err.error.status) {
           toastr.error(

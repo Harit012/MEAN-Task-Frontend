@@ -3,7 +3,7 @@
       display: flex;
       align-items: center;
       padding: 1rem;
-      border: 1px solid #2b282876;
+      border: 1px solid #36343476;
       background-color: rgba(65, 71, 66, 0.221);
     }
 .ride-details2 {
@@ -11,8 +11,8 @@
       display: flex;
       align-items: center;
       padding: 1rem;
-      border: 1px solid #2b282876;
-      background-color: rgba(44, 193, 68, 0.297);
+      border: 1px solid #938b8b76;
+      background-color: rgba(0, 255, 81, 0.435);
     }
     
     .price-source {
@@ -28,7 +28,7 @@
       margin-left: 10px;
     }
     .scrollable-section{
-      height: 25dvh;
+      height: 30dvh;
       overflow-y: scroll;
     }
     .label {
@@ -50,10 +50,9 @@
     #map{
       height: 300px;
       width: 100%;
-      background-color: brown;
     }
 
     .scrollable-section-2{
-      height: 45dvh;
+      height: 40dvh;
       overflow-y: scroll;
     }

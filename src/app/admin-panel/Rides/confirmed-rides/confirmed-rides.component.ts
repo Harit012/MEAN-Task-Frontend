@@ -10,11 +10,11 @@ import {
 } from '@angular/forms';
 import * as bootstrap from 'bootstrap';
 import { RideSocketService } from '../services/ride-socket.service';
-import { DriverService } from '../../Drivers/list/driver.service';
-import { Driver } from '../../Drivers/list/driver.interface';
 import { ToastrService } from 'ngx-toastr';
 import { environment } from '../../../../environments/environment';
 import { VehicleTypeService } from '../../Pricing/vehicle-type/vehicle-type.service';
+import { Subscription } from 'rxjs';
+import { RideDriver } from './RideDriver.interface';
 
 @Component({
   selector: 'app-confirmed-rides',
@@ -28,27 +28,41 @@ export class ConfirmedRidesComponent implements OnInit {
   filterForm: FormGroup;
   totalRides: ConfirmedRide[] = [];
   confirmedRideForm: FormGroup;
-  driversList: Driver[] = [];
+  driversList: RideDriver[] = [];
   userProfile!: string;
   serviceTypes: string[] = [];
-  selectedRideForAssign!: ConfirmedRide;
+  selectedRideForAssign: ConfirmedRide = {
+    _id: '--',
+    destination: '--',
+    source: '--',
+    time: '--',
+    distance: 0,
+    serviceType: '--',
+    paymentMethod: '--',
+    rideTime: '--',
+    price: '--',
+    stops: [],
+    stopPoints: [],
+    endPoints: [],
+    userName: '--',
+    userPhone: '--',
+    rideId: '--',
+    rideType: '--',
+    userProfile: '--',
+    status: '--',
+    driverId: '--',
+    driverName: '--',
+  };
+  subscriptions: Subscription[] = [];
 
   map!: google.maps.Map;
   endPoints: google.maps.LatLngLiteral[] = [];
   stopPoints: google.maps.LatLngLiteral[] = [];
-  directionsRenderer = new google.maps.DirectionsRenderer({
-    hideRouteList: true,
-    polylineOptions: {
-      strokeColor: 'blue',
-      strokeOpacity: 1,
-      strokeWeight: 3,
-    },
-  });
+  directionsRenderer! :google.maps.DirectionsRenderer;
 
   constructor(
     private confirmedRideService: ConfirmedRidesService,
     private rideSocketService: RideSocketService,
-    private driverService: DriverService,
     private toastr: ToastrService,
     private vehicleTypeService: VehicleTypeService
   ) {
@@ -72,12 +86,12 @@ export class ConfirmedRidesComponent implements OnInit {
   }
 
   ngOnInit() {
-    // to get drivers from server
-    this.driverService.getDrivers(0, 'none', '').subscribe({
-      next: (data) => {
-        this.driversList = data.drivers;
-      },
-    });
+    // // to get drivers from server
+    // this.confirmedRideService.getAllDrivers().subscribe({
+    //   next: (data) => {
+    //     this.driversList = data.driversList;
+    //   },
+    // });
     // to get rides from server
     this.confirmedRideService.getRides().subscribe({
       next: (data) => {
@@ -97,7 +111,6 @@ export class ConfirmedRidesComponent implements OnInit {
     this.rideSocketService.getNewRide().subscribe((ride: any) => {
       this.totalRides.unshift(ride);
       this.totalRides = this.availableRides;
-      // this.availableRides.unshift(ride);
     });
     // when admin cancels ride
     this.rideSocketService.cancleRide().subscribe((rideId: any) => {
@@ -109,25 +122,26 @@ export class ConfirmedRidesComponent implements OnInit {
 
     // when driver Accepts ride
     this.rideSocketService.getAcceptedRide().subscribe((data: any) => {
-      console.log(data)
+      console.log(data);
       this.totalRides = this.totalRides.filter((ride) => {
         return ride._id != data._id;
-      })
-      this.totalRides.push(data)
-      this.availableRides = this.totalRides
-    })
+      });
+      this.totalRides.push(data);
+      this.availableRides = this.totalRides;
+    });
 
     // When ride status change
     this.rideSocketService.getStatusChange().subscribe((data: any) => {
       this.totalRides = this.totalRides.filter((ride) => {
         return ride._id != data._id;
-      })
-      this.totalRides.push(data)
-      this.availableRides = this.totalRides
-    })
+      });
+      this.totalRides.push(data);
+      this.availableRides = this.totalRides;
+    });
   }
   // get detiled information about ride
   onClickRide(index: number) {
+    this.confirmedRideForm.disable();
     this.selectedRideForAssign = this.availableRides[index];
     this.endPoints = this.availableRides[index].endPoints;
     this.stopPoints = this.availableRides[index].stopPoints;
@@ -166,11 +180,17 @@ export class ConfirmedRidesComponent implements OnInit {
   }
   // on click of assign ride
   onAssignRide(index: number) {
+    this.selectedRideForAssign = this.availableRides[index];
+    // to get drivers from server
+    this.confirmedRideService.getAllDrivers().subscribe({
+      next: (data) => {
+        this.driversList = data.driversList;
+      },
+    });
     let modal = bootstrap.Modal.getOrCreateInstance(
       document.getElementById('AssignModal') as HTMLElement
     );
     modal.show();
-    this.selectedRideForAssign = this.availableRides[index];
   }
   // on search Input value change
   onSearchInputChange(event: any) {
@@ -226,6 +246,14 @@ export class ConfirmedRidesComponent implements OnInit {
       })),
       optimizeWaypoints: true,
     };
+    this.directionsRenderer = new google.maps.DirectionsRenderer({
+      hideRouteList: true,
+      polylineOptions: {
+        strokeColor: 'green',
+        strokeOpacity: 1,
+        strokeWeight: 3,
+      },
+    });
     directionServices.route(request, (result: any, status) => {
       this.directionsRenderer.setMap(this.map);
       this.directionsRenderer.setDirections(result);
@@ -240,15 +268,20 @@ export class ConfirmedRidesComponent implements OnInit {
   }
   // whenn driver is assigned manually
   onAssignDriver(index: number) {
-    this.confirmedRideService.assignDriver(this.selectedRideForAssign._id,this.driversList[index]._id!).subscribe({
-      next: (data) => {
-        this.selectedRideForAssign = data.ride;
-        this.toastr.info(
-          `Your ride is assigned to ${this.driversList[index].driverName}`,
-          '',
-          environment.TROASTR_STYLE
-        );
-      }
-    })
+    this.confirmedRideService
+      .assignDriver(
+        this.selectedRideForAssign._id,
+        this.driversList[index]._id
+      )
+      .subscribe({
+        next: (data) => {
+          this.selectedRideForAssign = data.ride;
+          this.toastr.info(
+            `Your ride is assigned to ${this.driversList[index].driverName}`,
+            '',
+            environment.TROASTR_STYLE
+          );
+        },
+      });
   }
 }

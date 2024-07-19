@@ -19,4 +19,5 @@ export interface ConfirmedRide {
   endPoints:google.maps.LatLngLiteral[];
   stopPoints:google.maps.LatLngLiteral[];
   driverId?:string;
+  driverName?:string;
 }
