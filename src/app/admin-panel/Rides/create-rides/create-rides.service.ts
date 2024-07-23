@@ -2,7 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { environment } from '../../../../environments/environment';
 import { VerifiedUser } from '../../users/userGet.inerface';
-import { BoxPricingContent, VehiclePricingInterface } from './all.interface';
+import { BoxPricingContent } from './all.interface';
 
 @Injectable({
   providedIn: 'root',
@@ -17,16 +17,7 @@ export class CreateRidesService {
     );
   }
 
-  getVehiclePricings(cityId: string) {
-    return this.http.get<{
-      status: string;
-      pricings: VehiclePricingInterface[];
-    }>(`${environment.BASE_URL}/admin/rides/create-ride/getPricings`, {
-      params: { city: cityId },
-    });
-  }
-
-  postCalculatPricing(zoneId: string, time: Number, distance: number) {
+  postCalculatPricing(zoneId: string, time: number, distance: number) {
     return this.http.post<{ status: string; prices: BoxPricingContent[] }>(
       `${environment.BASE_URL}/admin/rides/create-ride/calculate_pricings`,
       { zoneId: zoneId, time: time, distance: distance },

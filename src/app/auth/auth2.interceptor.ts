@@ -24,13 +24,15 @@ export const auth2Interceptor = (
     // tap(() => loaderService.subject.next(false)),
     // tap(() => console.log(`==========================================================================`)),
     catchError((err) => {
-        if (!err.error.status) {
+      console.log(err)
+        if (!err.error.success == false) {
           toastr.error(
             `Error while sending request to server`,
             `Error :- ${err.status}`,
             environment.TROASTR_STYLE
           );
-        } else if (err.error.status == 'Failure') {
+        } else if (err.error.success == false) {
+          console.log("In HERE")
           if (err.status == 401) {
             authService.userLogOut();
           } else {

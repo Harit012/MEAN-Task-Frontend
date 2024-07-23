@@ -20,4 +20,5 @@ export interface ConfirmedRide {
   stopPoints:google.maps.LatLngLiteral[];
   driverId?:string;
   driverName?:string;
+  sourceCity:string;
 }

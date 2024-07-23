@@ -45,6 +45,7 @@ export class RunningRequestComponent implements OnInit {
     status: '--',
     driverId: '--',
     driverName: '--',
+    sourceCity: '--',
   };
   userProfile: string = '--';
 

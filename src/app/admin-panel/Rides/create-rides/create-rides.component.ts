@@ -67,10 +67,210 @@ export class CreateRidesComponent implements OnInit, AfterViewInit {
   autoComplete1!: google.maps.places.Autocomplete;
   autoComplete2!: google.maps.places.Autocomplete;
   autoComplete3!: google.maps.places.Autocomplete;
-  sourcePin!: google.maps.marker.PinElement;
-  destinationPin!: google.maps.marker.PinElement;
-  stopsPin!: google.maps.marker.PinElement;
-  // directionsRenderer! : google.maps.DirectionsRenderer;
+  mapStyle:google.maps.MapTypeStyle[] = [
+    {
+      "elementType": "geometry",
+      "stylers": [
+        {
+          "color": "#212121"
+        }
+      ]
+    },
+    {
+      "elementType": "labels.icon",
+      "stylers": [
+        {
+          "visibility": "off"
+        }
+      ]
+    },
+    {
+      "elementType": "labels.text.fill",
+      "stylers": [
+        {
+          "color": "#757575"
+        }
+      ]
+    },
+    {
+      "elementType": "labels.text.stroke",
+      "stylers": [
+        {
+          "color": "#212121"
+        }
+      ]
+    },
+    {
+      "featureType": "administrative",
+      "elementType": "geometry",
+      "stylers": [
+        {
+          "color": "#757575"
+        }
+      ]
+    },
+    {
+      "featureType": "administrative.country",
+      "elementType": "labels.text.fill",
+      "stylers": [
+        {
+          "color": "#9e9e9e"
+        }
+      ]
+    },
+    {
+      "featureType": "administrative.land_parcel",
+      "stylers": [
+        {
+          "visibility": "off"
+        }
+      ]
+    },
+    {
+      "featureType": "administrative.locality",
+      "elementType": "labels.text.fill",
+      "stylers": [
+        {
+          "color": "#bdbdbd"
+        }
+      ]
+    },
+    {
+      "featureType": "poi",
+      "elementType": "labels.text.fill",
+      "stylers": [
+        {
+          "color": "#757575"
+        }
+      ]
+    },
+    {
+      "featureType": "poi.park",
+      "elementType": "geometry",
+      "stylers": [
+        {
+          "color": "#181818"
+        }
+      ]
+    },
+    {
+      "featureType": "poi.park",
+      "elementType": "labels.text.fill",
+      "stylers": [
+        {
+          "color": "#616161"
+        }
+      ]
+    },
+    {
+      "featureType": "poi.park",
+      "elementType": "labels.text.stroke",
+      "stylers": [
+        {
+          "color": "#1b1b1b"
+        }
+      ]
+    },
+    {
+      "featureType": "road",
+      "elementType": "geometry.fill",
+      "stylers": [
+        {
+          "color": "#2c2c2c"
+        }
+      ]
+    },
+    {
+      "featureType": "road",
+      "elementType": "labels.text.fill",
+      "stylers": [
+        {
+          "color": "#8a8a8a"
+        }
+      ]
+    },
+    {
+      "featureType": "road.arterial",
+      "elementType": "geometry",
+      "stylers": [
+        {
+          "color": "#373737"
+        }
+      ]
+    },
+    {
+      "featureType": "road.highway",
+      "elementType": "geometry",
+      "stylers": [
+        {
+          "color": "#3c3c3c"
+        }
+      ]
+    },
+    {
+      "featureType": "road.highway.controlled_access",
+      "elementType": "geometry",
+      "stylers": [
+        {
+          "color": "#4e4e4e"
+        }
+      ]
+    },
+    {
+      "featureType": "road.local",
+      "elementType": "labels.text.fill",
+      "stylers": [
+        {
+          "color": "#616161"
+        }
+      ]
+    },
+    {
+      "featureType": "transit",
+      "elementType": "labels.text.fill",
+      "stylers": [
+        {
+          "color": "#757575"
+        }
+      ]
+    },
+    {
+      "featureType": "water",
+      "elementType": "geometry",
+      "stylers": [
+        {
+          "color": "#000000"
+        }
+      ]
+    },
+    {
+      "featureType": "water",
+      "elementType": "geometry.fill",
+      "stylers": [
+        {
+          "color": "#c6d2d2"
+        }
+      ]
+    },
+    {
+      "featureType": "water",
+      "elementType": "geometry.stroke",
+      "stylers": [
+        {
+          "color": "#e1eaea"
+        }
+      ]
+    },
+    {
+      "featureType": "water",
+      "elementType": "labels.text.fill",
+      "stylers": [
+        {
+          "color": "#3d3d3d"
+        }
+      ]
+    }
+  ]
   directionsRenderer = new google.maps.DirectionsRenderer({
     hideRouteList: true,
     polylineOptions: {
@@ -107,6 +307,15 @@ export class CreateRidesComponent implements OnInit, AfterViewInit {
     return this.rideForm.get('stops') as FormArray;
   }
 
+  // TO create Image Of marker
+  createMarkersFromImage(image:string) {
+    let element = document.createElement('img');
+    element.src = image;
+    element.height= 50;
+    element.width = 50;
+    return element
+  }
+
   ngOnInit(): void {
     this.settingsService.getSettings().subscribe({
       next: (data) => {
@@ -125,6 +334,7 @@ export class CreateRidesComponent implements OnInit, AfterViewInit {
       {
         center: { lat: 52.7572, lng: 12.8022 },
         zoom: 10,
+        styles: this.mapStyle,      
         mapId: '8f2d9c7f9f9f8a9f',
       }
     );
@@ -197,20 +407,54 @@ export class CreateRidesComponent implements OnInit, AfterViewInit {
       customPinElement.style.height = '50px';
     if (this.stopsArray.length < this.settings.stops) {
       if (this.stopDetails != undefined) {
+        // let marker!:google.maps.marker.AdvancedMarkerElement;
         let marker = new google.maps.marker.AdvancedMarkerElement({
           position: this.stopDetails.placeLatLng,
           title: this.stopDetails.place.name,
           // gmpDraggable: true,
-          content: this.stopsPin.element,
+          // map:this.map,
+          content: this.createMarkersFromImage("../../assets/Images/pin.png"),
         });
-        marker.map = this.map;
+        // marker.map = this.map;
         
-
         this.stopMarkers[this.stopsArray.length] = marker;
         this.stopLatLngs[this.stopsArray.length] = this.stopDetails.placeLatLng;
-        this.stopsArray[this.stopsArray.length] = this.stopDetails.place.name;
-
-        this.stopDetails = undefined;
+        this.stopMarkers.forEach((ele:any)=>{
+          // console.log(ele.lat, ele.lng);
+          console.log("-===-=========-=---=-==-=--=-=-=-=-=-=-=-=-=-=-=-=-")
+          console.log(ele);
+          console.log("-===-=========-=---=-==-=--=-=-=-=-=-=-=-=-=-=-=-=-")
+          let marker = new google.maps.marker.AdvancedMarkerElement({
+            position: new google.maps.LatLng(ele.qt.lat, ele.qt.lng),
+            title: ele.nA.name,
+            map:this.map,
+            content: this.createMarkersFromImage("../../assets/Images/pin.png"),
+            });
+          })
+        // this.stopLatLngs.forEach((ele:any)=>{
+        //   // console.log(ele.lat, ele.lng);
+        //   console.log("-===-=========-=---=-==-=--=-=-=-=-=-=-=-=-=-=-=-=-")
+        //   console.log(ele);
+        //   console.log("-===-=========-=---=-==-=--=-=-=-=-=-=-=-=-=-=-=-=-")
+        //   let marker = new google.maps.marker.AdvancedMarkerElement({
+        //     position: ele,
+        //     title: "dihgjsiov",
+        //     map:this.map,
+        //     content: this.stopsPin.element,
+        //     });
+        //   })
+          // this.stopMarkers[this.stopsArray.length] = marker;
+          // console.log(this.stopsArray.length)
+          // console.log("===================================================================")
+          // console.log(this.stopMarkers.length);
+          // console.log("===================================================================")
+          // console.log(this.stopLatLngs)
+          console.log("===================================================================")
+          console.log(this.stopMarkers);
+          console.log("===================================================================")
+          
+          this.stopsArray[this.stopsArray.length] = this.stopDetails.place.name;
+          this.stopDetails = undefined;
         let temp_stops = document.getElementById(
           'stopAutocomplete'
         ) as HTMLInputElement;
@@ -294,7 +538,7 @@ export class CreateRidesComponent implements OnInit, AfterViewInit {
         position: this.center,
         title: temp_source.innerHTML,
         gmpDraggable: true,
-        content: this.sourcePin.element,
+        content: this.createMarkersFromImage("../../assets/Images/SourcePin.png"),
       });
       this.sourceLatLng = this.center;
       this.markers[0] = marker;
@@ -311,7 +555,6 @@ export class CreateRidesComponent implements OnInit, AfterViewInit {
     let invalidFields = [];
     let price: number = 0;
     if (this.rideForm.valid) {
-      console.log(this.rideForm.value);
       for (let pricing of this.vehiclePricings) {
         if (pricing.vehicleType == this.rideForm.value.serviceType) {
           price = Number(pricing.price.toFixed(2));
@@ -336,6 +579,7 @@ export class CreateRidesComponent implements OnInit, AfterViewInit {
         rideType: this.rideForm.value.rideType,
         endPoints: this.calculated_startEndLatLng,
         stopPoints: this.calculated_stopPoints,
+        sourceCity: this.sourceZoneId
       };
       this.createRideService.postRide(RideObject).subscribe({
         next: (data) => {
@@ -344,12 +588,12 @@ export class CreateRidesComponent implements OnInit, AfterViewInit {
             'Success',
             environment.TROASTR_STYLE
           );
+          this.rideForm.reset();
+          this.isCalulated = false;
+          this.isVerified = false;
+          this.initMap();
         },
       });
-      this.rideForm.reset();
-      this.isCalulated = false;
-      this.isVerified = false;
-      this.initMap();
     } else {
       let controls = this.rideForm.controls;
       this.rideForm.markAsDirty();
@@ -375,26 +619,7 @@ export class CreateRidesComponent implements OnInit, AfterViewInit {
       types: ['establishment'],
 
       fields: ['address_components', 'geometry', 'name', 'place_id'],
-    };
-    // let sessionsToken =new google.maps.places.AutocompleteSessionToken()
-    this.sourcePin = new google.maps.marker.PinElement({
-      scale: 1.2,
-      borderColor: 'blue',
-      background: 'yellow',
-      // glyph: '🚗',
-      glyphColor: 'blue',
-    });
-    this.destinationPin = new google.maps.marker.PinElement({
-      scale: 1.2,
-      borderColor: 'blue',
-      background: 'green',
-      // glyph: '🚗',
-      glyphColor: 'yellow',
-    });
-    
-    this.stopsPin = new google.maps.marker.PinElement({
-      glyph:"",
-    });
+    };   
     this.autoComplete1 = new google.maps.places.Autocomplete(
       document.getElementById('source') as HTMLInputElement,
       this.autocompleteOptions
@@ -460,7 +685,7 @@ export class CreateRidesComponent implements OnInit, AfterViewInit {
           position: placeGeo,
           title: place.name,
           gmpDraggable: true,
-          content: this.sourcePin.element,
+          content: this.createMarkersFromImage("../../assets/Images/SourcePin.png"),
         });
         this.rideForm.patchValue({
           source: place.name,
@@ -511,7 +736,7 @@ export class CreateRidesComponent implements OnInit, AfterViewInit {
         position: place2Geo,
         title: place2.name,
         gmpDraggable: true,
-        content: this.destinationPin.element,
+        content: this.createMarkersFromImage("../../assets/Images/DestinationPin2.png"),
       });
       this.rideForm.patchValue({
         destination: place2.name,
@@ -580,8 +805,6 @@ export class CreateRidesComponent implements OnInit, AfterViewInit {
       this.directionsRenderer.setMap(null);
       this.directionsRenderer.setMap(this.map);
       this.directionsRenderer.setDirections(result);
-      // if(this.stopLatLngs.length == 0){
-      // }
       let estimatedDistance = 0;
       let totalminutes = 0;
       const route = result!.routes[0];
@@ -613,7 +836,6 @@ export class CreateRidesComponent implements OnInit, AfterViewInit {
         .postCalculatPricing(this.sourceZoneId, totalminutes, estimatedDistance)
         .subscribe({
           next: (data) => {
-            console.log(data);
             this.vehiclePricings = data.prices;
           },
         });

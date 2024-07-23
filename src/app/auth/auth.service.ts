@@ -14,7 +14,7 @@ export class AuthService {
   userLogIn(form: { email: string; password: string }) {
     if (form.email != null && form.password != null) {
       this.http
-        .post<{ token: string; status: string }>(
+        .post<{ token: string; success: boolean }>(
           `${environment.BASE_URL}/user/login`,
           form
         )

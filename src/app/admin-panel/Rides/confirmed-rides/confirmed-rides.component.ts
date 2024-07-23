@@ -52,6 +52,7 @@ export class ConfirmedRidesComponent implements OnInit {
     status: '--',
     driverId: '--',
     driverName: '--',
+    sourceCity: '--',
   };
   subscriptions: Subscription[] = [];
 
@@ -78,6 +79,7 @@ export class ConfirmedRidesComponent implements OnInit {
       paymentmethod: new FormControl(null),
       ridetime: new FormControl(null),
       rideid: new FormControl(null),
+      sourceCity: new FormControl(null),
     });
     this.filterForm = new FormGroup({
       serviceType: new FormControl('all'),
@@ -86,12 +88,6 @@ export class ConfirmedRidesComponent implements OnInit {
   }
 
   ngOnInit() {
-    // // to get drivers from server
-    // this.confirmedRideService.getAllDrivers().subscribe({
-    //   next: (data) => {
-    //     this.driversList = data.driversList;
-    //   },
-    // });
     // to get rides from server
     this.confirmedRideService.getRides().subscribe({
       next: (data) => {
@@ -122,7 +118,7 @@ export class ConfirmedRidesComponent implements OnInit {
 
     // when driver Accepts ride
     this.rideSocketService.getAcceptedRide().subscribe((data: any) => {
-      console.log(data);
+      // console.log(data);
       this.totalRides = this.totalRides.filter((ride) => {
         return ride._id != data._id;
       });
@@ -159,6 +155,7 @@ export class ConfirmedRidesComponent implements OnInit {
       paymentmethod: this.availableRides[index].paymentMethod,
       servicetype: this.availableRides[index].serviceType,
       userProfile: this.availableRides[index].userProfile,
+      sourceCity: this.availableRides[index].sourceCity
     });
     this.userProfile = `${environment.BASE_URL}${this.availableRides[index].userProfile}`;
     const modal = bootstrap.Modal.getOrCreateInstance(
@@ -182,7 +179,7 @@ export class ConfirmedRidesComponent implements OnInit {
   onAssignRide(index: number) {
     this.selectedRideForAssign = this.availableRides[index];
     // to get drivers from server
-    this.confirmedRideService.getAllDrivers().subscribe({
+    this.confirmedRideService.getAllDrivers(this.selectedRideForAssign.sourceCity, this.selectedRideForAssign.serviceType).subscribe({
       next: (data) => {
         this.driversList = data.driversList;
       },

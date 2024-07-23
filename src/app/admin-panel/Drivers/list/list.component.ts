@@ -348,7 +348,6 @@ export class ListComponent implements OnInit {
     if (confirm('Are you sure you want to delete this driver?')) {
       this.driverService.deleteDriver(driver._id!).subscribe({
         next: (data) => {
-          console.log(data);
           if (data.message) {
             this.toastr.success(
               'Driver Deleted Successfully',
