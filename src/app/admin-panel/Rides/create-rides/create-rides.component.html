@@ -19,6 +19,7 @@
                 type="button"
                 class="btn ms-4"
                 (click)="onVerifyPhoneNumber()"
+                (keypress)="onVerifyPhoneNumber()"
                 [ngClass]="{
                   'btn-warning': rideForm.get('phone')?.invalid,
                   'btn-success': rideForm.get('phone')?.valid
@@ -113,7 +114,7 @@
                 class="form-control stops"
                 placeholder="Enter Stop"
               />
-              <button class="ms-3 btn btn-danger" (click)="onAddStop()">
+              <button type="button" class="ms-3 btn btn-danger" (click)="onAddStop()">
                 Add
               </button>
             </div>
@@ -130,6 +131,7 @@
               type="button"
               class="ms-3 btn-close"
               (click)="onRemoveStop(i)"
+              (keypress)="onRemoveStop(i)"
             ></button>
           </div>
         </div>
@@ -290,13 +292,13 @@
         <hr />
         <div class="row mb-4">
           <div class="d-flex justify-content-center">
-            <button class="btn btn-success me-4" (click)="onCreateRide()">
+            <button type="button" class="btn btn-success me-4" (click)="onCreateRide()">
               Create Ride
             </button>
-            <button class="btn btn-dark me-4" (click)="onClickCalculatePricing()">
+            <button type="button" class="btn btn-dark me-4" (click)="onClickCalculatePricing()">
               Calculate Distance
             </button>
-            <button class="btn btn-danger" (click)="onReset()">Reset</button>
+            <button type="button" class="btn btn-danger" (click)="onReset()">Reset</button>
           </div>
         </div>
         <hr />

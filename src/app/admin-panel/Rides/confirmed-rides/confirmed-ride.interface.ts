@@ -12,13 +12,26 @@ export interface ConfirmedRide {
   userEmail?: string;
   userName: string;
   userPhone: string;
-  rideId:string;
+  rideId: string;
   rideType: string;
-  userProfile:string;
-  status:string;
-  endPoints:google.maps.LatLngLiteral[];
-  stopPoints:google.maps.LatLngLiteral[];
-  driverId?:string;
-  driverName?:string;
-  sourceCity:string;
+  userProfile: string;
+  status: string;
+  endPoints: google.maps.LatLngLiteral[];
+  stopPoints: google.maps.LatLngLiteral[];
+  driverId?: string;
+  driverName?: string;
+  sourceCity: string;
+}
+
+export interface AssignStatusFromSocket {
+  rideId: string;
+  status: string;
+  driver: string;
+  driverId:string;
+  time: number;
+  type: string;
+  new?: boolean;
+  itr: number;
+  totalTime: number;
+  totalItr: number;
 }

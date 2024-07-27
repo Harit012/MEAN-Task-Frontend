@@ -411,48 +411,12 @@ export class CreateRidesComponent implements OnInit, AfterViewInit {
         let marker = new google.maps.marker.AdvancedMarkerElement({
           position: this.stopDetails.placeLatLng,
           title: this.stopDetails.place.name,
-          // gmpDraggable: true,
-          // map:this.map,
           content: this.createMarkersFromImage("../../assets/Images/pin.png"),
+          map: this.map,
         });
-        // marker.map = this.map;
         
         this.stopMarkers[this.stopsArray.length] = marker;
         this.stopLatLngs[this.stopsArray.length] = this.stopDetails.placeLatLng;
-        this.stopMarkers.forEach((ele:any)=>{
-          // console.log(ele.lat, ele.lng);
-          console.log("-===-=========-=---=-==-=--=-=-=-=-=-=-=-=-=-=-=-=-")
-          console.log(ele);
-          console.log("-===-=========-=---=-==-=--=-=-=-=-=-=-=-=-=-=-=-=-")
-          let marker = new google.maps.marker.AdvancedMarkerElement({
-            position: new google.maps.LatLng(ele.qt.lat, ele.qt.lng),
-            title: ele.nA.name,
-            map:this.map,
-            content: this.createMarkersFromImage("../../assets/Images/pin.png"),
-            });
-          })
-        // this.stopLatLngs.forEach((ele:any)=>{
-        //   // console.log(ele.lat, ele.lng);
-        //   console.log("-===-=========-=---=-==-=--=-=-=-=-=-=-=-=-=-=-=-=-")
-        //   console.log(ele);
-        //   console.log("-===-=========-=---=-==-=--=-=-=-=-=-=-=-=-=-=-=-=-")
-        //   let marker = new google.maps.marker.AdvancedMarkerElement({
-        //     position: ele,
-        //     title: "dihgjsiov",
-        //     map:this.map,
-        //     content: this.stopsPin.element,
-        //     });
-        //   })
-          // this.stopMarkers[this.stopsArray.length] = marker;
-          // console.log(this.stopsArray.length)
-          // console.log("===================================================================")
-          // console.log(this.stopMarkers.length);
-          // console.log("===================================================================")
-          // console.log(this.stopLatLngs)
-          console.log("===================================================================")
-          console.log(this.stopMarkers);
-          console.log("===================================================================")
-          
           this.stopsArray[this.stopsArray.length] = this.stopDetails.place.name;
           this.stopDetails = undefined;
         let temp_stops = document.getElementById(
@@ -562,6 +526,8 @@ export class CreateRidesComponent implements OnInit, AfterViewInit {
           continue;
         }
       }
+      console.log(this.calculated_startEndLatLng)
+      console.log(this.calculated_stopPoints)
       let RideObject = {
         userId: this.verifiedUser._id,
         username: this.rideForm.value.userName,
@@ -588,10 +554,14 @@ export class CreateRidesComponent implements OnInit, AfterViewInit {
             'Success',
             environment.TROASTR_STYLE
           );
+          this.initMap();
           this.rideForm.reset();
           this.isCalulated = false;
           this.isVerified = false;
-          this.initMap();
+          this.stopLatLngs = [];
+          this.stopDetails = [];
+          this.stopMarkers = [];
+          this.stopsArray = [];
         },
       });
     } else {

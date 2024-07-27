@@ -1,7 +1,9 @@
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { io } from 'socket.io-client';
-import { ConfirmedRide } from '../confirmed-rides/confirmed-ride.interface';
+import { AssignStatusFromSocket, ConfirmedRide } from '../confirmed-rides/confirmed-ride.interface';
+import { ToastrService } from 'ngx-toastr';
+import { environment } from '../../../../environments/environment';
 
 @Injectable({
   providedIn: 'root',
@@ -9,7 +11,7 @@ import { ConfirmedRide } from '../confirmed-rides/confirmed-ride.interface';
 export class RideSocketService {
   private socket = io('ws://localhost:3000');
 
-  constructor() {}
+  constructor(private toastr:ToastrService) {}
 
   getMessages() {
     return new Observable((observer) => {
@@ -35,15 +37,15 @@ export class RideSocketService {
 
   cancleRide() {
     return new Observable((observer) => {
-      this.socket.on('cancelRide', (rideId: string) => {
-        observer.next(rideId);
+      this.socket.on('cancelRide', (cancelRide: ConfirmedRide) => {
+        observer.next(cancelRide);
       });
       return () => {
         this.socket.disconnect();
       };
     });
   }
-// when admin assigns ride to driver
+  // when admin assigns ride to driver
   getAssignedRide() {
     return new Observable((observer) => {
       this.socket.on('assignRideFromServer', (ride: ConfirmedRide) => {
@@ -55,22 +57,93 @@ export class RideSocketService {
     });
   }
 
-// When any driver accepts the request 
-  getAcceptedRide(){
-    return new Observable((observer)=>{
-      this.socket.on('acceptRideFromServer', (ride:ConfirmedRide)=>{
+  // When any driver accepts the request
+  getAcceptedRide() {
+    return new Observable((observer) => {
+      this.socket.on('acceptRideFromServer', (ride: ConfirmedRide) => {
         observer.next(ride);
+      });
+      return () => {
+        this.socket.disconnect();
+      };
+    });
+  }
+  // when status change
+  getStatusChange() {
+    return new Observable((observer) => {
+      this.socket.on('changeStatusFromServer', (ride: ConfirmedRide) => {
+        observer.next(ride);
+      });
+      return () => {
+        this.socket.disconnect();
+      };
+    });
+  }
+
+  assignRequestToDriver(
+    drivers: string[],
+    driverIds: string[],
+    rideId: string,
+    type: string,
+    timeOut: number
+  ) {
+    this.socket.emit('cronDrivers', {
+      drivers: drivers,
+      driverIds: driverIds,
+      rideId: rideId,
+      type: type,
+      timeOut: timeOut,
+    });
+  }
+
+  // for driver action 
+
+  driverResponse(response:number){
+    this.socket.emit('DriverReaction',{reaction:response});
+  }
+
+  // after driver action is done
+  onRequestAccepted(){
+    return new Observable((observer) => {
+      this.socket.on('Accepted', (data: AssignStatusFromSocket ) => {
+        observer.next(data);
       });
       return () => {
         this.socket.disconnect();
       };
     })
   }
-  // when status change
-  getStatusChange(){
-    return new Observable((observer)=>{
-      this.socket.on('changeStatusFromServer', (ride:ConfirmedRide)=>{
-        observer.next(ride);
+  onRequestRejected(){
+    return new Observable((observer) => {
+      this.socket.on('Rejected', (data: AssignStatusFromSocket ) => {
+        observer.next(data);
+      });
+      return () => {
+        this.socket.disconnect();
+      };
+    })
+  } 
+  onRidePending(){
+    return new Observable((observer) => {
+      this.socket.on('Pending', (data: AssignStatusFromSocket ) => {
+        observer.next(data);
+      });
+      return () => {
+        this.socket.disconnect();
+      };
+    })
+  } 
+
+  onError(){
+    this.socket.on("Error",(data)=>{
+      this.toastr.error(data.message, "Erro in Socket", environment.TROASTR_STYLE)
+    })
+  }
+
+  onCronStop(){
+    return new Observable((observer) => {
+      this.socket.on('cronStoped', (data: { status:string} ) => {
+        observer.next(data);
       });
       return () => {
         this.socket.disconnect();

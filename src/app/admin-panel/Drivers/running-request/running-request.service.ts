@@ -26,4 +26,18 @@ export class RunningRequestService {
         { rideId: rideId, status: status }
     );
   }
+
+  patchRemoveDriver(rideId: string) {
+    return this.http.patch<{ status: boolean; ride: ConfirmedRide }>(
+      `${environment.BASE_URL}/admin/drivers/running-request/remove-driver`,
+      { rideId: rideId }
+    )
+  }
+
+  patchBlockDriver(driverId:string, rideId:string){
+    return this.http.patch<{status:boolean}>(
+      `${environment.BASE_URL}/admin/drivers/running-request/bolck-driver`,
+      {driverId:driverId, rideId:rideId}
+    )
+  }
 }

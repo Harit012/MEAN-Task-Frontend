@@ -352,8 +352,9 @@
 >
   <div class="modal-dialog">
     <div class="modal-content">
-      <div class="modal-header d-flex justify-content-center">
+      <div class="modal-header d-flex justify-content-between">
         <h1 class="modal-title fs-5" id="staticBackdropLabel">Assign Driver</h1>
+        <p id="remainingTime" class="modal-title ms-5 fs-5 text-bold"></p>
         <button
           type="button"
           class="btn-close"
@@ -371,18 +372,16 @@
             <div class="col-2 label-2"><p>Email</p></div>
             <div class="col-2 label-2"><p>Assign</p></div>
           </div>
-          @for(driver of driversList;track $index){ @if(driver.serviceType ==
-          selectedRideForAssign.serviceType && driver.approved &&
-          driver.isAvailable){
+          @for(driver of driversList;track $index){
           <div class="row mt-2">
-            <div class="col-2 ">
+            <div class="col-2">
               <img
                 src="http://localhost:3000/{{ driver.driverProfile }}"
                 alt="{{ driver.driverName }}"
                 height="80%"
                 width="80%"
-                />
-              </div>
+              />
+            </div>
             <div class="col-2 align-self-center">
               <p class="driver-details">{{ driver.driverName }}</p>
             </div>
@@ -392,24 +391,29 @@
             <div class="col-2 align-self-center">
               <p class="driver-details">{{ driver.phone }}</p>
             </div>
-              <div class="col-2 align-self-center">
-                <p class="driver-details">{{driver.driverEmail}}</p>
-              </div>
+            <div class="col-2 align-self-center">
+              <p class="driver-details">{{ driver.driverEmail }}</p>
+            </div>
             <div class="col-2 align-self-center">
               <button
+                id="AssignButton{{ selectedRideForAssign._id }}{{ driver._id }}"
                 [ngClass]="{ btn: true, 'btn-secondary': true }"
-                (click)="onAssignDriver($index)"
+                (click)="onAssignDriverManually($index)"
               >
                 Assign ride
               </button>
             </div>
           </div>
-          } }
+          }
         </div>
         <hr />
         <!-- Details of ride to be assigned -->
         <div class="row mt-2 mb-2">
-          <button type="button" class="col-2 offset-5 btn btn-success">
+          <button
+            type="button"
+            class="col-2 offset-5 btn btn-success"
+            (click)="onAssignDriverAuto()"
+          >
             Assign to any available
           </button>
         </div>
