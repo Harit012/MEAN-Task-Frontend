@@ -150,4 +150,26 @@ export class RideSocketService {
       };
     })
   }
+
+  onCompeteRide(){
+    return new Observable((observer) => {
+      this.socket.on('CompletedRide', (data: ConfirmedRide ) => {
+        observer.next(data);
+      });
+      return () => {
+        this.socket.disconnect();
+      };
+    })
+  }
+
+  onLinkToPayment(){
+    return new Observable((observer) => {
+      this.socket.on('paymentLink', (data: string ) => {
+        observer.next(data);
+      });
+      return () => {
+        this.socket.disconnect();
+      };
+    })
+  }
 }

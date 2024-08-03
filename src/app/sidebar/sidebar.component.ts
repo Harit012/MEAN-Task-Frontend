@@ -5,6 +5,7 @@ import { RouterLink } from '@angular/router';
 import { LoaderComponent } from '../loader/loader.component';
 import { LoaderService } from '../admin-panel/loader.service';
 import { RideSocketService } from '../admin-panel/Rides/services/ride-socket.service';
+import { PushNotificationsService } from './pushNotification.service';
 
 @Component({
   selector: 'app-sidebar',
@@ -22,24 +23,31 @@ export class SidebarComponent implements OnInit {
   constructor(
     private authservice: AuthService,
     private loaderService: LoaderService,
-    private rideSocketService : RideSocketService
-
+    private rideSocketService: RideSocketService,
+    private pushNotificationService: PushNotificationsService
   ) {}
 
   ngOnInit(): void {
+    this.pushNotificationService.requestPermission();
     let count = 0;
-    this.rideSocketService.onCronStop().subscribe((data: any ) => {
-      if(data.status == "accepted"){
-        if(count > 0 ){
-          count--
+    this.rideSocketService.onCronStop().subscribe((data: any) => {
+      if (data.status == 'accepted') {
+        if (count > 0) {
+          count--;
+          this.showNotification('Accepted Ride', 'Your ride has been accepted');
         }
-      }
-      else{
+      } else {
         count++;
+        this.showNotification(
+          'Rejected Ride',
+          'Your ride has not been accepted'
+        );
       }
-      let notification = document.getElementById('notification-handler') as HTMLAnchorElement;
-      notification.innerHTML = `<i class="fa fa-bell" aria-hidden="true"></i>Notifications (${count})`
-    })
+      let notification = document.getElementById(
+        'notification-handler'
+      ) as HTMLAnchorElement;
+      notification.innerHTML = `<i class="fa fa-bell" aria-hidden="true"></i>Notifications (${count})`;
+    });
 
     this.loaderService.subject.subscribe((data: boolean) => {
       this.isLoader = data;
@@ -58,5 +66,15 @@ export class SidebarComponent implements OnInit {
 
   onClickLogOut() {
     this.authservice.logOutManually();
+  }
+
+  showNotification(title: string, body: string) {
+    const notifications = [
+      {
+        title: title,
+        body: body,
+      },
+    ];
+    this.pushNotificationService.generateNotification(notifications);
   }
 }

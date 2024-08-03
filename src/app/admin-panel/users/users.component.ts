@@ -157,9 +157,7 @@ export class UsersComponent implements OnInit, AfterViewChecked {
         );
       } else {
         if (
-          event.target.files[0].size < 4000000 &&
-          event.target.files[0].type == 'image/png'
-        ) {
+          event.target.files[0].size < 4000000) {
           this.formdata.delete('userProfile');
           this.formdata.set('userProfile', event.target.files[0]);
         } else {
@@ -259,6 +257,7 @@ export class UsersComponent implements OnInit, AfterViewChecked {
     // console.log(user.customerId)
     this.cardService.getCards(user.customerId).subscribe({
       next: (res) => {
+        console.log(res.data)
         this.cardList = res.data;
         this.isLoader = false;
       },

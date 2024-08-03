@@ -1,45 +1,187 @@
-<div class="container" style="width: calc(100dvw - 262px)">
-  <app-loader *ngIf="isLoader"></app-loader>
-  <form>
-    <div class="row mt-2 mb-2">
-      <label for="timeOut" class="col-3 fs-5"><b>TimeOut :-</b></label>
-      <div class="col-7">
-        <select
-          name="timeOut"
-          id="timeOut"
-          class="col-6 form-select"
-          (change)="onTimeOutChange($event)"
-        >
-          <option *ngFor="let timeout of timeOutOptions" value="{{ timeout }}">
-            {{ timeout }}
-          </option>
-        </select>
+<div class="container" style="width: calc(100dvw - 250px)">
+  <div class="row p-2 d-flex justify-content-between bg-dark text-white">
+    <h1 class="col-4">Settings</h1>
+  </div>
+  <section id="mainSection" class="mt-2">
+    <form [formGroup]="settingsForm" (ngSubmit)="onSaveChanges()">
+    <div class="scrollable-section">
+      <div class="row mx-3 mt-3">
+        <h3 class="headings">Stops </h3>
+        <div class="row mt-4 mb-2 mx-5">
+          <label for="timeOut" class="col-3 fs-5"><b>TimeOut :-</b></label>
+          <div class="col-7">
+            <select
+              id="timeOut"
+              class="col-6 form-select"
+              formControlName="timeOut"
+            >
+              <option
+                *ngFor="let timeout of timeOutOptions"
+                value="{{ timeout }}"
+              >
+                {{ timeout }}
+              </option>
+            </select>
+            <small
+              *ngIf="settingsForm.get('timeOut')?.errors?.['required'] && (settingsForm.get('timeOut')?.dirty || settingsForm.get('timeOut')?.touched)"
+              >*Phone number is required</small
+            >
+          </div>
+        </div>
+        <div class="row mt-4 mb-2 mx-5">
+          <label for="stops" class="col-3 fs-5"><b>Stops :-</b></label>
+          <div class="col-7">
+            <select
+              id="stops"
+              class="col-6 form-select"
+              formControlName="stops"
+            >
+              <option
+                *ngFor="let stop of stopOptions"
+                value="{{ stop }}"
+              >
+                {{ stop }}
+              </option>
+            </select>
+          </div>
+        </div>
+      </div>
+      <hr>
+      <div class="row mx-3 mt-3">
+        <h3 class="headings">Stripe </h3>
+        <div class="row mt-4 mb-2 mx-5">
+          <label for="public" class="col-3 fs-5"><b>Public :-</b></label>
+          <div class="col-7">
+            <input
+              id="public"
+              class="col-6 form-control"
+              formControlName="stripePublishableKey">
+              <small
+              *ngIf="settingsForm.get('stripePublishableKey')?.errors?.['required'] && (settingsForm.get('stripePublishableKey')?.dirty || settingsForm.get('stripePublishableKey')?.touched)"
+              >* public_key is required</small>
+              <small
+              *ngIf="settingsForm.get('stripePublishableKey')?.errors?.['maxlength'] && (settingsForm.get('stripePublishableKey')?.dirty || settingsForm.get('stripePublishableKey')?.touched)"
+              >*public_key should not be more then 107 characters</small>
+              <small
+              *ngIf="settingsForm.get('stripePublishableKey')?.errors?.['minlength'] && (settingsForm.get('stripePublishableKey')?.dirty || settingsForm.get('stripePublishableKey')?.touched)"
+              >*public_key should not be less then 107 characters</small>
+          </div>
+        </div>
+        <div class="row mt-4 mb-2 mx-5">
+          <label for="secret" class="col-3 fs-5"><b>Secret :-</b></label>
+          <div class="col-7">
+            <input
+              id="secret"
+              class="col-6 form-control"
+              formControlName="stripeSecretKey"
+            >
+            <small
+              *ngIf="settingsForm.get('stripeSecretKey')?.errors?.['required'] && (settingsForm.get('stripeSecretKey')?.dirty || settingsForm.get('stripeSecretKey')?.touched)"
+              >*secret_key is required</small>
+              <small
+              *ngIf="settingsForm.get('stripeSecretKey')?.errors?.['maxlength'] && (settingsForm.get('stripeSecretKey')?.dirty || settingsForm.get('stripeSecretKey')?.touched)"
+              >*secret_key should not be more then 107 characters</small>
+              <small
+              *ngIf="settingsForm.get('stripeSecretKey')?.errors?.['minlength'] && (settingsForm.get('stripeSecretKey')?.dirty || settingsForm.get('stripeSecretKey')?.touched)"
+              >*secret_key should not be less then 107 characters</small>
+          </div>
+        </div>
+      </div>
+      <hr>
+      <div class="row mx-3 mt-3">
+        <h3 class="headings">Mailer </h3>
+        <div class="row mt-4 mb-2 mx-5">
+          <label for="user" class="col-3 fs-5"><b>User :-</b></label>
+          <div class="col-7">
+            <input
+              id="user"
+              class="col-6 form-control"
+              formControlName="mailerUser">
+              <small
+              *ngIf="settingsForm.get('mailerUser')?.errors?.['required'] && (settingsForm.get('mailerUser')?.dirty || settingsForm.get('mailerUser')?.touched)"
+              >* UserEmail is required</small>
+              <small
+              *ngIf="settingsForm.get('mailerUser')?.errors?.['email'] && (settingsForm.get('mailerUser')?.dirty || settingsForm.get('mailerUser')?.touched)"
+              >*Formate should be email</small>
+          </div>
+        </div>
+        <div class="row mt-4 mb-2 mx-5">
+          <label for="password" class="col-3 fs-5"><b>Password :-</b></label>
+          <div class="col-7">
+            <input
+              id="password"
+              class="col-6 form-control"
+              formControlName="mailerPassword"
+            >
+            <small
+              *ngIf="settingsForm.get('mailerPassword')?.errors?.['required'] && (settingsForm.get('mailerPassword')?.dirty || settingsForm.get('mailerPassword')?.touched)"
+              >* Password is required</small>
+          </div>
+        </div>
+      </div>
+      <hr>
+      <div class="row mx-3 mt-3">
+        <h3 class="headings">Twilio </h3>
+        <div class="row mt-4 mb-2 mx-5">
+          <label for="authToken" class="col-3 fs-5"><b>AuthToken :-</b></label>
+          <div class="col-7">
+            <input
+              id="authToken"
+              class="col-6 form-control"
+              formControlName="twilioAuthToken">
+              <small
+              *ngIf="settingsForm.get('twilioAuthToken')?.errors?.['required'] && (settingsForm.get('twilioAuthToken')?.dirty || settingsForm.get('twilioAuthToken')?.touched)"
+              >* AuthToken is required</small>
+              <small
+              *ngIf="settingsForm.get('twilioAuthToken')?.errors?.['maxlength'] && (settingsForm.get('twilioAuthToken')?.dirty || settingsForm.get('twilioAuthToken')?.touched)"
+              >*AuthToken should not be more then 32 characters</small>
+              <small
+              *ngIf="settingsForm.get('twilioAuthToken')?.errors?.['minlength'] && (settingsForm.get('twilioAuthToken')?.dirty || settingsForm.get('twilioAuthToken')?.touched)"
+              >*AuthToken should not be less then 32 characters</small>
+          </div>
+        </div>
+        <div class="row mt-4 mb-2 mx-5">
+          <label for="sid" class="col-3 fs-5"><b>SID :-</b></label>
+          <div class="col-7">
+            <input
+              id="sid"
+              class="col-6 form-control"
+              formControlName="twilioAccountSid"
+            >
+            <small
+              *ngIf="settingsForm.get('twilioAccountSid')?.errors?.['required'] && (settingsForm.get('twilioAccountSid')?.dirty || settingsForm.get('twilioAccountSid')?.touched)"
+              >* SID is required</small>
+              <small
+              *ngIf="settingsForm.get('twilioAccountSid')?.errors?.['maxlength'] && (settingsForm.get('twilioAccountSid')?.dirty || settingsForm.get('twilioAccountSid')?.touched)"
+              >*SID should not be more then 34 characters</small>
+              <small
+              *ngIf="settingsForm.get('twilioAccountSid')?.errors?.['minlength'] && (settingsForm.get('twilioAccountSid')?.dirty || settingsForm.get('twilioAccountSid')?.touched)"
+              >*SID should not be less then 34 characters</small>
+          </div>
+        </div>
+        <div class="row mt-4 mb-2 mx-5">
+          <label for="phone" class="col-3 fs-5"><b>Phone :-</b></label>
+          <div class="col-7">
+            <input
+              id="phone"
+              class="col-6 form-control"
+              formControlName="twilioPhoneNumber"
+            >
+            <small
+              *ngIf="settingsForm.get('twilioPhoneNumber')?.errors?.['required'] && (settingsForm.get('twilioPhoneNumber')?.dirty || settingsForm.get('twilioPhoneNumber')?.touched)"
+              >*PhoneNumber is required</small>
+              <small
+              *ngIf="settingsForm.get('twilioPhoneNumber')?.errors?.['pattern'] && (settingsForm.get('twilioPhoneNumber')?.dirty || settingsForm.get('twilioPhoneNumber')?.touched)"
+              >*Must have countryCallcode and 10 digits</small>
+          </div>
+        </div>
       </div>
     </div>
-    <div class="row mb-2">
-      <label for="stops" class="col-3 fs-5"><b>Stops :-</b></label>
-      <div class="col-7">
-        <select
-          name="stops"
-          id="stops"
-          class="col-6 form-select"
-          (change)="onStopsChange($event)"
-        >
-          <option *ngFor="let stop of stopOptions" value="{{ stop }}">
-            {{ stop }}
-          </option>
-        </select>
-      </div>
-      <div class="row mb-2 mt-3 justify-content-center">
-        <button
-          type="button"
-          class="btn btn-dark"
-          style="width: 5rem"
-          (click)="onSaveChanges()"
-        >
-          Save
-        </button>
+    <div class="row mx-3 mt-3">
+      <div class="offset-6 col-3">
+        <button class="btn btn-success" type="submit">Update</button>
       </div>
     </div>
-  </form>
+    </form>
+  </section>
 </div>

@@ -12,52 +12,50 @@
       />
     </div>
   </div>
-  <form [formGroup]="filterForm">
-    <div class="row mt-2 p-2">
-      <div class="col-5 d-flex">
-        <label for="status" class="label-2 me-3"
-          ><i class="fa fa-filter me-1"></i>Status</label
+  <div class="row mt-2 p-2">
+    <div class="col-5 d-flex">
+      <label for="status" class="label-2 me-3"
+        ><i class="fa fa-filter me-1"></i>Status</label
+      >
+      <div class="col-8">
+        <select
+          name="status"
+          id="status"
+          class="form-select"
+          (change)="onStatusChange($event)"
         >
-        <div class="col-8">
-          <select
-            name="status"
-            id="status"
-            class="form-select"
-            formControlName="status"
-          >
-            <option value="all">All</option>
-            <option value="available">Available</option>
-            <option value="accepted">Accepted</option>
-            <option value="arrived">Arrived</option>
-            <option value="picked">Picked</option>
-            <option value="started">Started</option>
-            <option value="completed">Completed</option>
-          </select>
-        </div>
+          <option value="all">All</option>
+          <option value="available">Available</option>
+          <option value="accepted">Accepted</option>
+          <option value="arrived">Arrived</option>
+          <option value="picked">Picked</option>
+          <option value="started">Started</option>
+          <option value="completed">Completed</option>
+        </select>
       </div>
-      <div class="col-5 d-flex">
-        <label for="servicetype" class="label-2 me-3"
-          ><i class="fa fa-filter me-1"></i> Service Type</label
-        >
-        <div class="col-8">
-          <select
-            name="servicetype"
-            id="servicetype"
-            class="form-select"
-            formControlName="serviceType"
-          >
-            <option value="all">All</option>
-            @for(serviceType of serviceTypes;track $index){
-            <option value="{{ serviceType }}">{{ serviceType }}</option>
-            }
-          </select>
-        </div>
-      </div>
-      <button class="col-2 btn btn-dark" (click)="onFilterRides()">
-        Filter results
-      </button>
     </div>
-  </form>
+    <div class="col-5 d-flex">
+      <label for="servicetype" class="label-2 me-3"
+        ><i class="fa fa-filter me-1"></i> Service Type</label
+      >
+      <div class="col-8">
+        <select
+          name="servicetype"
+          id="servicetype"
+          class="form-select"
+          (change)="onServiceTypeChange($event)"
+        >
+          <option value="all">All</option>
+          @for(serviceType of serviceTypes;track $index){
+          <option value="{{ serviceType }}">{{ serviceType }}</option>
+          }
+        </select>
+      </div>
+    </div>
+    <button class="col-2 btn btn-dark" (click)="onFilterRides()">
+      Filter results
+    </button>
+  </div>
   <hr />
   <div class="scrollable-section">
     @for(ride of availableRides;track $index){

@@ -7,11 +7,8 @@ import { environment } from '../../../environments/environment';
 export class SettingsService {
   constructor(private http: HttpClient) {}
 
-  putSettings(timeOut:number, stops:number) {
-    let settings:Settings ={
-      timeOut:timeOut,
-      stops:stops
-    }
+  putSettings(settings : Settings) {
+
     return this.http.patch<{ message:string; status: string }>(
       `${environment.BASE_URL}/admin/settings/patchSettings`,
        settings,

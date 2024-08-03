@@ -28,7 +28,7 @@ import { RideDriver } from './RideDriver.interface';
 })
 export class ConfirmedRidesComponent implements OnInit {
   availableRides: ConfirmedRide[] = [];
-  filterForm: FormGroup;
+  // filterForm: FormGroup;
   totalRides: ConfirmedRide[] = [];
   confirmedRideForm: FormGroup;
   driversList: RideDriver[] = [];
@@ -59,6 +59,8 @@ export class ConfirmedRidesComponent implements OnInit {
     sourceCity: '--',
   };
   subscriptions: Subscription[] = [];
+  selectedServiceType: string = 'all';
+  selectedstatus: string = 'all';
 
   map!: google.maps.Map;
   endPoints: google.maps.LatLngLiteral[] = [];
@@ -85,10 +87,7 @@ export class ConfirmedRidesComponent implements OnInit {
       rideid: new FormControl(null),
       sourceCity: new FormControl(null),
     });
-    this.filterForm = new FormGroup({
-      serviceType: new FormControl('all'),
-      status: new FormControl('all'),
-    });
+
   }
 
   ngOnInit() {
@@ -110,7 +109,7 @@ export class ConfirmedRidesComponent implements OnInit {
     // when new ride is created
     this.rideSocketService.getNewRide().subscribe((ride: any) => {
       this.totalRides.unshift(ride);
-      this.totalRides = this.availableRides;
+      this.onFilterRides();
     });
     // when admin cancels ride
     this.rideSocketService.cancleRide().subscribe((cancelRide: any) => {
@@ -121,7 +120,7 @@ export class ConfirmedRidesComponent implements OnInit {
         return cancelRide._id != ride._id;
       });
       modal.hide();
-      this.availableRides = this.totalRides;
+      this.onFilterRides();
     });
     // When driver is assigned to ride
     this.rideSocketService.onRidePending().subscribe((data: any) => {
@@ -142,7 +141,7 @@ export class ConfirmedRidesComponent implements OnInit {
 
     // When request is Rejected
     this.rideSocketService.onRequestRejected().subscribe((data: any) => {
-      console.log(data)
+      // console.log(data)
       let button = document.getElementById(
         `AssignButton${data.rideId}${data.driverId}`
       ) as HTMLButtonElement;
@@ -166,7 +165,8 @@ export class ConfirmedRidesComponent implements OnInit {
         return ride._id != data._id;
       });
       this.totalRides.push(data);
-      this.availableRides = this.totalRides;
+      this.onFilterRides();
+      // this.availableRides = this.totalRides;
     });
 
     // When ride status change
@@ -175,7 +175,7 @@ export class ConfirmedRidesComponent implements OnInit {
           return ride._id != data._id;
         });
         this.totalRides.push(data);
-        this.availableRides = this.totalRides;
+        this.onFilterRides();
     });
   }
   // get detiled information about ride
@@ -256,25 +256,33 @@ export class ConfirmedRidesComponent implements OnInit {
       );
     });
   }
+
+  onServiceTypeChange(event: any) {
+    this.selectedServiceType = event.target.value;
+    console.log(this.selectedServiceType);
+  }
+  onStatusChange(event: any) {
+    this.selectedstatus = event.target.value;
+    console.log(this.selectedstatus);
+  }
   //  on filter
   onFilterRides() {
-    let st = this.filterForm.value.serviceType;
-    let s = this.filterForm.value.status;
-    if (s == 'all' && st == 'all') {
-      this.availableRides = this.totalRides;
-    } else if (s != 'all' && st == 'all') {
-      this.availableRides = this.totalRides.filter((ride) => {
-        return ride.status == s;
-      });
-    } else if (s == 'all' && st != 'all') {
-      this.availableRides = this.totalRides.filter((ride) => {
-        return ride.serviceType == st;
-      });
-    } else {
-      this.availableRides = this.totalRides.filter((ride) => {
-        return ride.status == s && ride.serviceType == st;
-      });
-    }
+    this.availableRides = this.totalRides.filter((ride)=>{
+      let bool1 = false;
+      let bool2 = false;
+      if(this.selectedServiceType != 'all'){
+        bool1 = ride.serviceType == this.selectedServiceType;
+      }else{
+        bool1 = true;
+      }
+      if(this.selectedstatus != 'all'){
+        bool2 = ride.status == this.selectedstatus;
+      }else{
+        bool2 = true;
+      }
+      return bool1 && bool2;
+    });
+
   }
   // to show map of ride
   initMap() {

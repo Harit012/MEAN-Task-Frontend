@@ -24,7 +24,7 @@ export const auth2Interceptor = (
     // tap(() => loaderService.subject.next(false)),
     // tap(() => console.log(`==========================================================================`)),
     catchError((err) => {
-      console.log(err)
+      // console.log(err)
         if (!err.error.success == false) {
           toastr.error(
             `Error while sending request to server`,

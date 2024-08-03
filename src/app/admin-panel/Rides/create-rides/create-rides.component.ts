@@ -17,6 +17,7 @@ import { CityService } from '../../Pricing/city/city.service';
 import { RecivingZone } from '../../Pricing/city/recivingZone.interface';
 import { BoxPricingContent } from './all.interface';
 import * as bootstrap from 'bootstrap';
+import { CardService } from '../../users/card.service';
 
 @Component({
   selector: 'app-create-rides',
@@ -41,6 +42,7 @@ export class CreateRidesComponent implements OnInit, AfterViewInit {
   estimatedTime!: string;
   stopsArray: string[] = [];
   stopDetails: any;
+  hasCard: boolean = false;
 
   // for form
   calculated_source!: string;
@@ -283,7 +285,8 @@ export class CreateRidesComponent implements OnInit, AfterViewInit {
   constructor(
     private createRideService: CreateRidesService,
     private settingsService: SettingsService,
-    private cityService: CityService
+    private cityService: CityService,
+    private cardService: CardService,
   ) {
     this.rideForm = new FormGroup({
       phone: new FormControl(null, [
@@ -381,6 +384,17 @@ export class CreateRidesComponent implements OnInit, AfterViewInit {
               },
             });
             this.autocomplete();
+            this.cardService.getCards(this.verifiedUser.customerId).subscribe({
+              next: (data) => {
+                if(data.data.length == 0){
+                  this.hasCard = false;
+                  this.toastr.warning("user do not have any registered cards","Payment",environment.TROASTR_STYLE)
+                }
+                else{
+                  this.hasCard = true;
+                }
+                },
+            })
           } else {
             this.toastr.warning(
               'No User Found',
@@ -526,8 +540,8 @@ export class CreateRidesComponent implements OnInit, AfterViewInit {
           continue;
         }
       }
-      console.log(this.calculated_startEndLatLng)
-      console.log(this.calculated_stopPoints)
+      // console.log(this.calculated_startEndLatLng)
+      // console.log(this.calculated_stopPoints)
       let RideObject = {
         userId: this.verifiedUser._id,
         username: this.rideForm.value.userName,
@@ -889,5 +903,5 @@ export class CreateRidesComponent implements OnInit, AfterViewInit {
       this.stopMarkers = [];
       this.stopsArray = [];
     }
-  }
+  } 
 }

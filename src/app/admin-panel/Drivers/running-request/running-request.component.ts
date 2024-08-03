@@ -131,6 +131,12 @@ export class RunningRequestComponent implements OnInit {
     this.rideSocketService.cancleRide().subscribe((data: any) => {
       this.newRides = this.newRides.filter((ride) => ride._id != data._id);
     })
+    // When Payment Link Arrives
+    this.rideSocketService.onLinkToPayment().subscribe((data: any) => {
+      let link =document.createElement('a');
+      link.href = data;
+      link.click();
+    })
   }
   // when driver rejects ride
 

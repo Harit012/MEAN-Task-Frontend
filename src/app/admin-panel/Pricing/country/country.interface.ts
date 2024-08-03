@@ -6,5 +6,6 @@ export interface Country {
     _id?: string,
     timezones?: string[],
     latlng?: google.maps.LatLngLiteral,
-    countryShortName: string
+    countryShortName: string,
+    currencyISOName?: string
 }

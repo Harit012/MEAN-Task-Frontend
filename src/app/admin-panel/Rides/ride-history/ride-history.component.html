@@ -6,16 +6,102 @@
         type="search"
         name=""
         id="searchRide"
-        placeholder="Search"
+        placeholder="Search (username / source / destination / drivername)"
         class="form-control"
+        (input)="onSearchInputChange($event)"
       />
+    </div>
+  </div>
+  <hr />
+  <div class="row justify-content-between">
+    <div class="col-1 align-self-center">
+      <i class="fas fa-filter fs-4"></i>
+    </div>
+    <div class="col-4">
+      <div class="d-flex mb-3">
+        <div class="col-2">
+          <label for="status" class="fs-6" style="font-weight: 700"
+            >Types :-
+          </label>
+        </div>
+        <div class="col-9">
+          <select name="" id="status" class="form-select ms-2" (change)="onTypeChange($event)">
+            <option value="all" [defaultSelected]="true">All</option>
+            @for(vehicle of vehicleTypes;track $index){
+            <option value="{{ vehicle }}">{{ vehicle }}</option>
+            }
+          </select>
+        </div>
+      </div>
+      <div class="d-flex m-1">
+        <div class="col-2">
+          <label for="status" class="fs-6" style="font-weight: 700"
+            >Status :-
+          </label>
+        </div>
+        <div class="col-9">
+          <select name="" id="status" class="form-select ms-2" (change)="onStatusChange($event)">
+            <option value="all">All</option>
+            <option value="cancelled">Cancelled</option>
+            <option value="completed">Completed</option>
+          </select>
+        </div>
+      </div>
+    </div>
+    <div class="col-4">
+      <div class="row">
+        <div class="m-1 d-flex mb-3">
+          <div class="col-2">
+            <label for="from" class="fs-6" style="font-weight: 700"
+              >From :-
+            </label>
+          </div>
+          <input
+            type="date"
+            id="from"
+            class="form-control ms-1"
+            (change)="onFromDateChange($event)"
+          />
+          <button class="btn btn-danger ms-2" (click)="clearFrom()">Clear</button>
+        </div>
+        <div class="m-1 d-flex mb-3">
+          <div class="col-2">
+            <label for="from" class="fs-6" style="font-weight: 700"
+              >to :-
+            </label>
+          </div>
+          <input
+            type="date"
+            id="to"
+            class="form-control ms-1"
+            (change)="onToDateChange($event)"
+          />
+          <button class="btn btn-danger ms-2" (click)="clearTo()">Clear</button>
+        </div>
+      </div>
+    </div>
+    <div class="col-2">
+      <button
+        class="btn btn-warning btn-large font-weight-bold"
+        (click)="onClickFilter()"
+      >
+        <i class="fas fa-filter"></i>
+        Filter Data
+      </button>
+      <button class="btn btn-dark mt-4 font-weight-bold" (click)="onDownload()">
+        <i class="fas fa-download"></i>
+        Download(SVG)
+      </button>
     </div>
   </div>
   <hr />
   <div class="row p-2">
     <div class="scrollable-section">
       @for(ride of rideList;track $index){
-      <div class="row ride-details justify-content-between border-3 corners" [ngClass]="ride.status=='cancelled' ? 'cancledRide' : 'completedRide'">
+      <div
+        class="row ride-details justify-content-between border-3 corners"
+        [ngClass]="ride.status == 'cancelled' ? 'cancledRide' : 'completedRide'"
+      >
         <div class="col-md-4 col-sm-6 price-source">
           <p class="price fs-4">
             ₹ <span id="ridePrice">{{ ride.price }}</span>
@@ -45,7 +131,11 @@
           </p>
         </div>
         <div class="col-md-2 col-sm-6 d-none d-md-block">
-          <button type="button" class="btn btn-info w-100 mt-2" (click)="onClickRide($index)">
+          <button
+            type="button"
+            class="btn btn-info w-100 mt-2"
+            (click)="onClickRide($index)"
+          >
             More Details
           </button>
           <div class="w-100 mt-2 fs-4 ms-2">{{ ride.status }}</div>
@@ -56,7 +146,7 @@
   </div>
 </div>
 
-
+<!-- Modal -->
 <div
   class="modal fade"
   id="rideHistoryModal"

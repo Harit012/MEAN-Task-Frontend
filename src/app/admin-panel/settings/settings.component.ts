@@ -5,12 +5,17 @@ import { AuthService } from '../../auth/auth.service';
 import { ToastrService } from 'ngx-toastr';
 import { environment } from '../../../environments/environment';
 import { LoaderComponent } from '../../loader/loader.component';
-
+import {
+  FormControl,
+  FormGroup,
+  ReactiveFormsModule,
+  Validators,
+} from '@angular/forms';
 
 @Component({
   selector: 'app-settings',
   standalone: true,
-  imports: [CommonModule, LoaderComponent],
+  imports: [CommonModule, LoaderComponent, ReactiveFormsModule],
   templateUrl: './settings.component.html',
   styleUrl: './settings.component.css',
 })
@@ -20,64 +25,103 @@ export class SettingsComponent implements OnInit {
   stopOptions: number[] = [1, 2, 3, 4, 5];
   selectedTimeOut!: number;
   selectedStops!: number;
+  settingsForm!: FormGroup;
   toastr = inject(ToastrService);
   isLoader: boolean = false;
   constructor(
     private settingsService: SettingsService,
     private authService: AuthService
   ) {
-    
+    this.settingsForm = new FormGroup({
+      timeOut: new FormControl(null, [Validators.required]),
+      stops: new FormControl(null, [Validators.required]),
+      mailerUser: new FormControl(null, [
+        Validators.required,
+        Validators.email,
+      ]),
+      mailerPassword: new FormControl(null, [Validators.required]),
+      twilioAuthToken: new FormControl(null, [
+        Validators.required,
+        Validators.maxLength(32),
+        Validators.minLength(32),
+      ]),
+      twilioAccountSid: new FormControl(null, [
+        Validators.required,
+        Validators.maxLength(34),
+        Validators.minLength(34),
+      ]),
+      twilioPhoneNumber: new FormControl(null, [
+        Validators.required,
+        Validators.pattern('^[+][1-9]{1}[1-9]{1}[0-9]{9}$'),
+      ]),
+      stripePublishableKey: new FormControl(null, [
+        Validators.required,
+        Validators.minLength(107),
+        Validators.maxLength(107),
+      ]),
+      stripeSecretKey: new FormControl(null, [
+        Validators.required,
+        Validators.minLength(107),
+        Validators.maxLength(107),
+      ]),
+    });
   }
-  
+
   ngOnInit(): void {
     this.isLoader = true;
     this.settingsService.getSettings().subscribe({
       next: (data) => {
-        if (data.settings) {
-          const timeOut = document.getElementById('timeOut') as HTMLSelectElement;
-          const stops = document.getElementById('stops') as HTMLSelectElement;
-          timeOut.selectedIndex = this.timeOutOptions.indexOf(
-            data.settings.timeOut
-          );
-          stops.selectedIndex = this.stopOptions.indexOf(data.settings.stops);
-          this.selectedTimeOut = data.settings.timeOut;
-          this.selectedStops = data.settings.stops;
-          this.isLoader = false;
-        }
-        
-      }
+        this.settingsForm.patchValue({
+          timeOut: data.settings.timeOut,
+          stops: data.settings.stops,
+          mailerUser: data.settings.mailerUser,
+          mailerPassword: data.settings.mailerPassword,
+          twilioAuthToken: data.settings.twilioAuthToken,
+          twilioAccountSid: data.settings.twilioAccountSid,
+          twilioPhoneNumber: data.settings.twilioPhoneNumber,
+          stripePublishableKey: data.settings.stripePublishableKey,
+          stripeSecretKey: data.settings.stripeSecretKey,
+        });
+        this.settingsForm.markAsPristine();
+      },
     });
   }
 
-  onTimeOutChange(event: any) {
-    this.selectedTimeOut = Number(event.target.value);
-  }
-  onStopsChange(event: any) {
-    this.selectedStops = Number(event.target.value);
-  }
   onSaveChanges() {
-    // this.isLoader = true;
-    this.settingsService
-      .putSettings(this.selectedTimeOut, this.selectedStops)
-      .subscribe({
-        next: (data) => {
-          if (data.message) {
-            let timeOut = document.getElementById(
-              'timeOut'
-            ) as HTMLSelectElement;
-            let stops = document.getElementById('stops') as HTMLSelectElement;
-            timeOut.selectedIndex = this.timeOutOptions.indexOf(
-              this.selectedTimeOut
-            );
-            stops.selectedIndex = this.stopOptions.indexOf(this.selectedStops);
-            this.toastr.success(
-              `${data.message}`,
-              'Success',
-              environment.TROASTR_STYLE
-            );
-            this.isLoader = false;
+    if (this.settingsForm.valid) {
+      if (this.settingsForm.dirty) {
+        this.settingsService.putSettings(this.settingsForm.value).subscribe({
+          next: (data) => {
+            this.toastr.success(`${data.message}`,"",environment.TROASTR_STYLE)
           }
-        }
-      });
+        })
+      } else {
+        this.toastr.info('no changes made', 'Info', environment.TROASTR_STYLE);
+      }
+    } else {
+      this.settingsForm.markAllAsTouched();
+      this.toastr.error(
+        'Please fill all required fields',
+        'Error',
+        environment.TROASTR_STYLE
+      );
+    }
+
+    // console.log(this.settingsForm.getRawValue())
+    // this.isLoader = true;
+    // this.settingsService
+    //   .putSettings(this.settingsForm.value)
+    //   .subscribe({
+    //     next: (data) => {
+    //       if (data.message) {
+    //         this.toastr.success(
+    //           `${data.message}`,
+    //           'Success',
+    //           environment.TROASTR_STYLE
+    //         )
+    //         this.isLoader = false;
+    //       }
+    //     }
+    //   });
   }
 }

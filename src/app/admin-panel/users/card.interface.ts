@@ -4,5 +4,4 @@ export interface Card {
     exp_year: number,
     id: string,
     last4: string,
-
 }

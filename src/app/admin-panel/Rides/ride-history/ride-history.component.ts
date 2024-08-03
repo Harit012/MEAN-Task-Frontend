@@ -6,6 +6,9 @@ import { CommonModule } from '@angular/common';
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import * as bootstrap from 'bootstrap';
 import { environment } from '../../../../environments/environment';
+import { CsvExportService } from './csvExport.service';
+import { VehicleTypeService } from '../../Pricing/vehicle-type/vehicle-type.service';
+import { ToastrService } from 'ngx-toastr';
 
 @Component({
   selector: 'app-ride-history',
@@ -16,6 +19,7 @@ import { environment } from '../../../../environments/environment';
 })
 export class RideHistoryComponent implements OnInit {
   rideList: ConfirmedRide[] = [];
+  mainRideList: ConfirmedRide[] = [];
   rideForm: FormGroup;
   userProfile: string = '';
   selectedRide: ConfirmedRide = {
@@ -41,6 +45,11 @@ export class RideHistoryComponent implements OnInit {
     driverName: '--',
     sourceCity: '--',
   };
+  vehicleTypes: string[] = [];
+  fromDate: Date | undefined;
+  toDate: Date | undefined;
+  selectedType: string = 'all';
+  selectedStatus: string = 'all';
 
   // map element
 
@@ -49,7 +58,10 @@ export class RideHistoryComponent implements OnInit {
 
   constructor(
     private rideSocketService: RideSocketService,
-    private rideHistoryService: RideHistoryService
+    private rideHistoryService: RideHistoryService,
+    private csvExportService: CsvExportService,
+    private vehicleTypeService: VehicleTypeService,
+    private toasr: ToastrService
   ) {
     this.rideForm = new FormGroup({
       source: new FormControl(null),
@@ -71,12 +83,25 @@ export class RideHistoryComponent implements OnInit {
   ngOnInit(): void {
     this.rideHistoryService.getAllRides().subscribe({
       next: (data) => {
+        this.mainRideList = data.rides;
         this.rideList = data.rides;
       },
     });
-
+// on cancel ride
     this.rideSocketService.cancleRide().subscribe((data: any) => {
-      this.rideList.unshift(data);
+      this.mainRideList.unshift(data);
+      this.onClickFilter();
+    });
+
+    // onCompleteRide
+    this.rideSocketService.onCompeteRide().subscribe((data: any) => {
+      this.mainRideList.unshift(data);
+      this.onClickFilter();
+    })
+    this.vehicleTypeService.getAllVehicleTypes().subscribe({
+      next: (data) => {
+        this.vehicleTypes = data.allVehicleTypes;
+      },
     });
   }
 
@@ -90,13 +115,7 @@ export class RideHistoryComponent implements OnInit {
         mapId: '8f2d9c7f9f9f8a9f',
       }
     );
-    // let coordinates: google.maps.LatLngLiteral[] = [];
-    // this.endPoints.forEach((point) => {
-    //   coordinates.push({lat: point.lat, lng: point.lng});
-    // });
-    // console.log(coordinates);
     let polyLine = new google.maps.Polyline({
-      // path: coordinates,
       path: this.endPoints,
       geodesic: true,
       strokeColor: '#FF0000',
@@ -108,7 +127,6 @@ export class RideHistoryComponent implements OnInit {
       bounds.extend(point);
     });
     this.map.fitBounds(bounds);
-
   }
   onClickRide(index: number) {
     this.rideForm.disable();
@@ -138,5 +156,129 @@ export class RideHistoryComponent implements OnInit {
       document.getElementById('rideHistoryModal') as HTMLElement
     );
     modal.show();
+  }
+  onSearchInputChange(event: any) {
+    if (event.target.value == '') {
+      this.rideList = this.mainRideList;
+    } else {
+      let regEx = new RegExp(event.target.value, 'ig');
+      let rideHistory = this.rideList.filter((ride) => {
+        return (
+          ride.source.search(regEx) > -1 ||
+          ride.destination.search(regEx) > -1 ||
+          ride.userName.search(regEx) > -1
+        );
+      });
+      this.rideList = rideHistory;
+    }
+  }
+
+  onDownload() {
+    this.rideHistoryService.getRidesForDownload().subscribe({
+      next: (data) => {
+        this.csvExportService.downloadFile(data.rides);
+      },
+    });
+  }
+
+  onFromDateChange(event: any) {
+    this.fromDate = new Date(event.target.value);
+    let currentDate = new Date();
+    if (this.fromDate > currentDate) {
+      this.toasr.warning(
+        'Date should not be greater than current date',
+        'Warning',
+        environment.TROASTR_STYLE
+      );
+      this.clearFrom();
+    }
+  }
+
+  onToDateChange(event: any) {
+    this.toDate = new Date(event.target.value);
+    let currentDate = new Date();
+    if (this.toDate > currentDate) {
+      this.toasr.warning(
+        'Date should not be greater than current date',
+        'Warning',
+        environment.TROASTR_STYLE
+      );
+      this.clearTo();
+    }
+  }
+
+  onTypeChange(event: any) {
+    this.selectedType = event.target.value;
+  }
+
+  onStatusChange(event: any) {
+    this.selectedStatus = event.target.value;
+  }
+  onClickFilter() {
+    let bool = false;
+    let bool2 = false;
+    let bool3 = false;
+    if (this.toDate != undefined && this.fromDate != undefined) {
+      if (this.toDate > this.fromDate) {
+        this.rideList = this.mainRideList.filter((ride) => {
+          let rideDate = new Date(ride.rideTime);
+          if (this.fromDate! <= rideDate && this.toDate! >= rideDate) {
+            bool = true;
+          } else {
+            bool = false;
+          }
+          if (this.selectedType != 'all') {
+            bool2 = ride.serviceType == this.selectedType;
+          } else {
+            bool2 = true;
+          }
+          if (this.selectedStatus != 'all') {
+            bool3 = ride.status == this.selectedStatus;
+          } else {
+            bool3 = true;
+          }
+          return bool && bool2 && bool3;
+        });
+      } else {
+        this.toasr.warning(
+          'To date should be greater than From date',
+          'Warning',
+          environment.TROASTR_STYLE
+        );
+        this.clearFrom();
+        this.clearTo();
+      }
+    } else if (this.toDate == undefined && this.fromDate == undefined) {
+      this.rideList = this.mainRideList.filter((ride) => {
+        if (this.selectedType != 'all') {
+          bool2 = ride.serviceType == this.selectedType;
+        } else {
+          bool2 = true;
+        }
+        if (this.selectedStatus != 'all') {
+          bool3 = ride.status == this.selectedStatus;
+        } else {
+          bool3 = true;
+        }
+        return bool2 && bool3;
+      });
+    } else if (this.toDate == undefined || this.fromDate == undefined) {
+      this.toasr.warning(
+        'Please select both dates',
+        'Warning',
+        environment.TROASTR_STYLE
+      );
+    }
+  }
+
+  clearFrom() {
+    let from = document.getElementById('from') as HTMLInputElement;
+    from.value = '';
+    this.fromDate = undefined;
+  }
+  clearTo() {
+    let to = document.getElementById('to') as HTMLInputElement;
+    to.value = '';
+    this.toDate = undefined;
   }
 }

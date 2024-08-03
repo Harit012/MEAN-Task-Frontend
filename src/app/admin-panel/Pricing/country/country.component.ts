@@ -58,6 +58,7 @@ export class CountryComponent implements OnInit {
             let countryCurrency = Object.keys(currencyRequirment).toString();
             let obj: Country = {
               countryName: data['name']['common'],
+              currencyISOName: Object.keys(currencyRequirment).toString().toLowerCase(),
               countryCallCode:
                 data['idd']['root'] + data['idd']['suffixes'][0],
               currency:
