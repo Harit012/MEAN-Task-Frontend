@@ -8,6 +8,7 @@ export interface ConfirmedRide {
   paymentMethod: string;
   rideTime: string;
   price: string;
+  driverProfit: string;
   stops: string[];
   userEmail?: string;
   userName: string;
@@ -19,19 +20,13 @@ export interface ConfirmedRide {
   endPoints: google.maps.LatLngLiteral[];
   stopPoints: google.maps.LatLngLiteral[];
   driverId?: string;
-  driverName?: string;
   sourceCity: string;
+  driverName?: string;
+  customerId?: string;
+  csn?: string;
+  callCode?: string;
+  driver_stripe_id?: string;
+  rating?:number;
+
 }
 
-export interface AssignStatusFromSocket {
-  rideId: string;
-  status: string;
-  driver: string;
-  driverId:string;
-  time: number;
-  type: string;
-  new?: boolean;
-  itr: number;
-  totalTime: number;
-  totalItr: number;
-}

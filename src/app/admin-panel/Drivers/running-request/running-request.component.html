@@ -5,10 +5,9 @@
   <!-- for new rides -->
   <div class="mb-1">
     <div class="d-flex justify-content-between align-items-center">
-      <h5 class="w-100 ms-5 mt-1" >New Rides</h5>
-      <p id="remainingTime" class="modal-title me-5 fs-5 text-bold"></p>
+      <h5 class="w-100 ms-5 mt-1">New Rides</h5>
     </div>
-    <hr>
+    <hr />
     <div class="scrollable-section">
       @for(ride of newRides;track $index){
       <div class="row ride-details justify-content-between border-3 corners">
@@ -19,7 +18,16 @@
           <p class="source-destination">
             <span id="rideSource " class="fs-5">{{ ride.source }}</span>
             <i class="fas fa-arrow-right ms-2 me-2"></i>
-            <span id="rideDestination" class="fs-5">{{ ride.destination }}</span>
+            <span id="rideDestination" class="fs-5">{{
+              ride.destination
+            }}</span>
+          </p>
+          <p>
+            Driver Profit :-
+            <span id="ridePrice2">{{ ride.driverProfit }}</span>
+          </p>
+          <p>
+            remaining Time :- <small id="{{ ride._id }}" class="fs-4"></small>
           </p>
         </div>
         <div class="col-md-3 col-sm-6 estimated-time d-none d-md-block">
@@ -39,7 +47,11 @@
           </p>
         </div>
         <div class="col-md-2 col-sm-6 d-none d-md-block">
-          <button type="button" class="btn btn-info w-100 mt-2" (click)="onClickShowDetails($index)">
+          <button
+            type="button"
+            class="btn btn-info w-100 mt-2"
+            (click)="onClickShowDetails($index)"
+          >
             More Details
           </button>
           <button
@@ -50,71 +62,90 @@
           >
             Accept
           </button>
-          <button type="button" class="btn btn-danger w-100 mt-2" id="rideButton" (click)="onRejectRequest($index)">
+          <button
+            type="button"
+            class="btn btn-danger w-100 mt-2"
+            id="rideButton"
+            (click)="onRejectRequest($index)"
+          >
             Reject
           </button>
-          
         </div>
       </div>
       }
     </div>
   </div>
-<hr>
+  <hr />
   <!-- For rides in progress -->
-  <div class="mb-1 ">
+  <div class="mb-1">
     <h5 class="w-100 ms-5">Accepted Rides</h5>
-    <hr>
+    <hr />
     <div class="scrollable-section-2">
       @for(ride of acceptedRides;track $index){
-        <div class="row ride-details2 justify-content-between border-3 corners">
-          <div class="col-md-4 col-sm-6 price-source">
-            <p class="price fs-4">
-              ₹ <span id="ridePrice">{{ ride.price }}</span>
-            </p>
-            <p class="source-destination">
-              <span id="rideSource " class="fs-5">{{ ride.source }}</span>
-              <i class="fas fa-arrow-right ms-2 me-2"></i>
-              <span id="rideDestination" class="fs-5">{{ ride.destination }}</span>
-            </p>
-          </div>
-          <div class="col-md-3 col-sm-6 estimated-time d-none d-md-block">
-            <p>
-              <i class="fas fa-clock"></i>
-              <span id="estimatedTime" class="rideInfo">{{ ride.time }}</span>
-            </p>
-            <p>
-              <i class="fas fa-road"></i>
-              <span id="distance" class="rideInfo">{{ ride.distance }}</span>
-            </p>
-            <p>
-              <i class="fas fa-calendar-alt"></i>
-              <span id="rideTime" class="rideInfo"
-                >{{ ride.rideTime | date : "medium" }}({{ ride.rideType }})</span
-              >
-            </p>
-          </div>
-          <div class="col-md-2 col-sm-6 d-none d-md-block">
-            <select name="action-selector" [id]="$index" class="form-select">
-              <option value="{{ride.status}}" [defaultSelected]="true" [disabled]="true">{{ride.status}}</option>
-              <option value="accepted">Accepted</option>
-              <option value="arrived">Arrived</option>
-              <option value="picked">Picked</option>
-              <option value="started">Started</option>
-              <option value="completed">Completed</option>
-            </select>
-            <button type="button" class="btn btn-success w-100 mt-2" id="Statuschange" (click)="onStatusChange($index)">Update status</button>
-          </div>
+      <div class="row ride-details2 justify-content-between border-3 corners">
+        <div class="col-md-4 col-sm-6 price-source">
+          <p class="price fs-4">
+            ₹ <span id="ridePrice">{{ ride.price }}</span>
+          </p>
+          <p class="source-destination">
+            <span id="rideSource " class="fs-5">{{ ride.source }}</span>
+            <i class="fas fa-arrow-right ms-2 me-2"></i>
+            <span id="rideDestination" class="fs-5">{{
+              ride.destination
+            }}</span>
+          </p>
+          <p>
+            Driver Profit :-
+            <span id="ridePrice2">{{ ride.driverProfit }}</span>
+          </p>
         </div>
+        <div class="col-md-3 col-sm-6 estimated-time d-none d-md-block">
+          <p>
+            <i class="fas fa-clock"></i>
+            <span id="estimatedTime" class="rideInfo">{{ ride.time }}</span>
+          </p>
+          <p>
+            <i class="fas fa-road"></i>
+            <span id="distance" class="rideInfo">{{ ride.distance }}</span>
+          </p>
+          <p>
+            <i class="fas fa-calendar-alt"></i>
+            <span id="rideTime" class="rideInfo"
+              >{{ ride.rideTime | date : "medium" }}({{ ride.rideType }})</span
+            >
+          </p>
+        </div>
+        <div class="col-md-2 col-sm-6 d-none d-md-block">
+          <select name="action-selector" [id]="$index" class="form-select">
+            <option
+              value="{{ ride.status }}"
+              [defaultSelected]="true"
+              [disabled]="true"
+            >
+              {{ ride.status }}
+            </option>
+            <option value="accepted">Accepted</option>
+            <option value="arrived">Arrived</option>
+            <option value="picked">Picked</option>
+            <option value="started">Started</option>
+            <option value="completed">Completed</option>
+          </select>
+          <button
+            type="button"
+            class="btn btn-success w-100 mt-2"
+            id="Statuschange"
+            (click)="onStatusChange($index)"
+          >
+            Update status
+          </button>
+        </div>
+      </div>
       }
     </div>
   </div>
-  <hr>
+  <hr />
 </div>
-
-
-
-
-
+<!-- Trip details modal -->
 <div
   class="modal fade"
   id="confirmedRideModal"
@@ -320,6 +351,95 @@
       <div class="modal-footer d-flex justify-content-center">
         <button type="button" class="btn btn-danger" data-bs-dismiss="modal">
           Close
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- Invoice Modal -->
+<div
+  class="modal fade"
+  id="invoiceModal"
+  data-bs-backdrop="static"
+  data-bs-keyboard="false"
+  tabindex="-1"
+  aria-labelledby="staticBackdropLabel"
+  aria-hidden="true"
+>
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-body">
+        <div class="container2">
+          <div class="header">
+            <h1>Trip Invoice</h1>
+          </div>
+          <div class="content">
+            <div class="trip-info">
+              <p class="px-4"><strong>Passenger:</strong>&nbsp;&nbsp;{{invoiceObj.userName}}</p>
+              <p class="px-4"><strong>Date:</strong>&nbsp;&nbsp;{{invoiceObj.rideTime | date:'fullDate'}}  </p>
+              <p class="px-4"><strong>Pickup Location:</strong>&nbsp;&nbsp;{{invoiceObj.source}} </p>
+              <p class="px-4"><strong>Dropoff Location:</strong>&nbsp;&nbsp;{{invoiceObj.destination}} </p>
+              <p class="px-4"><strong>Driver:</strong>&nbsp;&nbsp;{{invoiceObj.driverName}} </p>
+              <p class="px-4"><strong>ServiceType:</strong>&nbsp;&nbsp;{{invoiceObj.serviceType}} </p>
+            </div>
+            <div class="fare-breakdown">
+              <h5 style="color: cadetblue;">Fare Breakdown</h5>
+              <table>
+                <tr>
+                  <th>Description</th>
+                  <th>Amount</th>
+                </tr>
+                <tr>
+                  <td>Distance</td>
+                  <td>{{invoiceObj.distance}}</td>
+                </tr>
+                <tr>
+                  <td>Time</td>
+                  <td>{{invoiceObj.time}} </td>
+                </tr>
+                <tr>
+                  <td>Total Fare</td>
+                  <td>{{ invoiceObj.price | currency:(invoiceObj.csn | uppercase) }}</td>
+                </tr>
+                <tr>
+                  <td>Driver Profit</td>
+                  <td>{{ invoiceObj.driverProfit | currency:(invoiceObj.csn | uppercase) }}</td>
+                </tr>
+                <tr>
+                  <td>payment Method </td>
+                  <td>{{invoiceObj.paymentMethod}}</td>
+                </tr>
+                
+              </table>
+            </div>
+            <p>
+              If you have any questions or concerns, please contact our support
+              team at  or
+              4539564385.
+            </p>
+          </div>
+          <div class="footer">
+            <p>&copy; 2024 EBER. All rights reserved.</p>
+          </div>
+        </div>
+      </div>
+      <div class="star-rating d-block w-100 justify-self-center">
+        <div class="centerthis">
+          <span>Feed back</span>
+        </div>
+        <div class="centerthis">
+          <span 
+            *ngFor="let star of stars; let i = index" 
+            (click)="rate(i + 1)" 
+            [class.filled]="i < rating"
+            style="font-size: 4rem;">
+            &#9733;
+          </span>
+        </div>
+      </div>
+      <div class="modal-footer justify-content-center">
+        <button type="button" class="btn btn-success" data-bs-dismiss="modal" (click)="onProceedToPayment()">
+          Conform to Payment
         </button>
       </div>
     </div>

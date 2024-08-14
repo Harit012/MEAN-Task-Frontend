@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { io } from 'socket.io-client';
-import { AssignStatusFromSocket, ConfirmedRide } from '../confirmed-rides/confirmed-ride.interface';
+import { ConfirmedRide } from '../confirmed-rides/confirmed-ride.interface';
 import { ToastrService } from 'ngx-toastr';
 import { environment } from '../../../../environments/environment';
 
@@ -52,7 +52,7 @@ export class RideSocketService {
         observer.next(ride);
       });
       return () => {
-        this.socket.disconnect();
+        this.socket.disconnect(); 
       };
     });
   }
@@ -80,69 +80,75 @@ export class RideSocketService {
     });
   }
 
-  assignRequestToDriver(
-    drivers: string[],
-    driverIds: string[],
-    rideId: string,
-    type: string,
-    timeOut: number
-  ) {
-    this.socket.emit('cronDrivers', {
-      drivers: drivers,
-      driverIds: driverIds,
-      rideId: rideId,
-      type: type,
-      timeOut: timeOut,
+  getRemainingTime(){
+    return new Observable((observer) => {
+      this.socket.on('remainingTime', (data:{seconds:number,rideId:string}) => {
+        observer.next(data);
+      });
+      return () => {
+        this.socket.disconnect();
+      };
+    });
+  }
+
+  rejectRide(){
+    return new Observable((observer) => {
+      this.socket.on('Rejected', (data:{rideId:string}) => {
+        observer.next(data);
+      });
+      return () => {
+        this.socket.disconnect();
+      };
     });
   }
 
   // for driver action 
 
-  driverResponse(response:number){
-    this.socket.emit('DriverReaction',{reaction:response});
-  }
+  // driverResponse(response:number){
+  //   this.socket.emit('DriverReaction',{reaction:response});
+  // }
 
   // after driver action is done
-  onRequestAccepted(){
-    return new Observable((observer) => {
-      this.socket.on('Accepted', (data: AssignStatusFromSocket ) => {
-        observer.next(data);
-      });
-      return () => {
-        this.socket.disconnect();
-      };
-    })
-  }
-  onRequestRejected(){
-    return new Observable((observer) => {
-      this.socket.on('Rejected', (data: AssignStatusFromSocket ) => {
-        observer.next(data);
-      });
-      return () => {
-        this.socket.disconnect();
-      };
-    })
-  } 
-  onRidePending(){
-    return new Observable((observer) => {
-      this.socket.on('Pending', (data: AssignStatusFromSocket ) => {
-        observer.next(data);
-      });
-      return () => {
-        this.socket.disconnect();
-      };
-    })
-  } 
+  // onRequestAccepted(){
+  //   return new Observable((observer) => {
+  //     this.socket.on('Accepted', (data: AssignStatusFromSocket ) => {
+  //       observer.next(data);
+  //     });
+  //     return () => {
+  //       this.socket.disconnect();
+  //     };
+  //   })
+  // }
+  // onRequestRejected(){
+  //   return new Observable((observer) => {
+  //     this.socket.on('Rejected', (data: AssignStatusFromSocket ) => {
+  //       observer.next(data);
+  //     });
+  //     return () => {
+  //       this.socket.disconnect();
+  //     };
+  //   })
+  // } 
+  // onRidePending(){
+  //   return new Observable((observer) => {
+  //     this.socket.on('Pending', (data: AssignStatusFromSocket ) => {
+  //       observer.next(data);
+  //     });
+  //     return () => {
+  //       this.socket.disconnect();
+  //     };
+  //   })
+  // } 
 
-  onError(){
-    this.socket.on("Error",(data)=>{
-      this.toastr.error(data.message, "Erro in Socket", environment.TROASTR_STYLE)
-    })
-  }
+  // onError(){
+  //   this.socket.on("Error",(data)=>{
+  //     this.toastr.error(data.message, "Erro in Socket", environment.TROASTR_STYLE)
+  //   })
+  // }
 
   onCronStop(){
     return new Observable((observer) => {
-      this.socket.on('cronStoped', (data: { status:string} ) => {
+      this.socket.on('cronEnd', (data: {message:string, rideId:string} ) => {
         observer.next(data);
       });
       return () => {
@@ -154,17 +160,6 @@ export class RideSocketService {
   onCompeteRide(){
     return new Observable((observer) => {
       this.socket.on('CompletedRide', (data: ConfirmedRide ) => {
-        observer.next(data);
-      });
-      return () => {
-        this.socket.disconnect();
-      };
-    })
-  }
-
-  onLinkToPayment(){
-    return new Observable((observer) => {
-      this.socket.on('paymentLink', (data: string ) => {
         observer.next(data);
       });
       return () => {

@@ -39,6 +39,13 @@ export class ConfirmedRidesService {
     );
   }
 
+  assignAnyDriver(rideId: string) {
+    return this.http.patch<{ status: boolean; ride: ConfirmedRide }>(
+      `${environment.BASE_URL}/admin/rides/confirmed-ride/assign-any-driver`,
+      { rideId: rideId}
+    );
+  }
+
   getTimeOut() {
     return this.http.get<{ status: boolean; timeOut: number }>(
       `${environment.BASE_URL}/admin/rides/confirmed-ride/getTimeOut`

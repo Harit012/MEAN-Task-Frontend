@@ -108,6 +108,9 @@
             </option>
             <option value="edit" style="color: blue">Edit Driver</option>
             <option value="delete" style="color: red">Delete Driver</option>
+            <option value="bankAccount" style="color: rgb(179, 3, 170)">
+              Add Bank Account
+            </option>
           </select>
         </div>
       </div>
@@ -285,7 +288,7 @@
                 >
                 <small
                   *ngIf="driverForm.get('phone')?.errors?.['pattern'] && (driverForm.get('phone')?.dirty || driverForm.get('phone')?.touched)"
-                  >**Phone must be DIGITS and must be 10</small
+                  >*Phone must be DIGITS and must be 10</small
                 >
               </div>
             </div>
@@ -420,6 +423,97 @@
             Save changes
           </button>
         </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Bank Account Modal -->
+
+<div
+  class="modal fade"
+  id="bankAccountModal"
+  tabindex="-1"
+  aria-labelledby="exampleModalLabel"
+  aria-hidden="true"
+>
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h1 class="modal-title fs-5" id="exampleModalLabel">
+          Add Your Bank Account
+        </h1>
+        <button
+          id="closeButtonOfAccountModal"
+          type="button"
+          class="btn-close"
+          data-bs-dismiss="modal"
+          aria-label="Close"
+        ></button>
+      </div>
+      <div class="modal-body" >
+        <div class="continer">
+          <form [formGroup]="bankAccountForm">
+            <div class="row align-items-center">
+              <label for="accountNumber" class="col-4"
+                >Account Number :-
+              </label>
+              <div class="col-8">
+                <input
+                  type="text"
+                  formControlName="accountNumber"
+                  class="form-control"
+                  placeholder="Enter Account Number"
+                  id="accountNumber"
+                />
+                <small
+                  *ngIf="bankAccountForm.get('accountNumber')?.errors?.['required'] && (bankAccountForm.get('accountNumber')?.dirty || bankAccountForm.get('accountNumber')?.touched)"
+                  >*Account Number is required</small>
+                <small
+                  *ngIf="bankAccountForm.get('accountNumber')?.errors?.['maxLength'] && (bankAccountForm.get('accountNumber')?.dirty || bankAccountForm.get('accountNumber')?.touched)"
+                  >*Account Number should more than 12 digits</small>
+                <small
+                  *ngIf="bankAccountForm.get('accountNumber')?.errors?.['minLength'] && (bankAccountForm.get('accountNumber')?.dirty || bankAccountForm.get('accountNumber')?.touched)"
+                  >*Account Number should less than 12 digits</small>
+                <small
+                  *ngIf="bankAccountForm.get('accountNumber')?.errors?.['pattern'] && (bankAccountForm.get('accountNumber')?.dirty || bankAccountForm.get('accountNumber')?.touched)"
+                  >*Account Number Must be 12 digits</small>
+              </div>
+            </div>
+            <div class="row align-items-center mt-3">
+              <label for="routingNumber" class="col-4"
+                >Routing Number :-
+              </label>
+              <div class="col-8">
+                <input
+                  type="text"
+                  formControlName="routingNumber"
+                  class="form-control"
+                  placeholder="Enter Routing Number"
+                  id="routingNumber"
+                />
+                <small
+                  *ngIf="bankAccountForm.get('routingNumber')?.errors?.['required'] && (bankAccountForm.get('routingNumber')?.dirty || bankAccountForm.get('routingNumber')?.touched)"
+                  >*Routig Number is required</small>
+                <small
+                  *ngIf="bankAccountForm.get('routingNumber')?.errors?.['maxLength'] && (bankAccountForm.get('routingNumber')?.dirty || bankAccountForm.get('routingNumber')?.touched)"
+                  >*Routig Number should more than 9 digits</small>
+                <small
+                  *ngIf="bankAccountForm.get('routingNumber')?.errors?.['minLength'] && (bankAccountForm.get('routingNumber')?.dirty || bankAccountForm.get('routingNumber')?.touched)"
+                  >*Routig Number should less than 9 digits</small>
+                <small
+                  *ngIf="bankAccountForm.get('routingNumber')?.errors?.['pattern'] && (bankAccountForm.get('routingNumber')?.dirty || bankAccountForm.get('routingNumber')?.touched)"
+                  >*Routig Number Must be 9 digits</small>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+          Close
+        </button>
+        <button type="button" class="btn btn-success" (click)="onAddBankAccount()">Add Account</button>
       </div>
     </div>
   </div>

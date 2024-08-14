@@ -14,4 +14,5 @@ export interface BoxPricingContent {
   vehicleImage: string;
   price: number;
   vehicleType: number;
+  driverProfit: number;
 }

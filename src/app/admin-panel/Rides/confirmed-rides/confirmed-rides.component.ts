@@ -1,9 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { ConfirmedRidesService } from './confirmed-rides.service';
-import {
-  AssignStatusFromSocket,
-  ConfirmedRide,
-} from './confirmed-ride.interface';
+import { ConfirmedRide } from './confirmed-ride.interface';
 import { CommonModule } from '@angular/common';
 import {
   FormControl,
@@ -45,6 +42,7 @@ export class ConfirmedRidesComponent implements OnInit {
     paymentMethod: '--',
     rideTime: '--',
     price: '--',
+    driverProfit: '--',
     stops: [],
     stopPoints: [],
     endPoints: [],
@@ -87,7 +85,6 @@ export class ConfirmedRidesComponent implements OnInit {
       rideid: new FormControl(null),
       sourceCity: new FormControl(null),
     });
-
   }
 
   ngOnInit() {
@@ -123,42 +120,19 @@ export class ConfirmedRidesComponent implements OnInit {
       this.onFilterRides();
     });
     // When driver is assigned to ride
-    this.rideSocketService.onRidePending().subscribe((data: any) => {
-      this.onAssignDriverToCron(data);
-    });
-
-    this.rideSocketService.onRequestAccepted().subscribe((data: any) => {
-      this.toastr.success('Ride Accepted', '', environment.TROASTR_STYLE);
-      let timer = document.getElementById(
-        'remainingTime'
-      ) as HTMLParagraphElement;
-      timer.textContent = "";
+    this.rideSocketService.getAssignedRide().subscribe((data: any) => {
       let modal = bootstrap.Modal.getOrCreateInstance(
         document.getElementById('AssignModal') as HTMLElement
       );
       modal.hide();
+      let assignButton = document.getElementById(
+        `rideButton${data._id}`
+      ) as HTMLButtonElement;
+      assignButton.classList.add('btn-warning');
+      assignButton.disabled = true;
+      assignButton.textContent = `Assignig to ${data.driverName}`;
     });
 
-    // When request is Rejected
-    this.rideSocketService.onRequestRejected().subscribe((data: any) => {
-      // console.log(data)
-      let button = document.getElementById(
-        `AssignButton${data.rideId}${data.driverId}`
-      ) as HTMLButtonElement;
-      button.classList.add('btn-danger');
-      button.textContent = `rejected`;
-      console.log(data.itr , data.totalItr)
-      if(data.itr == data.totalItr){
-        let timer = document.getElementById(
-          'remainingTime'
-        ) as HTMLParagraphElement;
-        timer.textContent = "";
-        let modal = bootstrap.Modal.getOrCreateInstance(
-          document.getElementById('AssignModal') as HTMLElement
-        );
-        modal.hide();
-      }
-    });
     // when driver Accepts ride
     this.rideSocketService.getAcceptedRide().subscribe((data: any) => {
       this.totalRides = this.totalRides.filter((ride) => {
@@ -166,16 +140,33 @@ export class ConfirmedRidesComponent implements OnInit {
       });
       this.totalRides.push(data);
       this.onFilterRides();
-      // this.availableRides = this.totalRides;
     });
-
+    // Cron End
+    this.rideSocketService.onCronStop().subscribe((data: any) => {
+      if (data.message == 'All Drivers are Busy') {
+        let assignButton = document.getElementById(
+          `rideButton${data.rideId}`
+        ) as HTMLButtonElement;
+        assignButton.classList.remove('btn-warning');
+        assignButton.disabled = false;
+        assignButton.textContent = `Re Assign`;
+      } else {
+      }
+    });
+    // When a ride is Completed
+    this.rideSocketService.onCompeteRide().subscribe((data: any) => {
+      this.totalRides = this.totalRides.filter((ride) => {
+        return ride._id != data._id;
+      });
+      this.onFilterRides();
+    });
     // When ride status change
     this.rideSocketService.getStatusChange().subscribe((data: any) => {
-        this.totalRides = this.totalRides.filter((ride) => {
-          return ride._id != data._id;
-        });
-        this.totalRides.push(data);
-        this.onFilterRides();
+      this.totalRides = this.totalRides.filter((ride) => {
+        return ride._id != data._id;
+      });
+      this.totalRides.push(data);
+      this.onFilterRides();
     });
   }
   // get detiled information about ride
@@ -219,8 +210,12 @@ export class ConfirmedRidesComponent implements OnInit {
     });
   }
   // on click of assign ride
-  onAssignRide(index: number) {
-    this.selectedRideForAssign = this.availableRides[index];
+  onAssignRide(id: string) {
+    // this.selectedRideForAssign = this.availableRides[index];
+    let rideSet = this.availableRides.filter((ride) => {
+      return ride._id == id;
+    });
+    this.selectedRideForAssign = rideSet[0];
     // to get drivers from server
     this.confirmedRideService
       .getAllDrivers(
@@ -267,22 +262,21 @@ export class ConfirmedRidesComponent implements OnInit {
   }
   //  on filter
   onFilterRides() {
-    this.availableRides = this.totalRides.filter((ride)=>{
+    this.availableRides = this.totalRides.filter((ride) => {
       let bool1 = false;
       let bool2 = false;
-      if(this.selectedServiceType != 'all'){
+      if (this.selectedServiceType != 'all') {
         bool1 = ride.serviceType == this.selectedServiceType;
-      }else{
+      } else {
         bool1 = true;
       }
-      if(this.selectedstatus != 'all'){
+      if (this.selectedstatus != 'all') {
         bool2 = ride.status == this.selectedstatus;
-      }else{
+      } else {
         bool2 = true;
       }
       return bool1 && bool2;
     });
-
   }
   // to show map of ride
   initMap() {
@@ -328,57 +322,16 @@ export class ConfirmedRidesComponent implements OnInit {
   }
   // whenn driver is assigned manually
   onAssignDriverManually(index: number) {
-    this.rideSocketService.assignRequestToDriver(
-      [this.driversList[index].driverName],
-      [this.driversList[index]._id],
-      this.selectedRideForAssign._id,
-      'manual',
-      this.timeOut
-    );
+    this.confirmedRideService
+      .assignDriver(this.selectedRideForAssign._id, this.driversList[index]._id)
+      .subscribe();
   }
 
   onAssignDriverAuto() {
-    this.rideSocketService.assignRequestToDriver(
-      this.driversList.map((driver) => driver.driverName),
-      this.driversList.map((driver) => driver._id),
-      this.selectedRideForAssign._id,
-      'auto',
-      this.timeOut
-    );
-  }
-
-  // onAssignDriverToCron
-  onAssignDriverToCron(data: AssignStatusFromSocket) {
-    let button = document.getElementById(
-      `AssignButton${data.rideId}${data.driverId}`
-    ) as HTMLButtonElement;
-    let timer = document.getElementById(
-      'remainingTime'
-    ) as HTMLParagraphElement;
-    if (data.new) {
-      this.confirmedRideService
-        .assignDriver(data.rideId, data.driverId)
-        .subscribe({
-          next: () => {
-            this.toastr.info(`"${data.driver}" is assigned to ride`,"",environment.TROASTR_STYLE);
-          },
-        });
-    }
-    if(!(data.time ==0 && data.itr ==0)){
-
-      timer.textContent = `${data.totalTime - data.time} Seconds`;
-      button.textContent = `assigning to ${data.driver}`;
-      button.classList.add('btn-warning');
-      button.disabled = true;
-      if (data.time == this.timeOut - 1) {
-        setTimeout(() => {
-          button.classList.remove('btn-warning');
-          button.textContent = `${data.driver} didn't responded`;
-          timer.textContent = ``;
-        }, 1000);
-      }
-    }else if (data.time == 0 && data.itr == 0) {
-      this.toastr.info('No Driver Responded to the request ');
-    }
+    this.confirmedRideService
+      .assignAnyDriver(this.selectedRideForAssign._id)
+      .subscribe({
+        next: (data) => {},
+      });
   }
 }

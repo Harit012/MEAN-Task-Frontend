@@ -25,7 +25,8 @@ import { VehicleTypeService } from '../../Pricing/vehicle-type/vehicle-type.serv
   styleUrl: './list.component.css',
 })
 export class ListComponent implements OnInit {
-  driverForm!: FormGroup;
+  driverForm: FormGroup;
+  bankAccountForm: FormGroup;
   countryList: Country[] = [];
   cityList: RecivingZone[] = [];
   driversList: any[] = [];
@@ -40,6 +41,7 @@ export class ListComponent implements OnInit {
   serviceTypes: string[] = ['none'];
   selectedServiceType: string = 'none';
   driverForService!: Driver;
+  driverForAccount!: Driver;
   toastr = inject(ToastrService);
   constructor(
     private countryService: CountriesService,
@@ -64,29 +66,22 @@ export class ListComponent implements OnInit {
       country: new FormControl(null, [Validators.required]),
       city: new FormControl(null, [Validators.required]),
     });
+    this.bankAccountForm = new FormGroup({
+      accountNumber: new FormControl(null, [
+        Validators.required,
+        Validators.maxLength(12),
+        Validators.minLength(12),
+        Validators.pattern('^[0-9]{12}$'),
+      ]),
+      routingNumber: new FormControl(null, [
+        Validators.required,
+        Validators.maxLength(9),
+        Validators.minLength(9),
+        Validators.pattern('^[0-9]{9}$'),
+      ]),
+    });
   }
 
-  // commonErrorHandler(err: any) {
-  //   if (!err.error.status) {
-  //     this.toastr.error(
-  //       `Error while sending request to server`,
-  //       `Error :- ${err.status}`,
-  //       environment.TROASTR_STYLE
-  //     );
-  //   } else if (err.error.status == 'Failure') {
-  //     if (err.status == 401) {
-  //       this.authService.userLogOut();
-  //     } else {
-  //       this.toastr.error(
-  //         `${err.error.message}`,
-  //         `Error :- ${err.status}`,
-  //         environment.TROASTR_STYLE
-  //       );
-  //     }
-  //   } else {
-  //     this.toastr.error(`Unknown Error`, `Error :- ${err.status}`, environment.TROASTR_STYLE);
-  //   }
-  // }
   ngOnInit(): void {
     this.getDrivers();
 
@@ -95,7 +90,7 @@ export class ListComponent implements OnInit {
         if (res.countries) {
           this.countryList = res.countries;
         }
-      }
+      },
     });
 
     this.vehicletypeService.getAllVehicleTypes().subscribe({
@@ -105,7 +100,7 @@ export class ListComponent implements OnInit {
         } else if (data.varified === false) {
           this.authService.userLogOut();
         }
-      }
+      },
     });
   }
   // when sort method changes
@@ -122,15 +117,17 @@ export class ListComponent implements OnInit {
           if (res.drivers) {
             this.driversList = res.drivers;
           }
-        }
+        },
       });
   }
   // when user changes country
 
-  preOnCountryChange(event:any){
-    let index = this.countryList.findIndex((X)=>X.countryName == event.target.value)
-    if(index != -1){
-      this.onCountryChange(this.countryList[index])
+  preOnCountryChange(event: any) {
+    let index = this.countryList.findIndex(
+      (X) => X.countryName == event.target.value
+    );
+    if (index != -1) {
+      this.onCountryChange(this.countryList[index]);
     }
   }
 
@@ -142,14 +139,16 @@ export class ListComponent implements OnInit {
         if (data.zones) {
           this.cityList = data.zones;
         }
-      }
+      },
     });
   }
 
-  preonCityChange(event:any){
-    let index = this.cityList.findIndex((X)=>X.zoneName == event.target.value)
-    if(index != -1){
-      this.onCityChange(this.cityList[index])
+  preonCityChange(event: any) {
+    let index = this.cityList.findIndex(
+      (X) => X.zoneName == event.target.value
+    );
+    if (index != -1) {
+      this.onCityChange(this.cityList[index]);
     }
   }
   // when user changes city
@@ -158,17 +157,28 @@ export class ListComponent implements OnInit {
   }
   // ehwn user changes file
   onFileChange(event: any) {
-    let files =event.target.files;
-    let length =event.target.files.length;
+    let files = event.target.files;
+    let length = event.target.files.length;
     if (files && length) {
-      if(event.target.files[0].type != 'image/png' && event.target.files[0].type != 'image/jpeg') {
-        this.toastr.warning(`${event.target.files[0].type} is not supported Upload Image/png`, 'Warning',environment.TROASTR_STYLE);
+      if (
+        event.target.files[0].type != 'image/png' &&
+        event.target.files[0].type != 'image/jpeg'
+      ) {
+        this.toastr.warning(
+          `${event.target.files[0].type} is not supported Upload Image/png`,
+          'Warning',
+          environment.TROASTR_STYLE
+        );
       }
       if (event.target.files[0].size < 4000000) {
         this.formdata.delete('driverProfile');
         this.formdata.append('driverProfile', event.target.files[0]);
       } else {
-        this.toastr.warning('Upload file size is too large', 'Warning',environment.TROASTR_STYLE);
+        this.toastr.warning(
+          'Upload file size is too large',
+          'Warning',
+          environment.TROASTR_STYLE
+        );
         this.driverForm.get('driverProfile')?.setValue(null);
       }
     }
@@ -190,7 +200,7 @@ export class ListComponent implements OnInit {
     );
     this.formdata.append('phone', this.driverForm.get('phone')?.value);
     this.formdata.append('country', this.selectedCountry._id!);
-    this.formdata.append('city', this.selectedCity._id!);
+    this.formdata.append('city', this.selectedCity._id);
     this.driverService.postDriver(this.formdata).subscribe({
       next: (data) => {
         if (data.driver) {
@@ -203,7 +213,7 @@ export class ListComponent implements OnInit {
           this.formdata = new FormData();
           this.driverForm.reset();
         }
-      }
+      },
     });
   }
   // to update user
@@ -220,7 +230,7 @@ export class ListComponent implements OnInit {
     let temp_city = this.driverForm.get('city')?.value;
     for (let city of this.cityList) {
       if (city['zoneName'] === temp_city) {
-        this.formdata.append('city', city._id!);
+        this.formdata.append('city', city._id);
         break;
       } else {
         continue;
@@ -241,7 +251,7 @@ export class ListComponent implements OnInit {
               environment.TROASTR_STYLE
             );
           }
-        }
+        },
       });
     } else {
       this.toastr.info(
@@ -262,7 +272,7 @@ export class ListComponent implements OnInit {
           if (data.message) {
             this.driversList[i]['approved'] = temp_status;
           }
-        }
+        },
       });
   }
   // when user selects action like edit / delete
@@ -276,6 +286,9 @@ export class ListComponent implements OnInit {
         break;
       case 'serviceType':
         this.serviceType(driver);
+        break;
+      case 'bankAccount':
+        this.onBankAccountModal(driver);
         break;
     }
     event.target.selectedIndex = 0;
@@ -293,7 +306,7 @@ export class ListComponent implements OnInit {
       'countrycode'
     ) as HTMLInputElement;
     let temp_country = document.getElementById('country') as HTMLSelectElement;
-    let temp_city = document.getElementById('city') as HTMLSelectElement;
+    // let temp_city = document.getElementById('city') as HTMLSelectElement;
     let selectedDriverProfile = document.getElementById(
       'selectedDriverProfile'
     ) as HTMLElement;
@@ -318,47 +331,49 @@ export class ListComponent implements OnInit {
             if (data.zones) {
               this.cityList = data.zones;
             }
-          }
+          },
         });
         break;
       } else {
         continue;
       }
-    } 
-    // for (let city of this.cityList){
-    //   if(city.zoneName == driver.city){
-    //     console.log("-----------------------------------------------------------")
-    //     console.log(temp_city.options)
-    //     console.log("-----------------------------------------------------------")
-    //     let ind = this.cityList.indexOf(city)+1;
-    //     temp_city.selectedIndex =ind;
-    //     break;
-    //   }else{
-    //     console.log(city.zoneName)
-    //     console.log(driver.city)
-    //     console.log("-------------------------------")
-    //     // console.log(city.zoneName);
-    //   }
-    // }
+    }
+    // // for (let city of this.cityList){
+    // //   if(city.zoneName == driver.city){
+    // //     console.log("-----------------------------------------------------------")
+    // //     console.log(temp_city.options)
+    // //     console.log("-----------------------------------------------------------")
+    // //     let ind = this.cityList.indexOf(city)+1;
+    // //     temp_city.selectedIndex =ind;
+    // //     break;
+    // //   }else{
+    // //     console.log(city.zoneName)
+    // //     console.log(driver.city)
+    // //     console.log("-------------------------------")
+    // //     console.log(city.zoneName);
+    // //   }
+    // // }
     this.formdata.append('driverProfile', driver.driverProfile);
     this.formdata.append('id', driver._id!);
   }
   // when user clicks on delete
   onDelete(driver: Driver) {
     if (confirm('Are you sure you want to delete this driver?')) {
-      this.driverService.deleteDriver(driver._id!).subscribe({
-        next: (data) => {
-          if (data.message) {
-            this.toastr.success(
-              'Driver Deleted Successfully',
-              'Success',
-              environment.TROASTR_STYLE
-            );
-            let index = this.driversList.indexOf(driver);
-            this.driversList.splice(index, 1);
-          }
-        }
-      });
+      this.driverService
+        .deleteDriver(driver._id!, driver.driver_stripe_id!)
+        .subscribe({
+          next: (data) => {
+            if (data.message) {
+              this.toastr.success(
+                'Driver Deleted Successfully',
+                'Success',
+                environment.TROASTR_STYLE
+              );
+              let index = this.driversList.indexOf(driver);
+              this.driversList.splice(index, 1);
+            }
+          },
+        });
     }
   }
   // when user wants to go to next page
@@ -417,7 +432,75 @@ export class ListComponent implements OnInit {
             );
             this.getDrivers();
           }
-        }
+        },
       });
   }
+  // onBankAccountModal
+  onBankAccountModal(driver: Driver) {
+    this.driverService.getAllAccounts(driver.driver_stripe_id!).subscribe({
+      next: (data: any) => {
+        let capabilities = data.capabilities;
+        if (
+          capabilities.card_payments == 'active' &&
+          capabilities.transfers == 'active'
+        ) {
+          this.toastr.info(
+            'You Already have Bank Account',
+            '',
+            environment.TROASTR_STYLE
+          );
+        } else if (
+          capabilities.card_payments == 'pending' ||
+          capabilities.transfers == 'pending'
+        ) {
+          this.toastr.info(
+            'Your Bank Account request is in verification stage',
+            '',
+            environment.TROASTR_STYLE
+          );
+        } else {
+          this.driverForAccount = driver;
+          const modal = new bootstrap.Modal(
+            document.getElementById('bankAccountModal') as HTMLElement
+          );
+          modal.show();
+        }
+      },
+    });
+    // this.driverForAccount = driver;
+    // const modal = new bootstrap.Modal(
+    //   document.getElementById('bankAccountModal') as HTMLElement
+    // );
+    // modal.show();
+  }
+
+  onAddBankAccount() {
+    if (this.bankAccountForm.valid) {
+      let AccountObj = {
+        accountNumber: this.bankAccountForm.value.accountNumber,
+        routingNumber: this.bankAccountForm.value.routingNumber,
+        driverId: this.driverForAccount._id,
+      };
+      this.driverService.addBankAccount(AccountObj).subscribe({
+        next: (data) => {
+          const modal = document.getElementById("closeButtonOfAccountModal") as HTMLButtonElement;
+          modal.click();  
+          this.toastr.success(
+            `Account Added it will take some time to verify`,
+            '',
+            environment.TROASTR_STYLE
+          );
+          this.bankAccountForm.reset();
+        },
+      });
+    } else {
+      this.toastr.error(
+        `Please Enter Valid Details`,
+        'Error',
+        environment.TROASTR_STYLE
+      );
+      this.bankAccountForm.markAllAsTouched();
+    }
+  }
+
 }

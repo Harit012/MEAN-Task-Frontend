@@ -57,8 +57,8 @@
     </button>
   </div>
   <hr />
-  <div class="scrollable-section">
-    @for(ride of availableRides;track $index){
+  <div id="list" class="scrollable-section">
+    @for(ride of availableRides;track ride._id){
     <div class="row ride-details justify-content-between border-3 corners">
       <div class="col-md-4 col-sm-6 price-source">
         <p class="price fs-4">
@@ -86,7 +86,7 @@
           >
         </p>
       </div>
-      @if(ride.status == "available"){
+      @if(ride.status == "available" || ride.status == "assignedToAny" || ride.status == "assignedToOne"){
       <div class="col-md-2 col-sm-6 d-none d-md-block">
         <button
           type="button"
@@ -98,8 +98,8 @@
         <button
           type="button"
           class="btn btn-success w-100 mt-2"
-          id="rideButton"
-          (click)="onAssignRide($index)"
+          id="rideButton{{ride._id}}"
+          (click)="onAssignRide(ride._id)"
         >
           Assign
         </button>
@@ -394,7 +394,7 @@
             </div>
             <div class="col-2 align-self-center">
               <button
-                id="AssignButton{{ selectedRideForAssign._id }}{{ driver._id }}"
+                id="AssignButton"
                 [ngClass]="{ btn: true, 'btn-secondary': true }"
                 (click)="onAssignDriverManually($index)"
               >

@@ -32,6 +32,7 @@ export class RideHistoryComponent implements OnInit {
     paymentMethod: '--',
     rideTime: '--',
     price: '--',
+    driverProfit: '--',
     stops: [],
     stopPoints: [],
     endPoints: [],

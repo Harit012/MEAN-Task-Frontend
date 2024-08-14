@@ -532,10 +532,12 @@ export class CreateRidesComponent implements OnInit, AfterViewInit {
   onCreateRide() {
     let invalidFields = [];
     let price: number = 0;
+    let driverProfit:number=0;
     if (this.rideForm.valid) {
       for (let pricing of this.vehiclePricings) {
         if (pricing.vehicleType == this.rideForm.value.serviceType) {
           price = Number(pricing.price.toFixed(2));
+          driverProfit = Number(pricing.driverProfit.toFixed(2));
         } else {
           continue;
         }
@@ -556,6 +558,7 @@ export class CreateRidesComponent implements OnInit, AfterViewInit {
         distance: this.calculated_distance,
         time: this.calculated_time,
         price: price,
+        driverProfit: driverProfit,
         rideType: this.rideForm.value.rideType,
         endPoints: this.calculated_startEndLatLng,
         stopPoints: this.calculated_stopPoints,

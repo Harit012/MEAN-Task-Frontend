@@ -31,7 +31,7 @@ export class SidebarComponent implements OnInit {
     this.pushNotificationService.requestPermission();
     let count = 0;
     this.rideSocketService.onCronStop().subscribe((data: any) => {
-      if (data.status == 'accepted') {
+      if (data.message == 'Accepted') {
         if (count > 0) {
           count--;
           this.showNotification('Accepted Ride', 'Your ride has been accepted');

@@ -9,5 +9,7 @@ export interface Driver {
     countryName: string;
     approved?: boolean;
     serviceType:string;
-    isAvailable?:boolean
+    isAvailable?:boolean;
+    driver_stripe_id?:string;
 }
+

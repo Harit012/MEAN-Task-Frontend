@@ -2,7 +2,6 @@ import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { RideSocketService } from '../../Rides/services/ride-socket.service';
 import {
-  AssignStatusFromSocket,
   ConfirmedRide,
 } from '../../Rides/confirmed-rides/confirmed-ride.interface';
 import {
@@ -15,7 +14,6 @@ import { RunningRequestService } from './running-request.service';
 import { ToastrService } from 'ngx-toastr';
 import { environment } from '../../../../environments/environment';
 import * as bootstrap from 'bootstrap';
-import { ConfirmedRidesService } from '../../Rides/confirmed-rides/confirmed-rides.service';
 
 @Component({
   selector: 'app-running-request',
@@ -38,6 +36,7 @@ export class RunningRequestComponent implements OnInit {
     paymentMethod: '--',
     rideTime: '--',
     price: '--',
+    driverProfit: '--',
     stops: [],
     stopPoints: [],
     endPoints: [],
@@ -52,6 +51,9 @@ export class RunningRequestComponent implements OnInit {
     sourceCity: '--',
   };
   userProfile: string = '--';
+  invoiceObj: any = {};
+  rating = 0; 
+  stars = [1, 2, 3, 4, 5]; 
 
   map!: google.maps.Map;
   endPoints: google.maps.LatLngLiteral[] = [];
@@ -62,7 +64,6 @@ export class RunningRequestComponent implements OnInit {
     private rideSocketService: RideSocketService,
     private runningRequestService: RunningRequestService,
     private toastr: ToastrService,
-    private confirmedRideService: ConfirmedRidesService
   ) {
     this.confirmedRideForm = new FormGroup({
       source: new FormControl(null),
@@ -95,10 +96,6 @@ export class RunningRequestComponent implements OnInit {
       });
       this.newRides.push(data);
     });
-    // when ride is pending
-    this.rideSocketService.onRidePending().subscribe((data: any) => {
-      this.onPendingRide(data);
-    });
     // When ride is accepted
     this.rideSocketService.getAcceptedRide().subscribe((data: any) => {
       this.acceptedRides.push(data);
@@ -107,11 +104,6 @@ export class RunningRequestComponent implements OnInit {
         'remainingTime'
       ) as HTMLParagraphElement;
       timer.textContent = '';
-    });
-
-    // When Driver Rejects the request
-    this.rideSocketService.onRequestRejected().subscribe((data: any) => {
-      this.afterDriverRejectsRide(data);
     });
     // When Status Change
     this.rideSocketService.getStatusChange().subscribe((data: any) => {
@@ -131,22 +123,37 @@ export class RunningRequestComponent implements OnInit {
     this.rideSocketService.cancleRide().subscribe((data: any) => {
       this.newRides = this.newRides.filter((ride) => ride._id != data._id);
     })
-    // When Payment Link Arrives
-    this.rideSocketService.onLinkToPayment().subscribe((data: any) => {
-      let link =document.createElement('a');
-      link.href = data;
-      link.click();
-    })
-  }
-  // when driver rejects ride
 
+    // shows remaining time for driver 
+    this.rideSocketService.getRemainingTime().subscribe((data: any)=>{
+      let seconds = data.seconds;
+      let id = data.rideId;
+      let displaySeconds = document.getElementById(`${id}`) as HTMLParagraphElement ;
+      if(seconds>0){
+        displaySeconds.textContent = seconds;
+      }else{
+        displaySeconds.textContent = "0";
+      }
+
+    });
+    // when ride is rejected
+    this.rideSocketService.rejectRide().subscribe((data: any)=>{
+      this.newRides = this.newRides.filter((ride)=>{return ride._id != data.rideId})
+    })
+
+  }
+
+  // when driver rejects ride
   onRejectRequest(i: number) {
-    this.rideSocketService.driverResponse(0);
+    this.runningRequestService.patchDriverResponse(this.newRides[i]._id,0).subscribe({
+      next: (data) => {
+        this.toastr.success(`Ride rejected `, '', environment.TROASTR_STYLE);
+      },
+    });
   }
   // when driver accept ride
   onAcceptRequest(i: number) {
-    this.rideSocketService.driverResponse(1);
-    this.runningRequestService.patchAcceptRide(this.newRides[i]._id).subscribe({
+    this.runningRequestService.patchDriverResponse(this.newRides[i]._id,1).subscribe({
       next: (data) => {
         this.toastr.success(`Ride Accepted `, '', environment.TROASTR_STYLE);
       },
@@ -157,17 +164,37 @@ export class RunningRequestComponent implements OnInit {
     let selectInput = document.getElementById(`${i}`) as HTMLSelectElement;
     let updatedStatus = selectInput.value;
     if (updatedStatus != this.acceptedRides[i].status) {
-      this.runningRequestService
-        .patchChangeStatus(this.acceptedRides[i]._id, updatedStatus)
-        .subscribe({
+      if(updatedStatus == 'completed'){
+        this.runningRequestService.patchCompleteRide(this.acceptedRides[i]._id).subscribe({
           next: (data) => {
-            this.toastr.success(
-              `Status Updated `,
-              '',
-              environment.TROASTR_STYLE
-            );
-          },
-        });
+            if(data.ride){
+              this.showInvoice(data.ride);
+              this.toastr.success(
+                `Ride Completed `,
+                '',
+                environment.TROASTR_STYLE
+              );
+            }else if(data.link){
+              let a = document.createElement('a');
+              a.href = data.link;
+              a.click();
+            }
+          }
+        })
+      }
+      else{
+        this.runningRequestService
+          .patchChangeStatus(this.acceptedRides[i]._id, updatedStatus)
+          .subscribe({
+            next: (data) => {
+              this.toastr.success(
+                `Status Updated `,
+                '',
+                environment.TROASTR_STYLE
+              );
+            },
+          });
+      }
     } else {
       this.toastr.info(`no changes Made `, '', environment.TROASTR_STYLE);
     }
@@ -242,58 +269,53 @@ export class RunningRequestComponent implements OnInit {
     });
   }
   //
-  onPendingRide(data: AssignStatusFromSocket) {
-    let timer = document.getElementById(
-      'remainingTime'
-    ) as HTMLParagraphElement;
-    if (data.time < data.totalTime) {
-      timer.textContent = `${data.totalTime - data.time} Seconds`;
+ 
+  showInvoice(ride:ConfirmedRide) {
+    this.invoiceObj = {
+      id:ride._id,
+      driver_stripe_id:ride.driver_stripe_id,
+      customerId:ride.customerId,
+      destination: ride.destination,
+      source: ride.source,
+      rideTime: ride.rideTime,
+      userName: ride.userName,
+      time: ride.time,
+      paymentMethod: ride.paymentMethod,
+      serviceType: ride.serviceType,
+      price: ride.price,
+      driverName: ride.driverName,
+      driverProfit: ride.driverProfit,
+      csn:ride.csn,
+      distance:ride.distance,
     }
-    if (data.time == data.totalTime - 10) {
-      this.toastr.warning('10 Seconds Left', '', environment.TROASTR_STYLE);
-    }
-    if (data.time == data.totalTime - 1) {
-      this.runningRequestService.patchRemoveDriver(data.rideId).subscribe({
-        next: (data) => {
-          this.toastr.warning(
-            'Timeout for the ride',
-            '',
-            environment.TROASTR_STYLE
-          );
-        },
-      });
-      this.newRides.pop();
-      setTimeout(() => {
-        timer.textContent = ``;
-      }, 1000);
-    }
+    const modal = bootstrap.Modal.getOrCreateInstance(
+      document.getElementById('invoiceModal') as HTMLElement
+    );
+    modal.show();
   }
 
-  afterDriverRejectsRide(data: AssignStatusFromSocket) {
-    this.runningRequestService.patchRemoveDriver(data.rideId).subscribe({
-      next: () => {
-        this.newRides = this.newRides.filter((ride) => {
-          return ride._id != data.rideId;
-        });
-        let timer = document.getElementById(
-          'remainingTime'
-        ) as HTMLParagraphElement;
-        timer.textContent = '';
-      },
-    });
-    if (data.type == 'auto') {
-      this.runningRequestService.patchBlockDriver(data.driverId, data.rideId).subscribe({
-        next:()=>{
-          console.log("Driver Blocked")
+  
+  onProceedToPayment(){
+    this.invoiceObj.rating = this.rating;
+    this.runningRequestService.postPaymentProcess(this.invoiceObj).subscribe({
+      next:(data)=>{
+        console.log(data)
+        if(data.link){
+          let a = document.createElement('a');
+          a.href = data.link;
+          a.click();
         }
-      })
-    }
-    else if(data.type == "manual"){
-      this.confirmedRideService.cancleRide(data.rideId).subscribe({
-        next:()=>{
-          console.log("Ride Canceled")
-        }
-      })
-    }
+        else if(data.message){
+          this.toastr.success(data.message,'',environment.TROASTR_STYLE);
+        } 
+        this.rating = 0;       
+      }
+    })
+  }
+
+  
+
+  rate(rating: number) {
+    this.rating = rating;
   }
 }

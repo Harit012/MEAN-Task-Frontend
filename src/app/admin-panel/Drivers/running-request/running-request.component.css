@@ -56,3 +56,77 @@
       height: 40dvh;
       overflow-y: scroll;
     }
+    #ridePrice2{
+      color: blue;
+    }
+    /* Invoice modal */
+
+    .container2  {
+      max-width: 600px;
+      margin: 0 auto;
+      background-color: #fff;
+      padding: 20px;
+      border-radius: 5px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  }
+  .header {
+      text-align: center;
+      border-bottom: 1px solid #ddd;
+      padding-bottom: 10px;
+  }
+  .header h1 {
+      margin: 0;
+      font-size: 24px;
+      color: #007bff;
+  }
+  .content {
+      margin: 20px 0;
+  }
+  .trip-info, .fare-breakdown {
+      margin-bottom: 20px;
+  }
+  .trip-info p, .fare-breakdown p {
+      margin: 5px 0;
+  }
+  .fare-breakdown table {
+      width: 100%;
+      border-collapse: collapse;
+  }
+  .fare-breakdown th, .fare-breakdown td {
+      text-align: left;
+      padding: 8px;
+      border-bottom: 1px solid #ddd;
+  }
+  .total {
+      font-weight: bold;
+  }
+  .footer {
+      text-align: center;
+      margin-top: 20px;
+      font-size: 0.9em;
+      color: #777;
+  }
+
+  /* fr feed back */
+
+  .star-rating {
+    display: flex;
+    flex-direction: row;
+    font-size: 2rem;
+    justify-content: center;
+  }
+  
+  .star-rating span {
+    cursor: pointer;
+    color: #d3d3d3; /* Default color for unselected stars */
+  }
+  
+  .star-rating .filled {
+    color: #ffd700; /* Color for selected stars */
+  }
+  .centerthis {
+    display: flex;
+    justify-content: center; /* Horizontally center the content inside each .centerthis div */
+    width: 100%; /* Ensures the div spans full width */
+    text-align: center; /* Optional: Centers text within each .centerthis div */
+  }
