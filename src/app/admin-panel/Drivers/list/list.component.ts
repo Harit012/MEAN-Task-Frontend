@@ -353,7 +353,7 @@ export class ListComponent implements OnInit {
     // //     console.log(city.zoneName);
     // //   }
     // // }
-    this.formdata.append('driverProfile', driver.driverProfile);
+    this.formdata.append('oldDriverProfile', driver.driverProfile);
     this.formdata.append('id', driver._id!);
   }
   // when user clicks on delete
@@ -503,4 +503,9 @@ export class ListComponent implements OnInit {
     }
   }
 
+  allowOnlyDigits(event: KeyboardEvent) {
+    if (!/^\d+$/.test(event.key) && event.key !== 'Backspace' && event.key !== 'Tab') {
+      event.preventDefault();
+    }
+  }
 }

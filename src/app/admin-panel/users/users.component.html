@@ -250,6 +250,7 @@
                   class="form-control"
                   [placeholder]="'Enter Phone'"
                   formControlName="phone"
+                  (keydown)="allowOnlyDigits($event)"
                 />
               </div>
               <small

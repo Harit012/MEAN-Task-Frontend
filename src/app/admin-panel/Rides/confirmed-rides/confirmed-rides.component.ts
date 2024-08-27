@@ -15,6 +15,7 @@ import { environment } from '../../../../environments/environment';
 import { VehicleTypeService } from '../../Pricing/vehicle-type/vehicle-type.service';
 import { Subscription } from 'rxjs';
 import { RideDriver } from './RideDriver.interface';
+import { CommonStatic } from '../../../shared/CommonStatic'
 
 @Component({
   selector: 'app-confirmed-rides',
@@ -71,6 +72,9 @@ export class ConfirmedRidesComponent implements OnInit {
     private toastr: ToastrService,
     private vehicleTypeService: VehicleTypeService
   ) {
+    // map api 
+    CommonStatic.addGoogleApi();
+    
     this.confirmedRideForm = new FormGroup({
       source: new FormControl(null),
       destination: new FormControl(null),
@@ -87,7 +91,7 @@ export class ConfirmedRidesComponent implements OnInit {
     });
   }
 
-  ngOnInit() {
+  ngOnInit() {    
     // to get rides from server
     this.confirmedRideService.getRides().subscribe({
       next: (data) => {
@@ -167,6 +171,19 @@ export class ConfirmedRidesComponent implements OnInit {
       });
       this.totalRides.push(data);
       this.onFilterRides();
+    });
+    // when ride is on hold
+    this.rideSocketService.onHoldRide().subscribe((data: any) => {
+      let modal = bootstrap.Modal.getOrCreateInstance(
+        document.getElementById('AssignModal') as HTMLElement
+      );
+      modal.hide();
+      let assignButton = document.getElementById(
+        `rideButton${data}`
+      ) as HTMLButtonElement;
+      assignButton.classList.add('btn-warning');
+      assignButton.disabled = true;
+      assignButton.textContent = `on Hold`;
     });
   }
   // get detiled information about ride

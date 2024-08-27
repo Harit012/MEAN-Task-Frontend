@@ -56,6 +56,7 @@ export class DriverService {
   }
 
   putEditUser(formData: FormData) {
+    // console.log(formData)
     return this.http.put<{ message: string; success: boolean}>(
       `${environment.BASE_URL}/admin/drivers/list`,
       formData,

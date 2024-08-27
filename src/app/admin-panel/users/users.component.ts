@@ -210,6 +210,7 @@ export class UsersComponent implements OnInit, AfterViewChecked {
       }
     });
     if (this.userForm.dirty) {
+      console.log(this.formdata)
       this.userService.updateUser(this.formdata).subscribe({
         next: (res) => {
           if (res.message) {
@@ -461,5 +462,10 @@ export class UsersComponent implements OnInit, AfterViewChecked {
         );
       },
     });
+  }
+  allowOnlyDigits(event: KeyboardEvent) {
+    if (!/^\d+$/.test(event.key) && event.key !== 'Backspace' && event.key !== 'Tab') {
+      event.preventDefault();
+    }
   }
 }

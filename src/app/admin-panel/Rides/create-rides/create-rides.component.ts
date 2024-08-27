@@ -18,6 +18,8 @@ import { RecivingZone } from '../../Pricing/city/recivingZone.interface';
 import { BoxPricingContent } from './all.interface';
 import * as bootstrap from 'bootstrap';
 import { CardService } from '../../users/card.service';
+import Swal from 'sweetalert2';
+
 
 @Component({
   selector: 'app-create-rides',
@@ -291,7 +293,7 @@ export class CreateRidesComponent implements OnInit, AfterViewInit {
     this.rideForm = new FormGroup({
       phone: new FormControl(null, [
         Validators.required,
-        Validators.pattern('^[0-9]{10}$'),
+        Validators.pattern('^[1-9]{1}[0-9]{9}$'),
         Validators.maxLength(10),
         Validators.minLength(10),
       ]),
@@ -341,6 +343,7 @@ export class CreateRidesComponent implements OnInit, AfterViewInit {
         mapId: '8f2d9c7f9f9f8a9f',
       }
     );
+    this.getCurrentLocation();
   }
   // to Verify user from phone number
   onVerifyPhoneNumber() {
@@ -671,7 +674,7 @@ export class CreateRidesComponent implements OnInit, AfterViewInit {
           map: this.map,
           position: placeGeo,
           title: place.name,
-          gmpDraggable: true,
+          gmpDraggable: false,
           content: this.createMarkersFromImage("../../assets/Images/SourcePin.png"),
         });
         this.rideForm.patchValue({
@@ -722,8 +725,8 @@ export class CreateRidesComponent implements OnInit, AfterViewInit {
         map: this.map,
         position: place2Geo,
         title: place2.name,
-        gmpDraggable: true,
-        content: this.createMarkersFromImage("../../assets/Images/DestinationPin2.png"),
+        gmpDraggable: false,
+        content: this.createMarkersFromImage("../../assets/Images/DestinationPin2.png")
       });
       this.rideForm.patchValue({
         destination: place2.name,
@@ -896,15 +899,67 @@ export class CreateRidesComponent implements OnInit, AfterViewInit {
   }
   // on reset form
   onReset() {
-    if (confirm('Are you sure want to reset?')) {
-      this.initMap();
-      this.rideForm.reset();
-      this.isCalulated = false;
-      this.isVerified = false;
-      this.stopLatLngs = [];
-      this.stopDetails = [];
-      this.stopMarkers = [];
-      this.stopsArray = [];
-    }
+    // if (confirm('Are you sure want to reset?')) {
+    //   this.initMap();
+    //   this.rideForm.reset();
+    //   this.isCalulated = false;
+    //   this.isVerified = false;
+    //   this.stopLatLngs = [];
+    //   this.stopDetails = [];
+    //   this.stopMarkers = [];
+    //   this.stopsArray = [];
+    // }
+    const swalWithBootstrapButtons = Swal.mixin({
+      customClass: {
+        confirmButton: "btn btn-success",
+        cancelButton: "btn btn-danger"
+      },
+      buttonsStyling: true
+    });
+    swalWithBootstrapButtons.fire({
+      title: "Are you sure?",
+      text: "You won't be able to revert this!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "Yes, Reset it!",
+      cancelButtonText: "No, cancel!",
+      reverseButtons: true,
+      showClass: {
+        popup: `
+          animate__animated
+          animate__fadeInDown
+          animate__fast
+        `
+      },
+      hideClass: {
+        popup: `
+          animate__animated
+          animate__fadeOutDown
+          animate__faster
+        `
+      }
+    }).then((result) => {
+      if (result.isConfirmed) {
+        this.initMap();
+        this.rideForm.reset();
+        this.isCalulated = false;
+        this.isVerified = false;
+        this.stopLatLngs = [];
+        this.stopDetails = [];
+        this.stopMarkers = [];
+        this.stopsArray = [];
+        swalWithBootstrapButtons.fire({
+          title: "Done!",
+          text: "Your Form is Reset.",
+          icon: "success"
+        });
+      }
+    });
   } 
+
+  allowOnlyDigits(event: KeyboardEvent) {
+    if (!/^\d+$/.test(event.key) && event.key !== 'Backspace' && event.key !== 'Tab') {
+      event.preventDefault();
+    }
+  }
 }

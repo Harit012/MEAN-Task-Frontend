@@ -280,6 +280,7 @@
                     class="form-control"
                     [placeholder]="'Enter Phone'"
                     formControlName="phone"
+                    (keydown)="allowOnlyDigits($event)"
                   />
                 </div>
                 <small
@@ -465,6 +466,7 @@
                   class="form-control"
                   placeholder="Enter Account Number"
                   id="accountNumber"
+                  (keydown)="allowOnlyDigits($event)"
                 />
                 <small
                   *ngIf="bankAccountForm.get('accountNumber')?.errors?.['required'] && (bankAccountForm.get('accountNumber')?.dirty || bankAccountForm.get('accountNumber')?.touched)"

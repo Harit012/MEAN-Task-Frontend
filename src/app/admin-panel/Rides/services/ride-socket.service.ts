@@ -167,4 +167,15 @@ export class RideSocketService {
       };
     })
   }
+
+  onHoldRide(){
+    return new Observable((observer) => {
+      this.socket.on('requestOnHold', (data: {rideId:string} ) => {
+        observer.next(data);
+      });
+      return () => {
+        this.socket.disconnect();
+      };
+    })
+  }
 }

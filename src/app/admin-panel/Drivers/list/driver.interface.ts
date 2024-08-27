@@ -1,4 +1,5 @@
 export interface Driver {
+    formData(formData: any): unknown;
     _id?: string ;
     driverName: string;
     driverEmail: string;

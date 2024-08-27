@@ -18,7 +18,7 @@ export class SidebarComponent implements OnInit {
   isRidesDropdownOpen: boolean = false;
   isDriverDropdownOpen: boolean = false;
   isPricingDropdownOpen: boolean = false;
-  isLoader: boolean = false;
+  isLoading: boolean = false;
 
   constructor(
     private authservice: AuthService,
@@ -28,6 +28,9 @@ export class SidebarComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
+
+    this.loaderService.isLoading$.subscribe(isLoading => this.isLoading= isLoading);
+
     this.pushNotificationService.requestPermission();
     let count = 0;
     this.rideSocketService.onCronStop().subscribe((data: any) => {
@@ -49,10 +52,10 @@ export class SidebarComponent implements OnInit {
       notification.innerHTML = `<i class="fa fa-bell" aria-hidden="true"></i>Notifications (${count})`;
     });
 
-    this.loaderService.subject.subscribe((data: boolean) => {
-      this.isLoader = data;
-      console.log(this.isLoader);
-    });
+    // this.loaderService.subject.subscribe((data: boolean) => {
+    //   this.isLoader = data;
+    //   console.log(this.isLoader);
+    // });
   }
   toggleDropdown(dropdownName: string) {
     if (dropdownName === 'rides') {
