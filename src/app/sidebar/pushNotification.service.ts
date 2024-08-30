@@ -33,7 +33,6 @@ export class PushNotificationsService {
         obs.complete();
       } else {
         const _notify = new Notification(title, options);
-        
         _notify.onshow = (e) => {
           obs.next({ notification: _notify, event: e });
         };
@@ -76,7 +75,7 @@ export class PushNotificationsService {
         lang: 'en-US',
         vibrate: [200, 100, 200]
       };
-      this.create(item.title, options).subscribe();
+    this.create(item.title, options).subscribe();
     });
   }
 }

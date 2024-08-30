@@ -343,7 +343,11 @@ export class CreateRidesComponent implements OnInit, AfterViewInit {
         mapId: '8f2d9c7f9f9f8a9f',
       }
     );
-    this.getCurrentLocation();
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition((position) => {
+        this.map.setCenter({lat :position.coords.latitude,lng : position.coords.longitude})
+      });
+    }
   }
   // to Verify user from phone number
   onVerifyPhoneNumber() {
@@ -899,16 +903,6 @@ export class CreateRidesComponent implements OnInit, AfterViewInit {
   }
   // on reset form
   onReset() {
-    // if (confirm('Are you sure want to reset?')) {
-    //   this.initMap();
-    //   this.rideForm.reset();
-    //   this.isCalulated = false;
-    //   this.isVerified = false;
-    //   this.stopLatLngs = [];
-    //   this.stopDetails = [];
-    //   this.stopMarkers = [];
-    //   this.stopsArray = [];
-    // }
     const swalWithBootstrapButtons = Swal.mixin({
       customClass: {
         confirmButton: "btn btn-success",

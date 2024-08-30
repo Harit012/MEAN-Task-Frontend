@@ -154,7 +154,6 @@ export class ConfirmedRidesComponent implements OnInit {
         assignButton.classList.remove('btn-warning');
         assignButton.disabled = false;
         assignButton.textContent = `Re Assign`;
-      } else {
       }
     });
     // When a ride is Completed
@@ -228,7 +227,6 @@ export class ConfirmedRidesComponent implements OnInit {
   }
   // on click of assign ride
   onAssignRide(id: string) {
-    // this.selectedRideForAssign = this.availableRides[index];
     let rideSet = this.availableRides.filter((ride) => {
       return ride._id == id;
     });
@@ -337,13 +335,13 @@ export class ConfirmedRidesComponent implements OnInit {
       this.map.fitBounds(bounds);
     });
   }
-  // whenn driver is assigned manually
+  // when driver is assigned manually
   onAssignDriverManually(index: number) {
     this.confirmedRideService
-      .assignDriver(this.selectedRideForAssign._id, this.driversList[index]._id)
-      .subscribe();
+    .assignDriver(this.selectedRideForAssign._id, this.driversList[index]._id)
+    .subscribe();
   }
-
+  // when driver is assigned Automatically
   onAssignDriverAuto() {
     this.confirmedRideService
       .assignAnyDriver(this.selectedRideForAssign._id)

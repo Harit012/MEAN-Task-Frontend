@@ -17,6 +17,8 @@ import { AuthService } from '../../../auth/auth.service';
 import { ToastrService } from 'ngx-toastr';
 import { environment } from '../../../../environments/environment';
 import { VehicleTypeService } from '../../Pricing/vehicle-type/vehicle-type.service';
+import Swal from 'sweetalert2';
+
 @Component({
   selector: 'app-list',
   standalone: true,
@@ -358,8 +360,38 @@ export class ListComponent implements OnInit {
   }
   // when user clicks on delete
   onDelete(driver: Driver) {
-    if (confirm('Are you sure you want to delete this driver?')) {
-      this.driverService
+    const swalWithBootstrapButtons = Swal.mixin({
+      customClass: {
+        confirmButton: "btn btn-success",
+        cancelButton: "btn btn-danger"
+      },
+      buttonsStyling: true
+    });
+    swalWithBootstrapButtons.fire({
+      title: "Are you sure?",
+      text: "You won't be able to revert this!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "Yes, Reset it!",
+      cancelButtonText: "No, cancel!",
+      reverseButtons: true,
+      showClass: {
+        popup: `
+          animate__animated
+          animate__fadeInDown
+          animate__fast
+        `
+      },
+      hideClass: {
+        popup: `
+          animate__animated
+          animate__fadeOutDown
+          animate__faster
+        `
+      }
+    }).then((result) => {
+      if (result.isConfirmed) {
+        this.driverService
         .deleteDriver(driver._id!, driver.driver_stripe_id!)
         .subscribe({
           next: (data) => {
@@ -374,7 +406,8 @@ export class ListComponent implements OnInit {
             }
           },
         });
-    }
+      }
+    });
   }
   // when user wants to go to next page
   onNextPage() {

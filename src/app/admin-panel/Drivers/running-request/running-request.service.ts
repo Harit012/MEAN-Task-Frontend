@@ -54,7 +54,7 @@ export class RunningRequestService {
   }
 
   postPaymentProcess(deatails: Invoice) {
-    return this.http.post<{success:boolean; message?:string; link?:string}>(
+    return this.http.post<{success:boolean; message?:string; link?:string; rideId?:string}>(
       `${environment.BASE_URL}/admin/drivers/running-request/payment-process`,
       deatails
     );

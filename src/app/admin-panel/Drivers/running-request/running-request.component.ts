@@ -59,6 +59,7 @@ export class RunningRequestComponent implements OnInit {
   endPoints: google.maps.LatLngLiteral[] = [];
   stopPoints: google.maps.LatLngLiteral[] = [];
   directionsRenderer!: google.maps.DirectionsRenderer;
+  data: any;
 
   constructor(
     private rideSocketService: RideSocketService,
@@ -133,6 +134,7 @@ export class RunningRequestComponent implements OnInit {
         displaySeconds.textContent = seconds;
       }else{
         displaySeconds.textContent = "0";
+        
       }
 
     });
@@ -140,7 +142,11 @@ export class RunningRequestComponent implements OnInit {
     this.rideSocketService.rejectRide().subscribe((data: any)=>{
       this.newRides = this.newRides.filter((ride)=>{return ride._id != data.rideId})
     })
-
+    // when ride Completes
+    this.rideSocketService.onCompeteRide().subscribe((data: any)=>{
+      console.log(data)
+      this.acceptedRides = this.acceptedRides.filter((ride)=>{return ride._id != data._id})
+    })
   }
 
   // when driver rejects ride
@@ -269,7 +275,6 @@ export class RunningRequestComponent implements OnInit {
     });
   }
   //
- 
   showInvoice(ride:ConfirmedRide) {
     this.invoiceObj = {
       id:ride._id,
@@ -299,7 +304,6 @@ export class RunningRequestComponent implements OnInit {
     this.invoiceObj.rating = this.rating;
     this.runningRequestService.postPaymentProcess(this.invoiceObj).subscribe({
       next:(data)=>{
-        console.log(data)
         if(data.link){
           let a = document.createElement('a');
           a.href = data.link;
