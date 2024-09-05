@@ -549,8 +549,7 @@ export class CreateRidesComponent implements OnInit, AfterViewInit {
           continue;
         }
       }
-      // console.log(this.calculated_startEndLatLng)
-      // console.log(this.calculated_stopPoints)
+
       let RideObject = {
         userId: this.verifiedUser._id,
         username: this.rideForm.value.userName,
@@ -626,15 +625,6 @@ export class CreateRidesComponent implements OnInit, AfterViewInit {
       document.getElementById('stopAutocomplete') as HTMLInputElement,
       this.autocompleteOptions
     );
-
-    // this.autoComplete3 = new google.maps.places.AutocompleteService()
-    // this.autoComplete3.getPlacePredictions({
-    //   input: 'tajmahal',
-    //   sessionToken: sessionsToken
-    // },(data, status) => {
-    //   console.log(data)
-    // })
-
     // onSourceChange
     this.onSourceChange();
 

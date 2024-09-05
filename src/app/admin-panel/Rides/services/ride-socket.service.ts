@@ -83,6 +83,7 @@ export class RideSocketService {
   getRemainingTime(){
     return new Observable((observer) => {
       this.socket.on('remainingTime', (data:{seconds:number,rideId:string}) => {
+        console.log(data)
         observer.next(data);
       });
       return () => {

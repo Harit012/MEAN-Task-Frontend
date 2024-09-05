@@ -62,7 +62,8 @@ export class PushNotificationsService {
     source.forEach(item => {
       const options = {
         body: item.body,
-        icon: 'https://angular.io/assets/images/logos/angular/angular.svg',
+        // icon: 'https://angular.io/assets/images/logos/angular/angular.svg',
+        icon: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRh8VGfy1GKL5vwnciBKTzhkWZ5mzVKDH9wGQ&s',
         sound: '../../assets/sounds/pop-up_sound.mp3',
         // sound: '../../assets/sounds/fullspeed.mp3',
         tag: 'completed',

@@ -51,11 +51,6 @@ export class SidebarComponent implements OnInit {
       ) as HTMLAnchorElement;
       notification.innerHTML = `<i class="fa fa-bell" aria-hidden="true"></i>Notifications (${count})`;
     });
-
-    // this.loaderService.subject.subscribe((data: boolean) => {
-    //   this.isLoader = data;
-    //   console.log(this.isLoader);
-    // });
   }
   toggleDropdown(dropdownName: string) {
     if (dropdownName === 'rides') {
