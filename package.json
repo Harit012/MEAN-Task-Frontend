@@ -23,6 +23,7 @@
     "@angular/router": "^17.3.0",
     "@stripe/stripe-js": "^3.4.1",
     "bootstrap": "^5.3.3",
+    "express": "^4.21.0",
     "google-maps": "^4.3.3",
     "ngx-spinner": "^17.0.0",
     "ngx-stripe": "^18.0.0",

@@ -1,5 +1,5 @@
 import { ApplicationConfig } from '@angular/core';
-import { Router, provideRouter } from '@angular/router';
+import { Router, provideRouter, withHashLocation } from '@angular/router';
 
 import { routes } from './app.routes';
 import { provideHttpClient, withInterceptors } from '@angular/common/http';
@@ -14,7 +14,7 @@ import { provideAnimationsAsync } from '@angular/platform-browser/animations/asy
 
 export const appConfig: ApplicationConfig = {
   providers: [
-    provideRouter(routes),
+    provideRouter(routes, withHashLocation()),
     provideHttpClient(withInterceptors([authInterceptor, auth2Interceptor])),
     Router,
     GoogleMapsModule,

@@ -9,7 +9,7 @@ import { environment } from '../../../../environments/environment';
   providedIn: 'root',
 })
 export class RideSocketService {
-  private socket = io('ws://localhost:3000');
+  private socket = io('ws://44.201.133.98:3000');
 
   constructor(private toastr:ToastrService) {}
 

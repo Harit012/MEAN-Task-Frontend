@@ -4,7 +4,7 @@ This project was generated with [Angular CLI](https://github.com/angular/angular
 
 ## Development server
 
-Run `ng serve` for a dev server. Navigate to `http://localhost:4200/`. The application will automatically reload if you change any of the source files.
+Run `ng serve` for a dev server. Navigate to `http://localhost/`. The application will automatically reload if you change any of the source files.
 
 ## Code scaffolding
 
@@ -34,6 +34,7 @@ STEP-1 :- create an <b>environments</b> folder in <b>src</b> </br>
 STEP-2 :- create two files with name <b>environment.prod.ts</b> and <b>environment.ts</b> in environments folder</br>
 STEP-3 :- put this code in it </br>
 <code>
+'''
     export const environment = {
   STRIPE_PUBLISHABLE_KEY : 'Your stripe public Key',
   STRIPE_SECRET_KEY: 'Your stripe secret key',
@@ -42,6 +43,7 @@ STEP-3 :- put this code in it </br>
   INACTIVE_TIME:1200000,
   BASE_URL:'Your Backend base url ex. "http://localhost:3000"'
 };
+'''
 </code>
 
 ## angular.json
@@ -49,6 +51,7 @@ STEP-3 :- put this code in it </br>
 STEP-1 :- change style and script of test as well as build with </br>
 
 <code>
+'''
             "styles": [
               "@angular/material/prebuilt-themes/purple-green.css",
               "src/styles.css",
@@ -60,4 +63,5 @@ STEP-1 :- change style and script of test as well as build with </br>
               "node_modules/bootstrap/dist/js/bootstrap.bundle.min.js",
               "node_modules/bootstrap/dist/js/bootstrap.min.js"
             ]
+            '''
 </code>

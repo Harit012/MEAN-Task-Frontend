@@ -23,7 +23,7 @@ export class DriverService {
       input: modifiedInput,
     };
     return this.http.get<{ drivers: Driver[]; success: boolean}>(
-      'http://localhost:3000/admin/drivers/list',
+      `${environment.BASE_URL}/admin/drivers/list`,
       { params: params, withCredentials: true }
     );
   }
